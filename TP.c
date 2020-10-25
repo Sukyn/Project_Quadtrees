@@ -1,15 +1,37 @@
+#include <stdio.h>
+
 //Calculez e en utilisant l’expression e=∑1/n!
-float e(float precision){
-  float v_n = 1; //v_n avec v_1 = 1/1
-  float v_nplus = 1.5; //v_n+1 avec v_2 = 1/1 + 1/2
+/* precision est la precision demandée */
+double e(float precision){
+  double v_n = 1.; //v_n avec v_1 = 1/1
+  double v_nplus = 1.5; //v_n+1 avec v_2 = 1/1 + 1/2
   n = 2;
-  while (v_nplus - v_n) > precision{
+  while ((v_nplus - v_n) > precision){
     v_n = v_nplus;
     n++;
     v_nplus += 1/n;
   }
+  return v_n;
 }
 
+//Implementez la fonction puissance(x,n),x réel,n entier positif ou nul.
+double puissance(double x, unsigned int n){
+  double res=1;
+  while(n>=1) {
+    res*=x;
+    n--;
+  }
+  return(res);
+}
+
+
+
+
 void main{
-  e(0.0001);
+  printf("e = %f", e(0.0001));
+  printf("1.1^10 = %f", puissance(1.1, 10));
+  printf("1.01^100 = %f", puissance(1.01, 100));
+  printf("1.001^1000 = %f", puissance(1.001, 1000));
+  printf("1.0000001^10000000 = %f", puissance(1.0000001, 10000000));
+
 }
