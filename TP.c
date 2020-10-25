@@ -11,6 +11,10 @@ long factorielle(int n)
   }
 }
 
+
+
+
+
 /* precision est la precision demandée */
 double e(float precision){
   double v_n = 1.; //v_n avec v_1 = 1/1!
