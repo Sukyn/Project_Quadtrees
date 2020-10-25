@@ -38,10 +38,11 @@ double puissance(double x, unsigned int n){
 
 
 void main{
-  printf("e = %f", e(0.0001));
+  double precision = 0.000001
   printf("1.1^10 = %f", puissance(1.1, 10));
   printf("1.01^100 = %f", puissance(1.01, 100));
   printf("1.001^1000 = %f", puissance(1.001, 1000));
-  printf("1.0000001^10000000 = %f", puissance(1.0000001, 10000000));
+  printf("e (méthode 1/n!) = %f", e(precision));
+  printf("e (méthode (1+1/n)^n)) = %f", puissance(1 + precision, int(1/precision)));
 
 }
