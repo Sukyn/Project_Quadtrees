@@ -79,6 +79,8 @@ double X_rec(int n){
   }
 }
 
+//bonjour je m'appelle doriane et je suis super intelligente
+
 void main{
   double precision = 0.000001
   printf("1.1^10 = %f", puissance(1.1, 10));
