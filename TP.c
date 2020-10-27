@@ -43,7 +43,37 @@ double puissance(double x, unsigned int n){
 }
 
 
+//Implémentez les deux méthodes pour calculer la fonction d’Ackermann.
 
+
+
+
+//La suite de réels (x n ) n∈N est définie par récurrence: x 0 = 1 puis ∀n ≥ 1, x n = x n−1 + 1/x n−1 .
+//On a donc x 0 = 1, x 1 = 2, x 2 = 2.5, x 3 = 2.9, etc.
+//Ecrire le pseudo-code de la fonction X qui prend n en argument et rend x n .
+//Donner une version itérative et une version récursive (sans utiliser de sous-fonctionnalité).
+//Utilisez les deux méthodes pour calculer X 100
+
+//itérative
+double X_it(int n){
+  int compteur = 0;
+  int res = 1;
+  while (n>compteur){
+    compteur++;
+    res = res + 1/res;
+  }
+  return res;
+}
+
+//récursive
+double X_rec(int n){
+  if (n == 0){
+    return 1;
+  } else {
+    temp_res = X_rec(n-1);
+    return temp_res + 1/temp_res;
+  }
+}
 
 void main{
   double precision = 0.000001
@@ -52,5 +82,6 @@ void main{
   printf("1.001^1000 = %f", puissance(1.001, 1000));
   printf("e (méthode 1/n!) = %f", e(precision));
   printf("e (méthode (1+1/n)^n)) = %f", puissance(1 + precision, int(1/precision)));
-
+  printf("X100 itératif = %f", X_it(100));
+  printf("X100 récursif = %f", X_rec(100));
 }
