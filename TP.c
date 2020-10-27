@@ -1,5 +1,13 @@
 #include <stdio.h>
 
+#define ISNOT !=
+#define NOT !
+#define AND &&
+#define OR ||
+#define then
+
+typedef enum { false, true } bool;
+
 //Calculez e en utilisant l’expression e=∑1/n!
 
 long factorielle(int n)
