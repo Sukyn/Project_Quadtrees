@@ -242,17 +242,88 @@ void poup (Liste l)
                ) ;
 }
 
-int main(int argc, char** argv)
+bool DebutDeuxIdentiques(Liste l){
+  if (estVide(l)==TRUE OR estVide(suite(l))==TRUE){
+    return FALSE;
+  }
+  if(premier(l)==premier(suite(l))){
+    return TRUE;
+  }
+  else{
+    return FALSE;
+  }
+}
+
+bool QueDesZeros(Liste l){
+  if (estVide(l)) {
+    return TRUE;
+  }
+  else{
+    if (premier(l)!=0){
+      return FALSE;
+    }
+    QueDesZeros(suite(l));
+  }
+  return FALSE;
+}
+
+bool SousEnsemble(Liste l1, Liste l2){
+  if (estVide(l2))
+    return FALSE;
+
+  if (estVide(l1))
+    return TRUE;
+
+  if (premier(l2)==premier(l1)){
+    l1=suite(l1);
+    l2=suite(l2);
+  }
+
+  if(premier(l1)!=premier(l2)){
+    if(premier(l1)<premier(l2))
+      return FALSE;
+    else
+      l2=suite(l2);
+  }
+  SousEnsemble(l1,l2);
+  return FALSE;
+}
+
+//void Permutations à faire
+
+void EliminePositionPaires(Liste* L)
 {
+    if (L == NULL)
+        return;
+
+    /* Initialize prev and node to be deleted */
+    Liste *prev = *L;
+    Liste *node = *L->next;
+
+    while (prev != NULL && node != NULL)
+    {
+        /* Change next link of previous node */
+        prev->next = node->next;
+
+        /* Free memory */
+        free(node);
+
+        /* Update prev and node */
+        prev = prev->next;
+        if (prev != NULL)
+            node = prev->next;
+    }
+}
+
+
+
+
+int main() {
     Liste l ;
 
         initVide (&l) ;
 
-          poup(l) ;
-
              empile(4, &l) ;
-
-          poup(l) ;
 
              empile(5, &l) ;
              empile(6, &l) ;
@@ -260,14 +331,9 @@ int main(int argc, char** argv)
              empile(8, &l) ;
              empile(9, &l) ;
 
-          poup(l) ;
+    poup(l);
+    EliminePositionPaires(&l);
+    poup(l);
 
-        VireDernier_rec  (&l) ;
-        VireDernier_iter (&l) ;
-        depile(& l) ;
-
-          poup(l) ;
-
-    VideListe(&l);
     return 0;
 }
