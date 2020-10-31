@@ -242,55 +242,47 @@ void poup (Liste l)
                ) ;
 }
 
+/* Indique si une liste commence par deux éléments identiques*/
 bool DebutDeuxIdentiques(Liste l){
-  if (estVide(l)==TRUE OR estVide(suite(l))==TRUE){
+  if (estVide(l) OR estVide(suite(l))){
     return FALSE;
   }
-  if(premier(l)==premier(suite(l))){
-    return TRUE;
-  }
-  else{
-    return FALSE;
-  }
+  return (premier(l) IS premier(suite(l)));
 }
 
+/* Indique si la liste ne contient que des 0 */
 bool QueDesZeros(Liste l){
-  if (estVide(l)) {
+  if (estVide(l))
     return TRUE;
-  }
-  else{
-    if (premier(l)!=0){
-      return FALSE;
-    }
-    QueDesZeros(suite(l));
-  }
-  return FALSE;
+  else
+    return (premier(l) ISNOT 0 AND QueDesZeros(suite(l)));
 }
 
+/* Indique si la liste l1 est un sous ensemble de l2 */
 bool SousEnsemble(Liste l1, Liste l2){
   if (estVide(l2))
     return FALSE;
-
   if (estVide(l1))
     return TRUE;
 
-  if (premier(l2)==premier(l1)){
+  if (premier(l2) IS premier(l1)){
     l1=suite(l1);
     l2=suite(l2);
   }
 
-  if(premier(l1)!=premier(l2)){
-    if(premier(l1)<premier(l2))
+  if(premier(l1) ISNOT premier(l2)){
+    if(premier(l1) < premier(l2))
       return FALSE;
     else
       l2=suite(l2);
   }
-  SousEnsemble(l1,l2);
-  return FALSE;
+  return SousEnsemble(l1,l2);
 }
 
 //void Permutations à faire
 
+/* Elimine un élément sur deux */
+//A CORRIGER
 void EliminePositionPaires(Liste* L)
 {
     if (L == NULL)
