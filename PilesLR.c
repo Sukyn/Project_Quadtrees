@@ -266,12 +266,11 @@ bool SousEnsemble(Liste l1, Liste l2){
   if (estVide(l1))
     return TRUE;
 
-  if (premier(l2) IS premier(l1)){
+  if (premier(l1) IS premier(l2)){
     l1=suite(l1);
     l2=suite(l2);
-  }
+  } else {
 
-  if(premier(l1) ISNOT premier(l2)){
     if(premier(l1) < premier(l2))
       return FALSE;
     else
@@ -285,14 +284,29 @@ bool SousEnsemble(Liste l1, Liste l2){
 /* Elimine un élément sur deux */
 void EliminePositionPaires(Liste *L)
 {
-  if (!estVide(*L)){
+  if (NOT estVide(*L) AND NOT estVide(suite(*L))){
     (*L)->suivant = suite(*L)->suivant;
     EliminePositionPaires(&((*L)->suivant));
   }
 }
 
+/* Begaye qui modifie la liste en entrée en dédoublant tous les éléments
+strictement positifs de la liste et en éliminant tous les autres */
+void Begaye(Liste *L)
+{
+    if (NOT estVide(*L))
+    {
 
+      if (premier(*L) <= 0) {
+        depile(L);
+        Begaye(L);
+      } else {
+        empile(premier(*L), L);
+        Begaye(&((suite(*L))->suivant));
+      }
 
+    }
+}
 
 int main() {
     Liste l ;
@@ -301,14 +315,14 @@ int main() {
 
              empile(4, &l) ;
 
-             empile(5, &l) ;
+             empile(-5, &l) ;
              empile(6, &l) ;
-             empile(7, &l) ;
+             empile(0, &l) ;
              empile(8, &l) ;
              empile(9, &l) ;
 
     poup(l);
-    EliminePositionPaires(&l);
+    Begaye(&l);
     poup(l);
 
     return 0;
