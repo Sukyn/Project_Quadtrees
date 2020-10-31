@@ -308,21 +308,55 @@ void Begaye(Liste *L)
     }
 }
 
+/* MaxZerosConsecutifsqui prend une liste en argument
+et rend le plus grand nombre dezeros  cons ́ecutifs  de  la  liste */
+
+/* La fonction EstPalindromevue en TD. */
+
+
+/* SommeAvantApres*/
+void SommeAvantApresAux(Liste L, int cptAvant, int *cptApres, bool *res)
+{
+  if (NOT estVide(L))
+  {
+    SommeAvantApresAux(suite(L), cptAvant+premier(L), cptApres, res);
+
+    if (cptAvant IS *cptApres) *res = TRUE;
+    *cptApres += premier(L);
+  }
+}
+
+
+bool SommeAvantApres(Liste L)
+{
+  bool res = FALSE;
+  int cptAvant = 0;
+  int cptApres = 0;
+
+  SommeAvantApresAux(L, cptAvant, &cptApres, &res);
+  return res;
+}
+/* --------------- */
+
+
+
+
 int main() {
     Liste l ;
 
         initVide (&l) ;
 
-             empile(4, &l) ;
+             empile(2, &l) ;
 
-             empile(-5, &l) ;
-             empile(6, &l) ;
+             empile(3, &l) ;
              empile(0, &l) ;
-             empile(8, &l) ;
-             empile(9, &l) ;
+             empile(4, &l) ;
+             empile(-2, &l) ;
+             empile(7, &l) ;
 
     poup(l);
-    Begaye(&l);
+    bool somme = SommeAvantApres(l);
+    printf("Somme ? = %d\n\n", somme);
     poup(l);
 
     return 0;
