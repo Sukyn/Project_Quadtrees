@@ -12,6 +12,7 @@
 #define OR ||
 #define ISNOT !=
 #define NOT !
+#define IS ==
 #define then
 
 typedef enum { FALSE, TRUE} bool;
@@ -282,29 +283,12 @@ bool SousEnsemble(Liste l1, Liste l2){
 //void Permutations à faire
 
 /* Elimine un élément sur deux */
-//A CORRIGER
-void EliminePositionPaires(Liste* L)
+void EliminePositionPaires(Liste *L)
 {
-    if (L == NULL)
-        return;
-
-    /* Initialize prev and node to be deleted */
-    Liste *prev = *L;
-    Liste *node = *L->next;
-
-    while (prev != NULL && node != NULL)
-    {
-        /* Change next link of previous node */
-        prev->next = node->next;
-
-        /* Free memory */
-        free(node);
-
-        /* Update prev and node */
-        prev = prev->next;
-        if (prev != NULL)
-            node = prev->next;
-    }
+  if (!estVide(*L)){
+    (*L)->suivant = suite(*L)->suivant;
+    EliminePositionPaires(&((*L)->suivant));
+  }
 }
 
 
