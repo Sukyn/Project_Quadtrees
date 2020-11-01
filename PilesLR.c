@@ -309,7 +309,65 @@ void Begaye(Liste *L)
 }
 
 /* MaxZerosConsecutifsqui prend une liste en argument
-et rend le plus grand nombre dezeros  cons ́ecutifs  de  la  liste */
+et rend le plus grand  nombre dezeros  cons ́ecutifs  de  la  liste */
+int Max(int first, int second){
+  if (first > second) return first;
+  else return second;
+}
+
+
+/* Itérative */
+int MaxZerosConsecutifsIteratif(Liste L){
+  int max = 0;
+  int suite = 0;
+  while (NOT estVide(L)){
+
+    if (premier(L) IS 0) suite++;
+    else suite = 0;
+
+    max = Max(max, suite);
+  }
+  return max;
+}
+
+/* récursive avec une sous fonction avec trois arguments in */
+int MZCR(Liste L, int max, int suite){
+  if (estVide(L)) return max;
+  else {
+    max = Max(max, suite);
+
+    if (premier(L) IS 0) suite++;
+    else suite = 0;
+
+    return MZCR(L, max, suite);
+  }
+}
+
+int MaxZerosConsecutifsRec(Liste L){
+  return MZCR(L, 0, 0);
+}
+/* récursive avec une sous fonction avec un argument in et deux arguments out */
+void MZCRB(Liste L, int *max, int *suite){
+  if (NOT estVide(L)) {
+    *max = Max(*max, *suite);
+
+    if (premier(L) IS 0) (*suite)++;
+    else *suite = 0;
+    MZCRB(L, max, suite);
+  }
+}
+
+int MaxZerosConsecutifsRecBis(Liste L){
+  int max = 0;
+  int suite = 0;
+  MZCRB(L, &max, &suite);
+  return max;
+}
+
+
+
+
+
 
 /* La fonction EstPalindrome vue en TD. */
 void EstPalindromeAux(Liste *P, Liste L, bool *estPalin){
