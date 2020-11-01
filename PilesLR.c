@@ -243,23 +243,35 @@ void poup (Liste l)
                ) ;
 }
 
-/* Indique si une liste commence par deux éléments identiques*/
+/* Indique si une liste commence par deux éléments identiques
+-[@param] l : prend en entrée une liste legal
+-return un bool : TRUE si la liste commence par deux éléments identiques
+                  FALSE sinon
+*/
 bool DebutDeuxIdentiques(Liste l){
-  if (estVide(l) OR estVide(suite(l))){
+  if (estVide(l) OR estVide(suite(l))){ // le cas ou la liste comprend moins de 2 éléments
     return FALSE;
   }
   return (premier(l) IS premier(suite(l)));
 }
 
-/* Indique si la liste ne contient que des 0 */
+/* Indique si la liste ne contient que des 0
+-Prend en entrée une liste l
+-return un bool : TRUE si la liste ne contient que des 0
+                  FALSE sinon*/
 bool QueDesZeros(Liste l){
   if (estVide(l))
     return TRUE;
   else
-    return (premier(l) ISNOT 0 AND QueDesZeros(suite(l)));
+    return (premier(l) IS 0 AND QueDesZeros(suite(l)));
 }
 
-/* Indique si la liste l1 est un sous ensemble de l2 */
+/* Indique si la liste l1 est un sous ensemble de l2
+-[@param] l1 : une liste l1
+-[@param] l2 : une liste l2
+-return un bool : TRUE si la liste l1 est un sous ensemble de la liste l2
+                  FALSE sinon
+*/
 bool SousEnsemble(Liste l1, Liste l2){
   if (estVide(l2))
     return FALSE;
@@ -281,7 +293,11 @@ bool SousEnsemble(Liste l1, Liste l2){
 
 //void Permutations à faire
 
-/* Elimine un élément sur deux */
+/* procdédure EliminePositionPaires élimine un élément sur deux : les pointeurs de la liste chainée ne pointent
+plus vers le suivant, mais vers le suivant du suivant.
+-prend en parametre [in/out] l'adresse de la liste L
+-la procédure modifie la liste chainée.
+*/
 void EliminePositionPaires(Liste *L)
 {
   if (NOT estVide(*L) AND NOT estVide(suite(*L))){
@@ -290,8 +306,11 @@ void EliminePositionPaires(Liste *L)
   }
 }
 
-/* Begaye qui modifie la liste en entrée en dédoublant tous les éléments
-strictement positifs de la liste et en éliminant tous les autres */
+/* procédure Begaye qui modifie la liste en entrée en dédoublant tous les éléments
+strictement positifs de la liste et en éliminant tous les autres
+-prend en parametre [in/out] l'adresse de la liste L
+
+*/
 void Begaye(Liste *L)
 {
     if (NOT estVide(*L))
@@ -308,21 +327,34 @@ void Begaye(Liste *L)
     }
 }
 
-/* MaxZerosConsecutifsqui prend une liste en argument
-et rend le plus grand  nombre dezeros  cons ́ecutifs  de  la  liste */
+
+
+/* fonction Max qui compare deux entiers et retourne ne plus grand
+[in] first : un entier
+[in] second : un entiers
+return un int, le maximum des 2 paramètres.
+*/
 int Max(int first, int second){
   if (first > second) return first;
   else return second;
 }
 
+/* MaxZerosConsecutifsqui prend une liste en argument
+et rend le plus grand  nombre de zeros consecutifs de la liste */
 
 /* Itérative */
+/*fonction MaxZerosConsecutifsIteratif, version itérative de MaxZerosConsecutifs
+rend le plus grand nombre de zeros consécutifs de la liste
+[in] L : une liste chainée L
+return un entier.
+*/
 int MaxZerosConsecutifsIteratif(Liste L){
   int max = 0;
   int suite = 0;
   while (NOT estVide(L)){
 
-    if (premier(L) IS 0) suite++;
+    if (premier(L) IS 0) suite++; // on incrémente suite si la suite est aussi un zéro.
+                                  // le nombre actuel de 0 consécutif dans cette partie de la liste.
     else suite = 0;
 
     max = Max(max, suite);
@@ -330,7 +362,14 @@ int MaxZerosConsecutifsIteratif(Liste L){
   return max;
 }
 
-/* récursive avec une sous fonction avec trois arguments in */
+/* récursive avec une sous fonction avec trois arguments in
+fonction MZCR rend le plus grand nombre de zeros consécutifs de la liste
+MZCR va servie de sous fonction pour MaxZerosConsecutifsRec.
+[in] L : une liste chainée L
+[in] max : un entier
+[in] suite : un entier
+return l'entier max qui a été modifié dans la fonction.
+*/
 int MZCR(Liste L, int max, int suite){
   if (estVide(L)) return max;
   else {
@@ -343,10 +382,26 @@ int MZCR(Liste L, int max, int suite){
   }
 }
 
+
+/* récursive avec une sous fonction avec trois arguments in
+fonction MaxZerosConsecutifsIteratif, version itérative de MaxZerosConsecutifs,
+appelle MZCR avec comme premiere valeur de max et suite : max = 0 et suite = 0
+[in] L : une liste chainée L
+return un entier, return ce que MZCR return à la fin.
+*/
 int MaxZerosConsecutifsRec(Liste L){
   return MZCR(L, 0, 0);
 }
+
+
 /* récursive avec une sous fonction avec un argument in et deux arguments out */
+
+/* procédure MZCRB qui modifie la valeur de suite et max, max étant le nombre
+maximum de zéros consécutifs dans la liste.
+[in] L : une liste chainée L
+[in/out] *max : un pointeur sur l'adresse de max
+[in/out] *suite : un pointeur sur l'adresse de suite
+*/
 void MZCRB(Liste L, int *max, int *suite){
   if (NOT estVide(L)) {
     *max = Max(*max, *suite);
@@ -357,6 +412,10 @@ void MZCRB(Liste L, int *max, int *suite){
   }
 }
 
+/*fonction MaxZerosConsecutifsRecBis
+[in] L : une liste chainée L
+return un entier max, qui a été modifié dans MZCRB
+*/
 int MaxZerosConsecutifsRecBis(Liste L){
   int max = 0;
   int suite = 0;
@@ -369,7 +428,19 @@ int MaxZerosConsecutifsRecBis(Liste L){
 
 
 
-/* La fonction EstPalindrome vue en TD. */
+/* La fonction EstPalindrome vue en TD.*/
+
+
+
+/*procédure EstPalindromeAux qui vérifie si une liste d'entier est un palindrome,
+modifie la valeur de *estPalin; Si la liste L est un palindrome,
+      *estPalin prend la valeur TRUE,
+      sinon, il prend la valeur FALSE.
+[in/out] *P : un pointeur sur l'adresse de la liste P
+[in] L : une liste d'entier L
+[in/out] *estPalin : un pointeur sur l'adresse du bool estPalin
+
+*/
 void EstPalindromeAux(Liste *P, Liste L, bool *estPalin){
   if (NOT estVide(L)){
     EstPalindromeAux(P, suite(L), estPalin);
@@ -378,6 +449,11 @@ void EstPalindromeAux(Liste *P, Liste L, bool *estPalin){
   }
 }
 
+
+/*fonction EstPalindrome qui détermine si une liste est un palindrome ou non.
+[in] L : une liste chainée d'entier L.
+return estPalin.
+*/
 bool EstPalindrome(Liste L)
 {
   bool estPalin = TRUE;
@@ -386,14 +462,27 @@ bool EstPalindrome(Liste L)
   return estPalin;
 }
 
-/* SommeAvantApres*/
+/* SommeAvantApres : prend une liste d’entiers en argument et rend vrai ssi il y a un
+élément tel que la somme de tous les éléments qui le précèdent est égal à la somme de
+tous les éléments qui le suivent
+*/
+
+
+
+/*Procédure SommeAvantApresAux
+[in] L : une liste chainée d'entiers L
+[in] cptAvant : un entiers
+[in/out] *captApres : un pointeur sur l'adresse de l'entier cptApres
+[in/out] *res: 
+*/
 void SommeAvantApresAux(Liste L, int cptAvant, int *cptApres, bool *res)
 {
   if (NOT estVide(L))
   {
     SommeAvantApresAux(suite(L), cptAvant+premier(L), cptApres, res);
-
-    if (cptAvant IS *cptApres) *res = TRUE;
+    if (cptAvant IS *cptApres){
+      *res = TRUE;
+    }
     *cptApres += premier(L);
   }
 }
@@ -401,7 +490,7 @@ void SommeAvantApresAux(Liste L, int cptAvant, int *cptApres, bool *res)
 
 bool SommeAvantApres(Liste L)
 {
-  bool res = FALSE;
+  bool res;
   int cptAvant = 0, cptApres = 0;
 
   SommeAvantApresAux(L, cptAvant, &cptApres, &res);
