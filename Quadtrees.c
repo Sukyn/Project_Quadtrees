@@ -231,9 +231,65 @@ void negatif(image* I) {
        }
 }
 
+void arrondit_elementaire(image *I) {
+  if (((*I) != NULL) && !((*I)->toutnoir)) {
+    for (int i = 0; i < 4; i++) {
+          arrondit_elementaire(&((*I)->fils[i])) ;
+    }
+    int compte_blanc = 0;
+    for (int i = 0; i < 4; i++) {
+      if (((*I)->fils[i]) == NULL) compte_blanc++;
+    }
+    if (compte_blanc >= 2) {
+      for (int i = 0; i < 4; i++) {
+            rendmemoire(&((*I)->fils[i])) ;
+      }
+      (*I) = NULL ;
+    } else {
+      for (int i = 0; i < 4; i++) {
+            rendmemoire(&((*I)->fils[i])) ;
+      }
+      (*I)->toutnoir = TRUE ;
+    }
+  }
+}
+
+
+
+void arrondit_aux(image* I, int k, int n) {
+  if (k <= n) {
+    arrondit_elementaire(I);
+  }
+  else {
+    if (((*I) != NULL) && !((*I)->toutnoir)) {
+      for (int i = 0; i < 4; i++) {
+      arrondit_aux(&((*I)->fils[i]), k, n+1);
+      }
+    }
+  }
+}
+
+void arrondit(image* I, int k) {
+  arrondit_aux(I, k, 0);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 int main() {
-  printf("\n - Memory - %d\n", compteur_memoire);
+
+  //printf("\n - Memory - %d\n", compteur_memoire);
   image Image1 = construit_compose(construit_noir(),
                                    construit_blanc(),
                                    construit_noir(),
@@ -244,7 +300,7 @@ int main() {
                                                                        construit_noir(),
                                                                        construit_noir(),
                                                                        construit_noir()))) ;
-  printf("\n - Memory - %d\n", compteur_memoire);
+  //  printf("\n - Memory - %d\n", compteur_memoire);
   image Image2 = construit_compose(construit_compose(construit_noir(),
                                                      construit_noir(),
                                                      construit_noir(),
@@ -264,18 +320,22 @@ int main() {
                                                                         construit_blanc()),
                                                       construit_blanc(),
                                                       construit_noir())) ;
+  /*
   printf("\n - Memory - %d\n", compteur_memoire);
   printf("Image 1 AVANT : \n");
   affiche_profondeur(Image1) ;
   printf("\nImage 2 AVANT : \n");
   affiche_profondeur(Image2) ;
   printf("\n");
-
+  */
   image I_copie = copie(Image1) ;
+  /*
   printf("\n - Memory - %d\n", compteur_memoire);
   simplifie(&I_copie) ;
   printf("\n - Memory - %d\n", compteur_memoire);
+  */
   image I2_copie = copie(Image2) ;
+  /*
   printf("\n - Memory - %d\n", compteur_memoire);
   simplifie(&I2_copie) ;
   printf("\n - Memory - %d\n", compteur_memoire);
@@ -290,13 +350,21 @@ int main() {
 
   printf("Meme dessin ? : %d", val) ;
   printf("\n - Memory - %d\n", compteur_memoire);
+  */
+
+
+
+  /*
   printf("\n\n NEGATIF \n");
   affiche_normal(I_copie);
   printf("\n");
   negatif(&I_copie);
   affiche_normal(I_copie);
   printf("\n - Memory - %d\n", compteur_memoire);
+  */
 
+
+  /*
   printf("\n\n RENDMEMOIRE \n");
   affiche_normal(I2_copie);
 
@@ -308,4 +376,9 @@ int main() {
   rendmemoire(&Image1);
   rendmemoire(&Image2);
   printf("\n - Memory - %d\n", compteur_memoire);
+  */
+  affiche_normal(I2_copie);
+  printf("\n");
+  arrondit(&I2_copie,2);
+  affiche_normal(I2_copie);
 }
