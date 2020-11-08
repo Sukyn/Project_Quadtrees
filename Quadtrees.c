@@ -172,6 +172,8 @@ void simplifie(image* I){
     }
   }
 }
+//------------
+
 
 bool meme_dessin(image I, image I2)
 {
@@ -183,8 +185,16 @@ bool meme_dessin(image I, image I2)
        && meme_dessin(I->fils[2], I2->fils[2])
        && meme_dessin(I->fils[3], I2->fils[3]) ) ;
 }
-//-------------
 
+void negatif(image* I) {
+  if (*I == NULL) *I = construit_noir();
+  else if ((*I)->toutnoir) *I = construit_blanc();
+       else {
+         for (int i = 0; i < 4; i++) {
+         negatif(&((*I)->fils[i]));
+         }
+       }
+}
 int main() {
 
   image B = construit_blanc() ;
@@ -212,4 +222,10 @@ int main() {
   bool val = meme_dessin(I_copie, I2_copie);
 
   printf("Meme dessin ? : %d", val) ;
+
+  printf("\n NEGATIF \n");
+  affiche_normal(I_copie);
+  printf("\n");
+  negatif(&I_copie);
+  affiche_normal(I_copie);
 }
