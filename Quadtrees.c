@@ -10,18 +10,21 @@ typedef struct bloc_image
   } bloc_image ;
 typedef bloc_image *image ;
 
-
+//Ce compteur nous permettra de vérifier qu'on libère bien la mémoire...
+int compteur_memoire = 0;
 
 
 image construit_blanc()
 {
   image I = NULL ;
+  compteur_memoire++;
   return I ;
 }
 
 image construit_noir()
 {
   image I = (bloc_image*) malloc(sizeof(bloc_image)) ;
+  compteur_memoire++;
   I->toutnoir = TRUE ;
   for (int i = 0; i < 4; i++) {
     I->fils[i] = NULL ;
@@ -32,6 +35,7 @@ image construit_noir()
 image construit_compose(image i1, image i2, image i3, image i4)
 {
   image I = (bloc_image*) malloc(sizeof(bloc_image)) ;
+  compteur_memoire++;
   I->toutnoir = FALSE ;
   I->fils[0] = i1 ;
   I->fils[1] = i2 ;
@@ -117,6 +121,7 @@ image copie(image I)
       for (int i = 0; i < 4; i++) {
         I_copie->fils[i] = copie(I->fils[i]) ; //Il faut appeler sur copie pour créer de nouvelles images
       }
+      compteur_memoire++;
     }
   }
   return I_copie ;
@@ -143,6 +148,18 @@ double aire(image I)
 
 
 
+void rendmemoire(image* I){
+
+  if (*I != NULL && !((*I)->toutnoir)) {
+    for (int i = 0; i < 4; i++) {
+      rendmemoire(&((*I)->fils[i]));
+    }
+  }
+  compteur_memoire--;
+  free(*I);
+
+}
+
 
 //-----------
 bool is_divided(image I)
@@ -167,8 +184,20 @@ void simplifie(image* I){
           simplifie(&((*I)->fils[i])) ;
     }
     if (is_divided(*I)) {
-        if ((*I)->fils[0] == NULL) (*I) = construit_blanc() ;
-        else (*I) = construit_noir() ;
+        if ((*I)->fils[0] == NULL) {
+          for (int i = 0; i < 4; i++) {
+                rendmemoire(&((*I)->fils[i])) ;
+          }
+          (*I) = NULL ;
+
+        }
+        else
+        {
+          for (int i = 0; i < 4; i++) {
+                rendmemoire(&((*I)->fils[i])) ;
+          }
+          (*I)->toutnoir = TRUE ;
+        }
     }
   }
 }
@@ -187,21 +216,55 @@ bool meme_dessin(image I, image I2)
 }
 
 void negatif(image* I) {
-  if (*I == NULL) *I = construit_noir();
-  else if ((*I)->toutnoir) *I = construit_blanc();
+  if (*I == NULL) {
+    rendmemoire(I);
+    *I = construit_noir();
+  }
+  else if ((*I)->toutnoir) {
+          rendmemoire(I);
+          *I = construit_blanc();
+      }
        else {
          for (int i = 0; i < 4; i++) {
          negatif(&((*I)->fils[i]));
          }
        }
 }
+
+
 int main() {
-
-  image B = construit_blanc() ;
-  image N = construit_noir() ;
-  image Image1 = construit_compose(N, B, N, construit_compose(B, B, B, construit_compose(N, N, N, N))) ;
-  image Image2 = construit_compose(construit_compose(N, N, N, construit_compose(N, N, N, construit_compose(N, N, N, N))), B, N, construit_compose(B, construit_compose(B, B, B, B), B, N)) ;
-
+  printf("\n - Memory - %d\n", compteur_memoire);
+  image Image1 = construit_compose(construit_noir(),
+                                   construit_blanc(),
+                                   construit_noir(),
+                                   construit_compose(construit_blanc(),
+                                                     construit_blanc(),
+                                                     construit_blanc(),
+                                                     construit_compose(construit_noir(),
+                                                                       construit_noir(),
+                                                                       construit_noir(),
+                                                                       construit_noir()))) ;
+  printf("\n - Memory - %d\n", compteur_memoire);
+  image Image2 = construit_compose(construit_compose(construit_noir(),
+                                                     construit_noir(),
+                                                     construit_noir(),
+                                                     construit_compose(construit_noir(),
+                                                                       construit_noir(),
+                                                                       construit_noir(),
+                                                                       construit_compose(construit_noir(),
+                                                                                         construit_noir(),
+                                                                                         construit_noir(),
+                                                                                         construit_noir()))),
+                                    construit_blanc(),
+                                    construit_noir(),
+                                    construit_compose(construit_blanc(),
+                                                      construit_compose(construit_blanc(),
+                                                                        construit_blanc(),
+                                                                        construit_blanc(),
+                                                                        construit_blanc()),
+                                                      construit_blanc(),
+                                                      construit_noir())) ;
+  printf("\n - Memory - %d\n", compteur_memoire);
   printf("Image 1 AVANT : \n");
   affiche_profondeur(Image1) ;
   printf("\nImage 2 AVANT : \n");
@@ -209,9 +272,13 @@ int main() {
   printf("\n");
 
   image I_copie = copie(Image1) ;
+  printf("\n - Memory - %d\n", compteur_memoire);
   simplifie(&I_copie) ;
+  printf("\n - Memory - %d\n", compteur_memoire);
   image I2_copie = copie(Image2) ;
+  printf("\n - Memory - %d\n", compteur_memoire);
   simplifie(&I2_copie) ;
+  printf("\n - Memory - %d\n", compteur_memoire);
 
   printf("Image 1 APRES : \n");
   affiche_profondeur(I_copie) ;
@@ -222,10 +289,23 @@ int main() {
   bool val = meme_dessin(I_copie, I2_copie);
 
   printf("Meme dessin ? : %d", val) ;
-
-  printf("\n NEGATIF \n");
+  printf("\n - Memory - %d\n", compteur_memoire);
+  printf("\n\n NEGATIF \n");
   affiche_normal(I_copie);
   printf("\n");
   negatif(&I_copie);
   affiche_normal(I_copie);
+  printf("\n - Memory - %d\n", compteur_memoire);
+
+  printf("\n\n RENDMEMOIRE \n");
+  affiche_normal(I2_copie);
+
+  printf("\n %d \n", compteur_memoire);
+
+  printf("\n - Memory - %d\n", compteur_memoire);
+  rendmemoire(&I2_copie);
+  rendmemoire(&I_copie);
+  rendmemoire(&Image1);
+  rendmemoire(&Image2);
+  printf("\n - Memory - %d\n", compteur_memoire);
 }
