@@ -111,7 +111,7 @@ bool est_noire(image I)
 
 image copie(image I)
 {
-  image I_copie = (bloc_image*) malloc(sizeof(bloc_image)) ;
+  image I_copie = (bloc_image*) malloc(sizeof(bloc_image)) ; // cd : peut etre m'expliquer cette igne
   if (I == NULL) I_copie = construit_blanc() ; //On construit une nouvelle image blanche
   else {
     if (I->toutnoir) I_copie = construit_noir() ; //On construit une nouvelle image noire
@@ -142,15 +142,15 @@ double aire_aux(image I, double cote){
 
 double aire(image I)
 {
-  if (est_noire(I)) return 1 ;
-  return aire_aux(I, 0.5);
+  if (est_noire(I)) return 1 ; // cd : a quoi sert cette ligne alors que dans aire_aux on a if (I->toutnoir) return cote*cote ;
+  return aire_aux(I, 0.5); // cd : Pourquoi ne pas directement appeler aire_aux(I , 1) sans faire la premiere ligne?
 }
 
 
 
 void rendmemoire(image* I){
 
-  if (*I != NULL && !((*I)->toutnoir)) {
+  if (*I != NULL && !((*I)->toutnoir)) { // cd : pourquoi la on met * avant I contrairement a precedemment?
     for (int i = 0; i < 4; i++) {
       rendmemoire(&((*I)->fils[i]));
     }
@@ -175,7 +175,7 @@ bool is_divided(image I)
     && ((I->fils[2]) != NULL && (I->fils[2])->toutnoir)
     && ((I->fils[3]) != NULL && (I->fils[3])->toutnoir)) return TRUE ;
   // Sinon...
-  return FALSE ;
+  return FALSE ; // cd : et dans le cas ou fils[0] par exemple est divisé aussi en 4 image noires? La ca ne va que en profondeur 2 c'est ca?
 }
 
 void simplifie(image* I){
@@ -265,7 +265,7 @@ void arrondit_elementaire(image *I) {
 
 
 
-void arrondit_aux(image* I, int k, int n) {
+void arrondit_aux(image* I, int k, int n) { // cd : peut etre m'expliquer un peu plus celle ci
   if (k <= n) {
     arrondit_elementaire(I);
   }

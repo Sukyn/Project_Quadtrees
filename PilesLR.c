@@ -473,7 +473,7 @@ tous les éléments qui le suivent
 [in] L : une liste chainée d'entiers L
 [in] cptAvant : un entiers
 [in/out] *captApres : un pointeur sur l'adresse de l'entier cptApres
-[in/out] *res: 
+[in/out] *res:
 */
 void SommeAvantApresAux(Liste L, int cptAvant, int *cptApres, bool *res)
 {
