@@ -204,15 +204,24 @@ void simplifie(image* I){
 //------------
 
 
-bool meme_dessin(image I, image I2)
+bool meme_dessin_aux(image I, image I2)
 {
 
   if (I == NULL) return (I2 == NULL) ;
   if (I->toutnoir) return (I2->toutnoir) ;
-  return (meme_dessin(I->fils[0], I2->fils[0])
-       && meme_dessin(I->fils[1], I2->fils[1])
-       && meme_dessin(I->fils[2], I2->fils[2])
-       && meme_dessin(I->fils[3], I2->fils[3]) ) ;
+  return (meme_dessin_aux(I->fils[0], I2->fils[0])
+       && meme_dessin_aux(I->fils[1], I2->fils[1])
+       && meme_dessin_aux(I->fils[2], I2->fils[2])
+       && meme_dessin_aux(I->fils[3], I2->fils[3]) ) ;
+}
+
+bool meme_dessin(image I, image I2)
+{
+  image I_copie = copie(Image1) ;
+  simplifie(&I_copie) ;
+  image I2_copie = copie(Image2) ;
+  simplifie(&I2_copie) ;
+  return meme_dessin_aux(I_copie, I2_copie);
 }
 
 void negatif(image* I) {
@@ -280,13 +289,6 @@ void arrondit(image* I, int k) {
 
 
 
-
-
-
-
-
-
-
 int main() {
 
   //printf("\n - Memory - %d\n", compteur_memoire);
@@ -346,7 +348,7 @@ int main() {
   affiche_profondeur(I2_copie) ;
   printf("\n") ;
 
-  bool val = meme_dessin(I_copie, I2_copie);
+  bool val = meme_dessin(Image1, Image2);
 
   printf("Meme dessin ? : %d", val) ;
   printf("\n - Memory - %d\n", compteur_memoire);
@@ -377,8 +379,12 @@ int main() {
   rendmemoire(&Image2);
   printf("\n - Memory - %d\n", compteur_memoire);
   */
+
+  /*
   affiche_normal(I2_copie);
   printf("\n");
   arrondit(&I2_copie,2);
   affiche_normal(I2_copie);
+  */
+
 }
