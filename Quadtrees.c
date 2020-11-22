@@ -303,62 +303,44 @@ void arrondit(image* I, int k) {
 
 
 void difference (image Image1, image Image2, image* imagedif){
-  printf("1\n");
   simplifie(&Image1);
   simplifie(&Image2);
-  printf("2\n");
   if(meme_dessin(Image1,Image2)){ // si les 2 images sont identiques
-    printf("3\n");
     *imagedif = NULL;
-    printf("4\n");
   }
   else{
-    printf("n\n");
     if ((Image1 == NULL && Image2 -> toutnoir)|| (Image1->toutnoir && Image2 == NULL)){ // si les 2 images sont unies mais une blanche et l'autre noire
-      printf("6\n");
       (*imagedif) -> toutnoir = TRUE ;
       for (int i = 0; i < 4; i++) {
         (*imagedif)->fils[i] = NULL ;
       }
-      printf("7\n");
     }
     else {// Cas ou au moins une des 2 images n'est pas unie.
       if((Image1 == NULL || Image1 -> toutnoir) && (Image2 != NULL || !(Image2 -> toutnoir) )){ // cas ou image2 a des fils mais pas image1
-        if (Image1 == NULL){
-          printf("8\n");                                                                   // Si l'image qui n'a pas de fils est blanche, on copie les fils de celle qui en a
+        if (Image1 == NULL){                                                                 // Si l'image qui n'a pas de fils est blanche, on copie les fils de celle qui en a
           *imagedif = Image2;                                                                 //  la on veut copier les fils de image2 et les mettre dans l'image qu'on vient de construire.
         }
-        else{
-          printf("9\n");                                                                             //Si l'image qui n'a pas de fils est noir
+        else{                                                                           //Si l'image qui n'a pas de fils est noir
           *imagedif = copie(Image2);
           negatif(imagedif);
         }
       }
       if((Image2 == NULL || Image2 -> toutnoir) && (Image1 != NULL || !(Image1 -> toutnoir) )){ // cas ou image1 a des fils mais pas image2
-         printf("a\n");
          if (Image2 == NULL){ // Si l'image qui n'a pas de fils est blanche, on copie les fils de celle qui en a
-             printf("10\n");
              *imagedif = Image1;
         }
         else{
-          printf("11\n");
           *imagedif = copie(Image1);
           negatif(imagedif);
         }
       }
       else{ //aucune des 2 n'est unies.
-        printf("12\n");
         for (int i = 0; i<4 ; i++){
-          printf("13\n");
           difference(Image1 -> fils[i], Image2 -> fils[i], imagedif);
         }
-        printf("14\n");
       }
-      printf("15\n");
     }
-    printf("16\n");
   }
-  printf("17\n");
 }
 
 
