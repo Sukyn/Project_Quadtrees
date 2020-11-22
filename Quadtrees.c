@@ -1,6 +1,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 typedef enum { FALSE, TRUE} bool;
 
@@ -111,8 +112,8 @@ bool est_noire(image I)
 
 image copie(image I)
 {
-  image I_copie = (bloc_image*) malloc(sizeof(bloc_image)) ; // cd : peut etre m'expliquer cette igne
-  if (I == NULL) I_copie = construit_blanc() ; //On construit une nouvelle image blanche
+  image I_copie = (bloc_image*) malloc(sizeof(bloc_image)) ;
+  if (I == NULL) I_copie = construit_blanc() ;
   else {
     if (I->toutnoir) I_copie = construit_noir() ; //On construit une nouvelle image noire
     else
@@ -142,15 +143,15 @@ double aire_aux(image I, double cote){
 
 double aire(image I)
 {
-  if (est_noire(I)) return 1 ; // cd : a quoi sert cette ligne alors que dans aire_aux on a if (I->toutnoir) return cote*cote ;
-  return aire_aux(I, 0.5); // cd : Pourquoi ne pas directement appeler aire_aux(I , 1) sans faire la premiere ligne?
+  if (est_noire(I)) return 1 ;
+  return aire_aux(I, 0.5);
 }
 
 
 
 void rendmemoire(image* I){
 
-  if (*I != NULL && !((*I)->toutnoir)) { // cd : pourquoi la on met * avant I contrairement a precedemment?
+  if (*I != NULL && !((*I)->toutnoir)) {
     for (int i = 0; i < 4; i++) {
       rendmemoire(&((*I)->fils[i]));
     }
@@ -175,7 +176,7 @@ bool is_divided(image I)
     && ((I->fils[2]) != NULL && (I->fils[2])->toutnoir)
     && ((I->fils[3]) != NULL && (I->fils[3])->toutnoir)) return TRUE ;
   // Sinon...
-  return FALSE ; // cd : et dans le cas ou fils[0] par exemple est divisé aussi en 4 image noires? La ca ne va que en profondeur 2 c'est ca?
+  return FALSE ;
 }
 
 void simplifie(image* I){
@@ -204,22 +205,39 @@ void simplifie(image* I){
 //------------
 
 
-bool meme_dessin_aux(image I, image I2)
-{
+bool meme_dessin_aux(image I, image I2){
 
-  if (I == NULL) return (I2 == NULL) ;
-  if (I->toutnoir) return (I2->toutnoir) ;
+  if (I == NULL){
+    return (I2 == NULL) ;
+  }
+  else{
+    if (I->toutnoir){
+      return (I2->toutnoir) ;
+    }
+    else{
+      if (I2==NULL){
+        return (I==NULL);
+      }
+      else{
+        if (I2 -> toutnoir){
+          return (I -> toutnoir);
+        }
+      }
+    }
+  }
   return (meme_dessin_aux(I->fils[0], I2->fils[0])
        && meme_dessin_aux(I->fils[1], I2->fils[1])
        && meme_dessin_aux(I->fils[2], I2->fils[2])
        && meme_dessin_aux(I->fils[3], I2->fils[3]) ) ;
 }
 
+
+
 bool meme_dessin(image I, image I2)
 {
-  image I_copie = copie(Image1) ;
+  image I_copie = copie(I) ;
   simplifie(&I_copie) ;
-  image I2_copie = copie(Image2) ;
+  image I2_copie = copie(I2) ;
   simplifie(&I2_copie) ;
   return meme_dessin_aux(I_copie, I2_copie);
 }
@@ -265,7 +283,7 @@ void arrondit_elementaire(image *I) {
 
 
 
-void arrondit_aux(image* I, int k, int n) { // cd : peut etre m'expliquer un peu plus celle ci
+void arrondit_aux(image* I, int k, int n) {
   if (k <= n) {
     arrondit_elementaire(I);
   }
@@ -284,8 +302,64 @@ void arrondit(image* I, int k) {
 
 
 
-
-
+void difference (image Image1, image Image2, image* imagedif){
+  printf("1\n");
+  simplifie(&Image1);
+  simplifie(&Image2);
+  printf("2\n");
+  if(meme_dessin(Image1,Image2)){ // si les 2 images sont identiques
+    printf("3\n");
+    *imagedif = NULL;
+    printf("4\n");
+  }
+  else{
+    printf("n\n");
+    if ((Image1 == NULL && Image2 -> toutnoir)|| (Image1->toutnoir && Image2 == NULL)){ // si les 2 images sont unies mais une blanche et l'autre noire
+      printf("6\n");
+      (*imagedif) -> toutnoir = TRUE ;
+      for (int i = 0; i < 4; i++) {
+        (*imagedif)->fils[i] = NULL ;
+      }
+      printf("7\n");
+    }
+    else {// Cas ou au moins une des 2 images n'est pas unie.
+      if((Image1 == NULL || Image1 -> toutnoir) && (Image2 != NULL || !(Image2 -> toutnoir) )){ // cas ou image2 a des fils mais pas image1
+        if (Image1 == NULL){
+          printf("8\n");                                                                   // Si l'image qui n'a pas de fils est blanche, on copie les fils de celle qui en a
+          *imagedif = Image2;                                                                 //  la on veut copier les fils de image2 et les mettre dans l'image qu'on vient de construire.
+        }
+        else{
+          printf("9\n");                                                                             //Si l'image qui n'a pas de fils est noir
+          *imagedif = copie(Image2);
+          negatif(imagedif);
+        }
+      }
+      if((Image2 == NULL || Image2 -> toutnoir) && (Image1 != NULL || !(Image1 -> toutnoir) )){ // cas ou image1 a des fils mais pas image2
+         printf("a\n");
+         if (Image2 == NULL){ // Si l'image qui n'a pas de fils est blanche, on copie les fils de celle qui en a
+             printf("10\n");
+             *imagedif = Image1;
+        }
+        else{
+          printf("11\n");
+          *imagedif = copie(Image1);
+          negatif(imagedif);
+        }
+      }
+      else{ //aucune des 2 n'est unies.
+        printf("12\n");
+        for (int i = 0; i<4 ; i++){
+          printf("13\n");
+          difference(Image1 -> fils[i], Image2 -> fils[i], imagedif);
+        }
+        printf("14\n");
+      }
+      printf("15\n");
+    }
+    printf("16\n");
+  }
+  printf("17\n");
+}
 
 
 
@@ -317,7 +391,7 @@ int main() {
                                     construit_noir(),
                                     construit_compose(construit_blanc(),
                                                       construit_compose(construit_blanc(),
-                                                                        construit_blanc(),
+                                                                        construit_noir(),
                                                                         construit_blanc(),
                                                                         construit_blanc()),
                                                       construit_blanc(),
@@ -330,6 +404,15 @@ int main() {
   affiche_profondeur(Image2) ;
   printf("\n");
   */
+
+  image Image3 = construit_compose(construit_noir(),
+                                   construit_blanc(),
+                                   construit_noir(),
+                                   construit_noir());
+  image Image4 = construit_noir();
+
+
+
   image I_copie = copie(Image1) ;
   /*
   printf("\n - Memory - %d\n", compteur_memoire);
@@ -337,6 +420,8 @@ int main() {
   printf("\n - Memory - %d\n", compteur_memoire);
   */
   image I2_copie = copie(Image2) ;
+
+  meme_dessin(Image3,Image4);
   /*
   printf("\n - Memory - %d\n", compteur_memoire);
   simplifie(&I2_copie) ;
@@ -386,5 +471,61 @@ int main() {
   arrondit(&I2_copie,2);
   affiche_normal(I2_copie);
   */
+  simplifie(&Image1);
+  affiche_normal(Image1);
+  printf("\n" );
+  simplifie(&Image2);
+  affiche_normal(Image2);
+  printf("\n" );
+
+  image imagedif = (bloc_image*) malloc(sizeof(bloc_image)) ;
+  imagedif->toutnoir = TRUE ;
+  for (int i = 0; i < 4; i++) {
+    imagedif->fils[i] = NULL ;
+  }
+
+  difference(Image3,Image4,&imagedif);
+  affiche_normal(imagedif);
+  printf("\n" );
 
 }
+
+
+
+
+/*image lecture_au_clavier_aux(char image2){
+  //cas vide a gerer
+  int i=256;
+  while(image2[i]!= '.' && image2[i]!= 'N' && image2[i]!= 'B' ){
+    i--;
+  }
+
+
+
+  if (image[0]=='N') return construit_noir();
+  else if (image[0]=='B') return construit_blanc();
+  else if(image[0]=='.') {
+    char* image2 = image2 + 1;
+    if (image2[0] != '.' && image2[1] != '.' && image2[2] != '.' && image2[3] != '.'){
+      return construit_compose(lecture_au_clavier_aux(image2);
+
+    }
+  }
+
+
+}
+image lecture_au_clavier (){
+  char image1[256], flag;
+  int i = 0;
+  while (flag != '\n'){
+    flag=getchar();
+    image1[i] = flag;
+    i++;
+  }
+
+
+
+  return 0;
+}
+
+*/
