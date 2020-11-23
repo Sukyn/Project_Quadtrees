@@ -209,10 +209,12 @@ bool meme_dessin_aux(image I, image I2)
 
   if (I == NULL) return (I2 == NULL) ;
   if (I->toutnoir) return (I2->toutnoir) ;
+  if (I2 != NULL && !(I2->toutnoir)){
   return (meme_dessin_aux(I->fils[0], I2->fils[0])
        && meme_dessin_aux(I->fils[1], I2->fils[1])
        && meme_dessin_aux(I->fils[2], I2->fils[2])
        && meme_dessin_aux(I->fils[3], I2->fils[3]) ) ;
+     } else return FALSE;
 }
 
 bool meme_dessin(image I, image I2)

@@ -339,7 +339,7 @@ int Max(int first, int second){
   else return second;
 }
 
-/* MaxZerosConsecutifsqui prend une liste en argument
+/* MaxZerosConsecutifs qui prend une liste en argument
 et rend le plus grand  nombre de zeros consecutifs de la liste */
 
 /* Itérative */
@@ -473,7 +473,7 @@ tous les éléments qui le suivent
 [in] L : une liste chainée d'entiers L
 [in] cptAvant : un entiers
 [in/out] *captApres : un pointeur sur l'adresse de l'entier cptApres
-[in/out] *res: 
+[in/out] *res:
 */
 void SommeAvantApresAux(Liste L, int cptAvant, int *cptApres, bool *res)
 {
