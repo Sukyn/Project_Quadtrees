@@ -1,6 +1,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 typedef enum { FALSE, TRUE} bool;
 
@@ -112,7 +113,7 @@ bool est_noire(image I)
 image copie(image I)
 {
   image I_copie = (bloc_image*) malloc(sizeof(bloc_image)) ;
-  if (I == NULL) I_copie = construit_blanc() ; //On construit une nouvelle image blanche
+  if (I == NULL) I_copie = construit_blanc() ;
   else {
     if (I->toutnoir) I_copie = construit_noir() ; //On construit une nouvelle image noire
     else
@@ -204,12 +205,26 @@ void simplifie(image* I){
 //------------
 
 
-bool meme_dessin_aux(image I, image I2)
-{
+bool meme_dessin_aux(image I, image I2){
 
-  if (I == NULL) return (I2 == NULL) ;
-  if (I->toutnoir) return (I2->toutnoir) ;
-  if (I2 != NULL && !(I2->toutnoir)){
+  if (I == NULL){
+    return (I2 == NULL) ;
+  }
+  else{
+    if (I->toutnoir){
+      return (I2->toutnoir) ;
+    }
+    else{
+      if (I2==NULL){
+        return (I==NULL);
+      }
+      else{
+        if (I2 -> toutnoir){
+          return (I -> toutnoir);
+        }
+      }
+    }
+  }
   return (meme_dessin_aux(I->fils[0], I2->fils[0])
        && meme_dessin_aux(I->fils[1], I2->fils[1])
        && meme_dessin_aux(I->fils[2], I2->fils[2])
@@ -217,11 +232,13 @@ bool meme_dessin_aux(image I, image I2)
      } else return FALSE;
 }
 
+
+
 bool meme_dessin(image I, image I2)
 {
-  image I_copie = copie(Image1) ;
+  image I_copie = copie(I) ;
   simplifie(&I_copie) ;
-  image I2_copie = copie(Image2) ;
+  image I2_copie = copie(I2) ;
   simplifie(&I2_copie) ;
   return meme_dessin_aux(I_copie, I2_copie);
 }
@@ -286,10 +303,114 @@ void arrondit(image* I, int k) {
 
 
 
+void difference (image Image1, image Image2, image* imagedif){
+  simplifie(&Image1);
+  simplifie(&Image2);
+  if(meme_dessin(Image1,Image2)){ // si les 2 images sont identiques
+    *imagedif = NULL;
+  }
+  else{
+    if ((Image1 == NULL && Image2 -> toutnoir)|| (Image1->toutnoir && Image2 == NULL)){ // si les 2 images sont unies mais une blanche et l'autre noire
+      (*imagedif) -> toutnoir = TRUE ;
+      for (int i = 0; i < 4; i++) {
+        (*imagedif)->fils[i] = NULL ;
+      }
+    }
+    else {// Cas ou au moins une des 2 images n'est pas unie.
+      if((Image1 == NULL || Image1 -> toutnoir) && (Image2 != NULL || !(Image2 -> toutnoir) )){ // cas ou image2 a des fils mais pas image1
+        if (Image1 == NULL){                                                                 // Si l'image qui n'a pas de fils est blanche, on copie les fils de celle qui en a
+          *imagedif = Image2;                                                                 //  la on veut copier les fils de image2 et les mettre dans l'image qu'on vient de construire.
+        }
+        else{                                                                           //Si l'image qui n'a pas de fils est noir
+          *imagedif = copie(Image2);
+          negatif(imagedif);
+        }
+      }
+      if((Image2 == NULL || Image2 -> toutnoir) && (Image1 != NULL || !(Image1 -> toutnoir) )){ // cas ou image1 a des fils mais pas image2
+         if (Image2 == NULL){ // Si l'image qui n'a pas de fils est blanche, on copie les fils de celle qui en a
+             *imagedif = Image1;
+        }
+        else{
+          *imagedif = copie(Image1);
+          negatif(imagedif);
+        }
+      }
+      else{ //aucune des 2 n'est unies.
+        for (int i = 0; i<4 ; i++){
+          difference(Image1 -> fils[i], Image2 -> fils[i], imagedif);
+        }
+      }
+    }
+  }
+}
 
 
 
 
+
+
+
+// en fait il faudrait modifier une image passée en refference.
+/*a chaque fois que je vois un point, je crée des fils a imagelue.
+je remplis les fils avec les 4 prochaines cases, en sachant que si je vois un point,
+je recrée des fils que je remplis avec les 4 prochaines cases etc.
+*/
+void lecture_au_clavier_aux(int j, char image1[], image* imagelue){
+  if((image1[j] == 'N') || (image1[j] == 'B') || (image1[j] == '.')){
+    if(image1[j]=='.'){
+      //if((image1[j+1]!='.') && (image1[j+2]!='.') && (image1[j+3]!='.') && (image1[j+4]!='.')){
+        for (int i = 0; i < 4; i++){
+          printf("1ter\n");
+          lecture_au_clavier_aux(j+1+i, image1, &((*imagelue)->fils[i])); // la ca appelle sur les 4 suivant
+        }
+    //  }
+      printf("1\n");
+    }
+    else{
+      printf("1bis\n");
+      if(image1[j]=='B'){
+        printf("2\n");
+        (*imagelue) -> toutnoir = FALSE;
+        *imagelue=NULL;
+      }
+      else{ // image[j] == 'N'
+        printf("3\n");
+        (*imagelue) -> toutnoir = TRUE ;
+        printf("3bis\n");
+        for (int i = 0; i < 4; i++) {
+          printf("4\n");
+          (*imagelue)->fils[i] = NULL ;
+        }
+        printf("5\n");
+      }
+      printf("6\n");
+    }
+    printf("7\n");
+  }
+  printf("8\n");
+}
+
+
+
+
+
+
+image lecture_au_clavier(){
+  char image1[256], flag;
+  int i = 0;
+  while (flag != '\n'){
+    flag=getchar();
+    image1[i] = flag;
+    i++;
+  }
+  image imagelue = (bloc_image*) malloc(sizeof(bloc_image)) ;
+  imagelue->toutnoir = TRUE ;
+  for (int i = 0; i < 4; i++) {
+    imagelue->fils[i] = NULL ;
+  }
+  lecture_au_clavier_aux(0,image1,&imagelue);
+  return imagelue;
+}
 
 int main() {
 
@@ -319,7 +440,7 @@ int main() {
                                     construit_noir(),
                                     construit_compose(construit_blanc(),
                                                       construit_compose(construit_blanc(),
-                                                                        construit_blanc(),
+                                                                        construit_noir(),
                                                                         construit_blanc(),
                                                                         construit_blanc()),
                                                       construit_blanc(),
@@ -332,6 +453,15 @@ int main() {
   affiche_profondeur(Image2) ;
   printf("\n");
   */
+
+  image Image3 = construit_compose(construit_noir(),
+                                   construit_blanc(),
+                                   construit_noir(),
+                                   construit_noir());
+  image Image4 = construit_noir();
+
+
+
   image I_copie = copie(Image1) ;
   /*
   printf("\n - Memory - %d\n", compteur_memoire);
@@ -339,6 +469,8 @@ int main() {
   printf("\n - Memory - %d\n", compteur_memoire);
   */
   image I2_copie = copie(Image2) ;
+
+  meme_dessin(Image3,Image4);
   /*
   printf("\n - Memory - %d\n", compteur_memoire);
   simplifie(&I2_copie) ;
@@ -388,5 +520,22 @@ int main() {
   arrondit(&I2_copie,2);
   affiche_normal(I2_copie);
   */
+  simplifie(&Image1);
+  affiche_normal(Image1);
+  printf("\n" );
+  simplifie(&Image2);
+  affiche_normal(Image2);
+  printf("\n" );
 
+  image imagedif = (bloc_image*) malloc(sizeof(bloc_image)) ;
+  imagedif->toutnoir = TRUE ;
+  for (int i = 0; i < 4; i++) {
+    imagedif->fils[i] = NULL ;
+  }
+
+  difference(Image3,Image4,&imagedif);
+  affiche_normal(imagedif);
+  printf("\n" );
+  affiche_normal(lecture_au_clavier());
+  printf("\n" );
 }
