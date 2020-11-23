@@ -345,6 +345,72 @@ void difference (image Image1, image Image2, image* imagedif){
 
 
 
+
+
+
+
+// en fait il faudrait modifier une image passée en refference.
+/*a chaque fois que je vois un point, je crée des fils a imagelue.
+je remplis les fils avec les 4 prochaines cases, en sachant que si je vois un point,
+je recrée des fils que je remplis avec les 4 prochaines cases etc.
+*/
+void lecture_au_clavier_aux(int j, char image1[], image* imagelue){
+  if((image1[j] == 'N') || (image1[j] == 'B') || (image1[j] == '.')){
+    if(image1[j]=='.'){
+      //if((image1[j+1]!='.') && (image1[j+2]!='.') && (image1[j+3]!='.') && (image1[j+4]!='.')){
+        for (int i = 0; i < 4; i++){
+          printf("1ter\n");
+          lecture_au_clavier_aux(j+1+i, image1, &((*imagelue)->fils[i])); // la ca appelle sur les 4 suivant
+        }
+    //  }
+      printf("1\n");
+    }
+    else{
+      printf("1bis\n");
+      if(image1[j]=='B'){
+        printf("2\n");
+        (*imagelue) -> toutnoir = FALSE; 
+        *imagelue=NULL;
+      }
+      else{ // image[j] == 'N'
+        printf("3\n");
+        (*imagelue) -> toutnoir = TRUE ;
+        printf("3bis\n");
+        for (int i = 0; i < 4; i++) {
+          printf("4\n");
+          (*imagelue)->fils[i] = NULL ;
+        }
+        printf("5\n");
+      }
+      printf("6\n");
+    }
+    printf("7\n");
+  }
+  printf("8\n");
+}
+
+
+
+
+
+
+image lecture_au_clavier(){
+  char image1[256], flag;
+  int i = 0;
+  while (flag != '\n'){
+    flag=getchar();
+    image1[i] = flag;
+    i++;
+  }
+  image imagelue = (bloc_image*) malloc(sizeof(bloc_image)) ;
+  imagelue->toutnoir = TRUE ;
+  for (int i = 0; i < 4; i++) {
+    imagelue->fils[i] = NULL ;
+  }
+  lecture_au_clavier_aux(0,image1,&imagelue);
+  return imagelue;
+}
+
 int main() {
 
   //printf("\n - Memory - %d\n", compteur_memoire);
@@ -469,45 +535,6 @@ int main() {
   difference(Image3,Image4,&imagedif);
   affiche_normal(imagedif);
   printf("\n" );
-
+  affiche_normal(lecture_au_clavier());
+  printf("\n" );
 }
-
-
-
-
-/*image lecture_au_clavier_aux(char image2){
-  //cas vide a gerer
-  int i=256;
-  while(image2[i]!= '.' && image2[i]!= 'N' && image2[i]!= 'B' ){
-    i--;
-  }
-
-
-
-  if (image[0]=='N') return construit_noir();
-  else if (image[0]=='B') return construit_blanc();
-  else if(image[0]=='.') {
-    char* image2 = image2 + 1;
-    if (image2[0] != '.' && image2[1] != '.' && image2[2] != '.' && image2[3] != '.'){
-      return construit_compose(lecture_au_clavier_aux(image2);
-
-    }
-  }
-
-
-}
-image lecture_au_clavier (){
-  char image1[256], flag;
-  int i = 0;
-  while (flag != '\n'){
-    flag=getchar();
-    image1[i] = flag;
-    i++;
-  }
-
-
-
-  return 0;
-}
-
-*/
