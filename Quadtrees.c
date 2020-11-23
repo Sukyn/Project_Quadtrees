@@ -375,7 +375,10 @@ image lecture_au_clavier_aux(char image[], int indice, int* shift){
                                  lecture_au_clavier_aux(image, indice - 2, shift),
                                  lecture_au_clavier_aux(image, indice - 3, shift));
   }
-  printf("humm");
+  char s = image[indice+(*shift)];
+  printf("La valeur entrée suivante n'est pas valide :");
+  putchar(s);
+  printf("\n");
   return construit_noir();
 }
 
