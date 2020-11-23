@@ -346,7 +346,17 @@ void difference (image Image1, image Image2, image* imagedif){
 
 
 
+image construit_compose_retourne(image i1, image i2, image i3, image i4) {
 
+    image I = (bloc_image*) malloc(sizeof(bloc_image)) ;
+    compteur_memoire++;
+    I->toutnoir = FALSE ;
+    I->fils[0] = i4 ;
+    I->fils[1] = i3 ;
+    I->fils[2] = i2 ;
+    I->fils[3] = i1 ;
+    return I ;
+  }
 
 
 // en fait il faudrait modifier une image passée en refference.
@@ -354,39 +364,19 @@ void difference (image Image1, image Image2, image* imagedif){
 je remplis les fils avec les 4 prochaines cases, en sachant que si je vois un point,
 je recrée des fils que je remplis avec les 4 prochaines cases etc.
 */
-void lecture_au_clavier_aux(int j, char image1[], image* imagelue){
-  if((image1[j] == 'N') || (image1[j] == 'B') || (image1[j] == '.')){
-    if(image1[j]=='.'){
-      //if((image1[j+1]!='.') && (image1[j+2]!='.') && (image1[j+3]!='.') && (image1[j+4]!='.')){
-        for (int i = 0; i < 4; i++){
-          printf("1ter\n");
-          lecture_au_clavier_aux(j+1+i, image1, &((*imagelue)->fils[i])); // la ca appelle sur les 4 suivant
-        }
-    //  }
-      printf("1\n");
-    }
-    else{
-      printf("1bis\n");
-      if(image1[j]=='B'){
-        printf("2\n");
-        (*imagelue) -> toutnoir = FALSE;
-        *imagelue=NULL;
-      }
-      else{ // image[j] == 'N'
-        printf("3\n");
-        (*imagelue) -> toutnoir = TRUE ;
-        printf("3bis\n");
-        for (int i = 0; i < 4; i++) {
-          printf("4\n");
-          (*imagelue)->fils[i] = NULL ;
-        }
-        printf("5\n");
-      }
-      printf("6\n");
-    }
-    printf("7\n");
+image lecture_au_clavier_aux(char image[], int indice, int* shift){
+
+  if (image[indice+(*shift)] == 'N') { return construit_noir(); }
+  if (image[indice+(*shift)] == 'B') { return construit_blanc(); }
+  if (image[indice+(*shift)] == '.') {
+    (*shift) += 4;
+    return construit_compose_retourne( lecture_au_clavier_aux(image, indice, shift),
+                                 lecture_au_clavier_aux(image, indice - 1, shift),
+                                 lecture_au_clavier_aux(image, indice - 2, shift),
+                                 lecture_au_clavier_aux(image, indice - 3, shift));
   }
-  printf("8\n");
+  printf("humm");
+  return construit_noir();
 }
 
 
@@ -395,20 +385,16 @@ void lecture_au_clavier_aux(int j, char image1[], image* imagelue){
 
 
 image lecture_au_clavier(){
-  char image1[256], flag;
+  char image1[256];
+  char flag = 's';
   int i = 0;
   while (flag != '\n'){
-    flag=getchar();
+    flag = getchar();
     image1[i] = flag;
     i++;
   }
-  image imagelue = (bloc_image*) malloc(sizeof(bloc_image)) ;
-  imagelue->toutnoir = TRUE ;
-  for (int i = 0; i < 4; i++) {
-    imagelue->fils[i] = NULL ;
-  }
-  lecture_au_clavier_aux(0,image1,&imagelue);
-  return imagelue;
+  int shift = 0;
+  return lecture_au_clavier_aux(image1, 0, &shift);
 }
 
 int main() {
@@ -519,6 +505,8 @@ int main() {
   arrondit(&I2_copie,2);
   affiche_normal(I2_copie);
   */
+
+  /*
   simplifie(&Image1);
   affiche_normal(Image1);
   printf("\n" );
@@ -527,14 +515,13 @@ int main() {
   printf("\n" );
 
   image imagedif = (bloc_image*) malloc(sizeof(bloc_image)) ;
-  imagedif->toutnoir = TRUE ;
-  for (int i = 0; i < 4; i++) {
-    imagedif->fils[i] = NULL ;
-  }
+  imagedif = construit_noir();
 
   difference(Image3,Image4,&imagedif);
   affiche_normal(imagedif);
   printf("\n" );
+  */
+
   affiche_normal(lecture_au_clavier());
-  printf("\n" );
+  printf(" est ce que vous avez entré\n" );
 }
