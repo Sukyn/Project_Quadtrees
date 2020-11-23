@@ -5,6 +5,13 @@
 
 typedef enum { FALSE, TRUE} bool;
 
+typedef struct
+  { //int length;
+    char tab[256];
+    int length;
+}string;
+
+
 typedef struct bloc_image
   { bool toutnoir ;
   struct bloc_image * fils[4] ;
@@ -397,8 +404,30 @@ image lecture_au_clavier(){
     i++;
   }
   int shift = 0;
+
   return lecture_au_clavier_aux(image1, 0, &shift);
 }
+
+image tabdechar_to_image( char phrase[]){
+  char image1[256];
+  int i = 0;
+  while(phrase[i] != '\n'){
+    image1[i] = phrase[i];
+    i++;
+  }
+  int shift=0;
+  return lecture_au_clavier_aux(image1, 0, &shift);
+}
+
+/*image string_to_image(string mot){
+  char image1[mot.length];
+  for(int i =0; i< mot.length; i++){
+    image1[i] = mot.tab[i];
+  }
+  int shift=0;
+  return lecture_au_clavier_aux(image1, 0, &shift);
+}*/
+
 
 int main() {
 
@@ -524,7 +553,12 @@ int main() {
   affiche_normal(imagedif);
   printf("\n" );
   */
-
+  printf(" entrez une image en mode normal\n" );
   affiche_normal(lecture_au_clavier());
   printf(" est ce que vous avez entré\n" );
+
+  char phrase[10] = {'.', 'N', 'B', 'N', '.', 'N', 'N', 'B', 'N', '\n'};
+  affiche_normal(tabdechar_to_image(phrase));
+  printf(" est phrase\n" );
+
 }
