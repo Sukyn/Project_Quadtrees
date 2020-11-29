@@ -5,11 +5,7 @@
 
 typedef enum { FALSE, TRUE} bool;
 
-typedef struct
-  { //int length;
-    char tab[256];
-    int length;
-}string;
+
 
 
 typedef struct bloc_image
@@ -109,8 +105,8 @@ bool est_blanche(image I)
 
 bool est_noire(image I)
 {
-  if (I->toutnoir) return TRUE;
   if (I == NULL) return FALSE;
+  if (I->toutnoir) return TRUE;
   return (est_noire(I->fils[0])
        && est_noire(I->fils[1])
        && est_noire(I->fils[2])
@@ -355,15 +351,15 @@ void difference (image Image1, image Image2, image* imagedif){
 
 image construit_compose_retourne(image i1, image i2, image i3, image i4) {
 
-    image I = (bloc_image*) malloc(sizeof(bloc_image)) ;
-    compteur_memoire++;
-    I->toutnoir = FALSE ;
-    I->fils[0] = i4 ;
-    I->fils[1] = i3 ;
-    I->fils[2] = i2 ;
-    I->fils[3] = i1 ;
-    return I ;
-  }
+  image I = (bloc_image*) malloc(sizeof(bloc_image)) ;
+  compteur_memoire++;
+  I->toutnoir = FALSE ;
+  I->fils[0] = i4 ;
+  I->fils[1] = i3 ;
+  I->fils[2] = i2 ;
+  I->fils[3] = i1 ;
+  return I ;
+}
 
 
 // en fait il faudrait modifier une image passée en refference.
@@ -428,6 +424,85 @@ image tabdechar_to_image( char phrase[]){
   return lecture_au_clavier_aux(image1, 0, &shift);
 }*/
 
+bool est_pleine(image image1){
+  if((est_noire(image1)) || (est_blanche(image1))){
+    return FALSE;
+  }
+  else{
+    for(int j = 0; j<4;j++){
+      if(!(est_noire(image1 -> fils[j])) && !(est_blanche(image1 -> fils[j]))){
+        return FALSE;
+      }
+    }
+    return TRUE;
+  }
+}
+//on teste sur la prmiere couche
+//on teste sur la deuxieme couxhe
+//on apelle est pleine sur les fils de image1, tant qu'il y en a
+void CompteSousImagePleine(image I, int hauteur, int* cpt, bool* is_full, int profondeur){
+  // Si la hauteur vaut 0, on regarde qu'il n'y a pas de fils,
+  if (hauteur == profondeur) {
+      if (est_blanche(I) || est_noire(I)) {
+        *(is_full) = TRUE ;
+        if (hauteur == 0) (*cpt)++;
+
+      }
+      else {
+        for(int i = 0; i < 4; i++) {
+          CompteSousImagePleine(I->fils[i], hauteur, cpt, is_full, 0) ;
+        }
+      }
+
+
+
+  } else {
+    if (est_blanche(I) || est_noire(I)) {
+      *(is_full) = FALSE ;
+    }
+    else {
+
+      for(int i = 0; i < 4; i++) {
+        CompteSousImagePleine(I->fils[i], hauteur, cpt, is_full, profondeur+1) ;
+      }
+
+    }
+
+    if (*(is_full)) (*cpt)++;
+  }
+  affiche_normal(I);
+  printf(" cpt = %d\n", *cpt) ;
+}
+
+
+
+  /*On rentre une image. Si c'est une image pleine, on renvoie true, plus le
+  compteur
+  comment on sait que y a une image pleine?
+  Quand tous ses fils sont a la meme profondeur.
+  on regarde une image. Si elle a un fils, on regarde le premier :
+  si lui aussi a des fils,
+  En gros on va dans la profondeur de chaque fils. Si parmi les 4 fils,
+  il y en a un qui a pas la meme profondeur que les autres, on renvoie false, surement,
+  enfin on fait comprendre que c'est pas la qu'on trouvera une image pleine.
+  si les 4 fils ont la meme profondeur, on renvoie true, et on incremente le
+  compteur d'image pleine.
+  a la fin on renvoie cpt.
+  Une image pleine a 4 fils, qui sont composé de 4 fils qui sont soit tout blanc, soit tout noir. */
+
+/*
+  int p=0;
+  if(est_noire(image1) OR est_blanche(image1)){
+
+    return cpt; // la je sais pas quoi faire
+  }
+  else{
+    p++;
+    for (int i = 0; i < 4; i++) {
+      (*image1)->fils[i] = NULL ;
+    }
+  }
+}*/
 
 int main() {
 
@@ -553,12 +628,17 @@ int main() {
   affiche_normal(imagedif);
   printf("\n" );
   */
+  /*
   printf(" entrez une image en mode normal\n" );
   affiche_normal(lecture_au_clavier());
   printf(" est ce que vous avez entré\n" );
-
-  char phrase[10] = {'.', 'N', 'B', 'N', '.', 'N', 'N', 'B', 'N', '\n'};
+//. ..BBNB.NNBN.BBBN.NNNB
+                                    1   2    3    4        5    6    7    8        9   10  11   12       13  14  15   16   17      18  19  20      21  22  23  24      25  26  27          28   29  30  31     32  33  34  35      36  37  38  39      40  41  42  43        N     . N   B   N     . B   B     N   B  .  B   N     B  .  .   B   B   N     B   . N     B   B   N   .   B N   B   N   .     N   B   N   B
+*/  char phrase[58] = {'.','.','.','B','B', 'N', 'B','.', 'N', 'N', 'B', 'N', '.','B','B','B', 'N', '.','N','N','N', 'B', 'N','.','N','B','N','.','B','B','N','B','.','B','N','B','.','.','B','B','N','B','.','N','B','B','N','.','B','N','B','N','.','N','B','N','B', '\n'};
   affiche_normal(tabdechar_to_image(phrase));
   printf(" est phrase\n" );
-
+  int i = 0;
+  bool b = TRUE;
+  CompteSousImagePleine(tabdechar_to_image(phrase), 1, &i, &b, 0);
+  printf("Compteur = %d", i);
 }
