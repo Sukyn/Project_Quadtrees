@@ -445,14 +445,15 @@ void CompteSousImagePleine(image I, int hauteur, int* cpt, bool* is_full, int pr
   if (hauteur == profondeur) {
       if (est_blanche(I) || est_noire(I)) {
         *(is_full) = TRUE ;
+        affiche_normal(I);
+        printf(" cpt = %d\n", *cpt) ;
         if (hauteur == 0) (*cpt)++;
 
       }
       else {
-        for(int i = 0; i < 4; i++) {
-          CompteSousImagePleine(I->fils[i], hauteur, cpt, is_full, 0) ;
-        }
+         CompteSousImagePleine(I, hauteur, cpt, is_full, profondeur-1) ;
       }
+
 
 
 
@@ -464,14 +465,18 @@ void CompteSousImagePleine(image I, int hauteur, int* cpt, bool* is_full, int pr
 
       for(int i = 0; i < 4; i++) {
         CompteSousImagePleine(I->fils[i], hauteur, cpt, is_full, profondeur+1) ;
+        //if (!(*(is_full))) break;
       }
 
     }
 
-    if (*(is_full)) (*cpt)++;
+    if (*(is_full) && hauteur != 0 && profondeur == 0) {
+      (*cpt)++;
+      *(is_full) = FALSE ;
+    }
+    affiche_normal(I);
+    printf(" cpt = %d, p = %d\n ", *cpt, profondeur) ;
   }
-  affiche_normal(I);
-  printf(" cpt = %d\n", *cpt) ;
 }
 
 
@@ -639,6 +644,11 @@ int main() {
   printf(" est phrase\n" );
   int i = 0;
   bool b = TRUE;
-  CompteSousImagePleine(tabdechar_to_image(phrase), 1, &i, &b, 0);
+  CompteSousImagePleine(tabdechar_to_image(phrase), 2, &i, &b, -1);
+  // 0 = 43 ok
+  // 1 = 9 ok
+  // 2 = 3 (devrait etre 2)
+  // 3 = 1 (devrait etre 0)
+  // 4 ou + = 0 ok
   printf("Compteur = %d", i);
 }
