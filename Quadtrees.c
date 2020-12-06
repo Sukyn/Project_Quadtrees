@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
+#include <errno.h>
 
 typedef enum { FALSE, TRUE} bool;
 
@@ -92,6 +94,8 @@ void affiche_profondeur(image I)
   affiche_prof_aux(I, 0) ;
 }
 
+
+
 bool est_blanche(image I)
 {
   if (I == NULL) return TRUE;
@@ -112,6 +116,44 @@ bool est_noire(image I)
        && est_noire(I->fils[2])
        && est_noire(I->fils[3]));
 }
+
+
+
+int donne_profondeur_max_aux(image I, int profondeur, bool fils ){
+
+  int max = 0;
+  if (est_blanche(I) || est_noire(I)){
+    if(fils){
+      return profondeur+1 ;
+    }
+    else{
+      return profondeur;
+    }
+  }
+  else {
+      fils = TRUE;
+      for (int i = 0; i < 4; i++) {
+        int resultat = donne_profondeur_max_aux(I->fils[i], profondeur+1, fils) ; //We go deeper inside
+        if (resultat>= max){
+          max = resultat;
+        }
+      }
+  }
+  return max;
+}
+
+
+// je verrai si c'est vraiment utilse d'avoir une fonction auxilliaire ici
+
+int donne_profondeur_max(image I){
+  int profondeur = 0;
+  return donne_profondeur_max_aux(I,profondeur, TRUE);
+}
+
+
+
+
+
 
 image copie(image I)
 {
@@ -182,6 +224,8 @@ bool is_divided(image I)
   return FALSE ;
 }
 
+// On peut optimiser cette fonction grâce à "est_blanche" et "est_noire" (si noir -> on renvoie noir, si blanc -> on renvoie blanc)
+// La simplification se fait alors naturellement
 void simplifie(image* I){
   if (*I != NULL && !((*I)->toutnoir)) {
     for (int i = 0; i < 4; i++) {
@@ -389,7 +433,8 @@ image lecture_au_clavier_aux(char image[], int indice, int* shift){
 
 
 
-
+// La fonction fait deux passes, ce qui est à l'origine du shift, on peut bien
+// la simplifier en ne faisant qu'une passe
 image lecture_au_clavier(){
   char image1[256];
   char flag = 's';
@@ -423,7 +468,7 @@ image tabdechar_to_image( char phrase[]){
   int shift=0;
   return lecture_au_clavier_aux(image1, 0, &shift);
 }*/
-
+/*
 bool est_pleine(image image1){
   if((est_noire(image1)) || (est_blanche(image1))){
     return FALSE;
@@ -474,7 +519,7 @@ void CompteSousImagePleine(image I, int hauteur, int* cpt, bool* is_full, int pr
   printf(" cpt = %d\n", *cpt) ;
 }
 
-
+*/
 
   /*On rentre une image. Si c'est une image pleine, on renvoie true, plus le
   compteur
@@ -503,6 +548,164 @@ void CompteSousImagePleine(image I, int hauteur, int* cpt, bool* is_full, int pr
     }
   }
 }*/
+
+/*Si il y a une image blanche, on afiche un point
+  Si il y a une image noir, on affiche un 8*/
+/*Il faut une fonction auxilliaire qui retourne un string_to_image
+la fonction principale parcourera le string et coupera a 2^k*/
+
+
+/*cadeau pour roxane : a peu presque */
+
+/*Il faut une fonction qui réarrange.*/
+
+
+image Division_aux (image I, int profondeur){
+
+  if(est_blanche(I)){
+    image f1 = construit_blanc();
+    I=construit_blanc();
+
+    if(profondeur==0){
+      return I;
+    }
+    else{
+
+      return construit_compose(Division_aux(f1,profondeur-1),Division_aux(f1,profondeur-1),Division_aux(f1,profondeur-1),Division_aux(f1,profondeur-1));
+    }
+  }
+
+  if(est_noire(I)){
+    image f1 = construit_noir();
+    image I = construit_noir();
+
+    if(profondeur==0){
+      return I;
+    }
+
+    else{
+      return construit_compose(Division_aux(f1,profondeur-1),Division_aux(f1,profondeur-1),Division_aux(f1,profondeur-1),Division_aux(f1,profondeur-1));
+    }
+  }
+
+  else{
+
+      profondeur--;
+      for(int i = 0; i<4; i++){
+
+        I->fils[i] = Division_aux(I->fils[i],profondeur);
+
+
+    }
+    return I;
+  }
+}
+
+image Division (image I){
+  int profondeur = donne_profondeur_max(I); // la profoneur a laquelle il faudra diviser tout les carrés qui ne le sont pas deja
+  Division_aux(I,profondeur);
+}
+
+
+// cette fonction
+
+void image_divise_to_char_aux(image I,int* i, char(* imageI)[]){
+
+  if(I == NULL){
+    (*imageI)[*i]='B';
+    (*i)++;
+  }
+  else{
+    if (I->toutnoir) {
+      (*imageI)[*i]='N';
+      (*i)++;
+    }
+    else{
+      for(int j=0; j<4; j++){
+        image_divise_to_char_aux(I->fils[j],i,imageI);
+      }
+    }
+  }
+}
+
+
+void image_divise_to_char(image I, char(* imageI)[]){
+  int profondeur= donne_profondeur_max(I);
+  int cases = pow(2,2*profondeur); // pour avoir un tableau avec le nombre de casses exactes
+  int i = 0;
+  I = Division(I);
+
+  image_divise_to_char_aux(I,&i, imageI);
+
+}
+
+/*
+if(est_blanche(image1)){
+  printf(".");
+}
+else{
+  printf("8");
+}
+
+*/
+void affichage2kpixel(image image1){
+  int profondeur = donne_profondeur_max(image1);
+  int cases = pow(2,2*profondeur);
+  char I[cases];
+  image_divise_to_char(image1, &I);
+
+
+
+
+  int debut = 0;
+  int ligne = pow(2,profondeur)/2;
+  char signe = '$';
+  int indice = 0;
+
+
+  for (int i = 0; i < 64; i++) {
+  putchar(I[i]);
+}
+  printf("\n");
+
+
+
+
+  for(int t = 0; t< ligne; t +=ligne ){ // ligne par ligne
+    for(int i = 0; i<ligne; i++){
+      for(int j = 0; j< 2; j++){
+        indice = pow(2, i+t)+j-2;
+        printf("t=%d   ",t );
+        printf("i=%d   ",i );
+        printf("j=%d \n",j );
+        printf("indice = %d\n", indice);
+        /*if(I[indice]=='N'){
+          printf("8");
+        }
+        else{
+          printf(".");
+        }*/
+      }
+      printf("\n");
+    }
+    for(int i = 0; i<ligne; i++){
+      for(int j=2; j<4; j++){
+        indice = pow(2, i+t)+j-1;
+        printf("t=%d   ",t );
+        printf("i=%d   ",i );
+        printf("j=%d \n",j );
+        printf("indice = %d\n", indice);
+        /*if(I[indice]=='N'){
+          printf("8");
+        }
+        else{
+          printf(".");
+        }*/
+      }
+    }
+    printf("\n");
+  }
+}
 
 int main() {
 
@@ -635,10 +838,21 @@ int main() {
 //. ..BBNB.NNBN.BBBN.NNNB
                                     1   2    3    4        5    6    7    8        9   10  11   12       13  14  15   16   17      18  19  20      21  22  23  24      25  26  27          28   29  30  31     32  33  34  35      36  37  38  39      40  41  42  43        N     . N   B   N     . B   B     N   B  .  B   N     B  .  .   B   B   N     B   . N     B   B   N   .   B N   B   N   .     N   B   N   B
 */  char phrase[58] = {'.','.','.','B','B', 'N', 'B','.', 'N', 'N', 'B', 'N', '.','B','B','B', 'N', '.','N','N','N', 'B', 'N','.','N','B','N','.','B','B','N','B','.','B','N','B','.','.','B','B','N','B','.','N','B','B','N','.','B','N','B','N','.','N','B','N','B', '\n'};
-  affiche_normal(tabdechar_to_image(phrase));
-  printf(" est phrase\n" );
-  int i = 0;
-  bool b = TRUE;
-  CompteSousImagePleine(tabdechar_to_image(phrase), 1, &i, &b, 0);
-  printf("Compteur = %d", i);
+  //affiche_normal(tabdechar_to_image(phrase));
+  //printf(" est phrase\n" );
+  //int i = 0;
+  //bool b = TRUE;
+  //CompteSousImagePleine(tabdechar_to_image(phrase), 1, &i, &b, 0);
+  //printf("Compteur = %d", i);
+
+  //affichage2kpixel(tabdechar_to_image(phrase));
+
+  //image_divise_to_char(Image1);
+  //image_divise_to_char(Image1);
+
+  //printf("%d\n", donne_profondeur_max(Image1) );
+  //printf("%d\n", donne_profondeur_max(Image2) );
+//  affiche_normal(Division(Image1));
+  printf("\n");
+  affichage2kpixel(Image1);
 }
