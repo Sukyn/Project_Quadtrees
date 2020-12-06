@@ -546,16 +546,11 @@ la fonction principale parcourera le string et coupera a 2^k*/
 
 image Division_aux (image I, int profondeur){
 
-  if(est_blanche(I)){
-    if(profondeur==0) return construit_blanc();
-    else return construit_compose(Division_aux(I,profondeur-1),
-                                  Division_aux(I,profondeur-1),
-                                  Division_aux(I,profondeur-1),
-                                  Division_aux(I,profondeur-1));
-  }
-
-  if(est_noire(I)){
-    if(profondeur==0) return construit_noir();
+  if(est_blanche(I) || est_noire(I)){
+    if(profondeur == 0) {
+      if (est_blanche(I)) return construit_blanc();
+                     else return construit_noir();
+    }
     else return construit_compose(Division_aux(I,profondeur-1),
                                   Division_aux(I,profondeur-1),
                                   Division_aux(I,profondeur-1),
