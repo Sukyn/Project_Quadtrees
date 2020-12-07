@@ -6,6 +6,8 @@
 #include <errno.h>
 
 typedef enum { FALSE, TRUE} bool;
+//gfg
+
 
 
 
