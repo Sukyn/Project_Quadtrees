@@ -5,6 +5,8 @@
 
 /* Sucre syntaxique */
 typedef enum { FALSE, TRUE} bool;
+//gfg
+
 
 
 /*
@@ -475,11 +477,24 @@ void simplifie(image* I){
 /* Fonction auxiliaire */
 bool meme_dessin_aux(image I, image I2){
 
-       if (I  == NULL)     return (I2 == NULL) ;
-  else if (I  -> toutnoir) return (I2 -> toutnoir) ;
-  else if (I2 == NULL)     return (I  == NULL);
-  else if (I2 -> toutnoir) return (I  -> toutnoir);
-
+  if (I == NULL){
+    return (I2 == NULL) ;
+  }
+  else{
+    if (I->toutnoir){
+      return (I2->toutnoir) ;
+    }
+    else{
+      if (I2==NULL){
+        return (I==NULL);
+      }
+      else{
+        if (I2 -> toutnoir){
+          return (I -> toutnoir);
+        }
+      }
+    }
+  }
   return (meme_dessin_aux(I->fils[0], I2->fils[0])
        && meme_dessin_aux(I->fils[1], I2->fils[1])
        && meme_dessin_aux(I->fils[2], I2->fils[2])
@@ -515,10 +530,10 @@ void negatif(image* I) {
     *I = construit_blanc();
   } else {
     rendmemoire(I);
-    *I =  construit_compose((*I)->fils[0],
-                            (*I)->fils[1],
-                            (*I)->fils[2],
-                            (*I)->fils[3]))
+    *I =  construit_compose(negatif(&((*I)->fils[0])),
+                            negatif(&((*I)->fils[1])),
+                            negatif(&((*I)->fils[2])),
+                            negatif(&((*I)->fils[3])))
   }
 }
 
@@ -606,12 +621,32 @@ void difference (image I1, image I2){
             return dif
           }
       }
-
-  // On gère désormais le cas où ni l'une ni l'autre n'est uni
-  else {
+    }
+    else {// Cas ou au moins une des 2 images n'est pas unie.
+      if((Image1 == NULL || Image1 -> toutnoir) && (Image2 != NULL || !(Image2 -> toutnoir) )){ // cas ou image2 a des fils mais pas image1
+        if (Image1 == NULL){                                                                 // Si l'image qui n'a pas de fils est blanche, on copie les fils de celle qui en a
+          *imagedif = Image2;                                                                 //  la on veut copier les fils de image2 et les mettre dans l'image qu'on vient de construire.
+        }
+        else{                                                                           //Si l'image qui n'a pas de fils est noir
+          *imagedif = copie(Image2);
+          negatif(imagedif);
+        }
+      }
+      if((Image2 == NULL || Image2 -> toutnoir) && (Image1 != NULL || !(Image1 -> toutnoir) )){ // cas ou image1 a des fils mais pas image2
+         if (Image2 == NULL){ // Si l'image qui n'a pas de fils est blanche, on copie les fils de celle qui en a
+             *imagedif = Image1;
+        }
+        else{
+          *imagedif = copie(Image1);
+          negatif(imagedif);
+        }
+      }
+      else{ //aucune des 2 n'est unies.
         for (int i = 0; i<4 ; i++){
           difference(I1 -> fils[i], I2 -> fils[i]);
         }
+      }
+    }
   }
 }
 
@@ -646,10 +681,27 @@ image lecture_au_clavier(){
 /*
 void CompteSousImagePleine(image I, int hauteur, int* cpt, bool* is_full, int profondeur){
   if (hauteur == profondeur) {
-      if (!(est_blanche(I) || est_noire(I))) CompteSousImagePleine(I, hauteur, cpt, is_full, profondeur-1) ;
+      if (est_blanche(I) || est_noire(I)) {
+        *(is_full) = TRUE ;
+        if (hauteur == 0) (*cpt)++;
+
+      }
       else {
-         *(is_full) = TRUE ;
-         if (hauteur == 0) (*cpt)++;
+        for(int i = 0; i < 4; i++) {
+          CompteSousImagePleine(I->fils[i], hauteur, cpt, is_full, 0) ;
+        }
+      }
+
+
+
+  } else {
+    if (est_blanche(I) || est_noire(I)) {
+      *(is_full) = FALSE ;
+    }
+    else {
+
+      for(int i = 0; i < 4; i++) {
+        CompteSousImagePleine(I->fils[i], hauteur, cpt, is_full, profondeur+1) ;
       }
 
   }
@@ -660,11 +712,11 @@ void CompteSousImagePleine(image I, int hauteur, int* cpt, bool* is_full, int pr
     }
   }
 
-  if (*(is_full) && hauteur != 0 && profondeur == 0) {
-    (*cpt)++;
-    printf("incr. ici, h = %d, p = %d\n", hauteur, profondeur);
-    *(is_full) = FALSE ;
+    if (*(is_full)) (*cpt)++;
   }
+  affiche_normal(I);
+  printf(" cpt = %d\n", *cpt) ;
+}
 
   affiche_normal(I);
   printf(" cpt = %d, p = %d\n ", *cpt, profondeur) ;
