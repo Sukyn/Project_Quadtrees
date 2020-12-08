@@ -113,6 +113,62 @@ void rendmemoire(image* I){
 }
 
 
+/* ----------------------------------------------------------------------
+
+
+              BRIQUES DE BASE
+
+
+---------------------------------------------------------------------- */
+
+/* Fonction qui vérifie si une image est toute blanche
+@param L'image que l'on veut tester
+@return TRUE si l'image est toute blanche
+*/
+bool est_blanche(image I)
+{
+  if (I == NULL) return TRUE;
+  if (I->toutnoir) return FALSE;
+  return (est_blanche(I->fils[0])
+       && est_blanche(I->fils[1])
+       && est_blanche(I->fils[2])
+       && est_blanche(I->fils[3]));
+}
+
+/* Fonction qui vérifie si une image est toute noire
+@param L'image que l'on veut tester
+@return TRUE si l'image est toute noire
+*/
+bool est_noire(image I)
+{
+  if (I == NULL) return FALSE;
+  if (I->toutnoir) return TRUE;
+  return (est_noire(I->fils[0])
+       && est_noire(I->fils[1])
+       && est_noire(I->fils[2])
+       && est_noire(I->fils[3]));
+}
+
+
+
+/* Fonction qui copie une image dans un nouvel emplacement mémoire
+@param L'image à copier
+@return Une copie de l'image, que l'on peut modifier sans modifier l'originale
+*/
+image copie(image I)
+{
+  image I_copie = (bloc_image*) malloc(sizeof(bloc_image)) ;
+  if (I == NULL) I_copie = construit_blanc() ;
+  else if (I->toutnoir) I_copie = construit_noir() ;
+  else I_copie = construit_compose(copie(I->fils[0]),
+                                   copie(I->fils[1]),
+                                   copie(I->fils[2]),
+                                   copie(I->fils[3])) ;
+  return I_copie ;
+}
+/* Pourquoi ne pas juste faire I_copie = I ?
+Parce que ce sont des pointeurs, et donc ce ne serait pas une copie mais un pointeur vers le même
+Il faut donc créer de nouvelles images */
 
 
 
@@ -135,7 +191,8 @@ int donne_profondeur_max_aux(image I, int profondeur){
   if ((I == NULL) || I->toutnoir) return profondeur;
   else {
       for (int i = 0; i < 4; i++) {
-        if (donne_profondeur_max_aux(I->fils[i], profondeur+1) > max) max = resultat;
+        int resultat = donne_profondeur_max_aux(I->fils[i], profondeur+1);
+        if (resultat > max) max = resultat;
       }
   }
   return max;
@@ -373,54 +430,6 @@ else{
 
 ---------------------------------------------------------------------- */
 
-/* Fonction qui vérifie si une image est toute blanche
-@param L'image que l'on veut tester
-@return TRUE si l'image est toute blanche
-*/
-bool est_blanche(image I)
-{
-  if (I == NULL) return TRUE;
-  if (I->toutnoir) return FALSE;
-  return (est_blanche(I->fils[0])
-       && est_blanche(I->fils[1])
-       && est_blanche(I->fils[2])
-       && est_blanche(I->fils[3]));
-}
-
-/* Fonction qui vérifie si une image est toute noire
-@param L'image que l'on veut tester
-@return TRUE si l'image est toute noire
-*/
-bool est_noire(image I)
-{
-  if (I == NULL) return FALSE;
-  if (I->toutnoir) return TRUE;
-  return (est_noire(I->fils[0])
-       && est_noire(I->fils[1])
-       && est_noire(I->fils[2])
-       && est_noire(I->fils[3]));
-}
-
-
-
-/* Fonction qui copie une image dans un nouvel emplacement mémoire
-@param L'image à copier
-@return Une copie de l'image, que l'on peut modifier sans modifier l'originale
-*/
-image copie(image I)
-{
-  image I_copie = (bloc_image*) malloc(sizeof(bloc_image)) ;
-  if (I == NULL) I_copie = construit_blanc() ;
-  else if (I->toutnoir) I_copie = construit_noir() ;
-  else I_copie = construit_compose(copie(I->fils[0]),
-                                   copie(I->fils[1]),
-                                   copie(I->fils[2]),
-                                   copie(I->fils[3])) ;
-  return I_copie ;
-}
-/* Pourquoi ne pas juste faire I_copie = I ?
-Parce que ce sont des pointeurs, et donc ce ne serait pas une copie mais un pointeur vers le même
-Il faut donc créer de nouvelles images */
 
 
 
@@ -441,8 +450,7 @@ double aire_aux(image I, double cote){
           aire_aux(I->fils[3], cote/2)) ;
 }
 /* Fonction principale */
-double aire(image I)
-{
+double aire(image I){
   if (est_noire(I)) return 1 ;
   return aire_aux(I, 0.5);
 }
@@ -501,8 +509,7 @@ bool meme_dessin_aux(image I, image I2){
        && meme_dessin_aux(I->fils[3], I2->fils[3]) ) ;
 }
 /* Fonction principale */
-bool meme_dessin(image I, image I2)
-{
+bool meme_dessin(image I, image I2) {
   /* Il est plus simple de simplifier au maximum nos images, on sait ainsi que si l'on tombe
   sur un élément blanc ou noir, c'est qu'il est à la profondeur minimale telle qu'il représente l'image,
   on peut donc comparer plus facilement les images (mais de manière moins optimisée...) */
@@ -530,10 +537,9 @@ void negatif(image* I) {
     *I = construit_blanc();
   } else {
     rendmemoire(I);
-    *I =  construit_compose(negatif(&((*I)->fils[0])),
-                            negatif(&((*I)->fils[1])),
-                            negatif(&((*I)->fils[2])),
-                            negatif(&((*I)->fils[3])))
+    for (int i = 0; i < 4; i++) {
+      negatif(&((*I)->fils[i]));
+    }
   }
 }
 
@@ -582,20 +588,17 @@ L'image rendue est noire là où l'une des deux images de départ est noire mais
 @param Les deux images que l'on compare
 @return L'image de la différence
 */
-void difference (image I1, image I2){
+image difference (image I1, image I2){
   // --- On travaille sur des images qui n'ont pas de fils identiques ---
   simplifie(&I1);
   simplifie(&I2);
   // ---
 
   // Si les deux images sont identiques, il n'y a aucune différence donc on renvoie une imge blanche
-  if(meme_dessin(I1,I2)){
-    return construit_blanc();
-  }
+  if(meme_dessin(I1,I2)) return construit_blanc();
 
   // Si les deux images sont unies mais opposées, on renvoie une image noire
-  else if ((I1 == NULL && I2 -> toutnoir) || (I1->toutnoir && I2 == NULL))
-    return = construit_noir();
+  else if ((I1 == NULL && I2 -> toutnoir) || (I1->toutnoir && I2 == NULL)) return construit_noir();
 
   // Si la première image est unie mais pas la seconde (si la seconde était unie on serait rentrés dans un cas précédent)
   else if (I1 == NULL || I1 -> toutnoir){
@@ -607,47 +610,14 @@ void difference (image I1, image I2){
           else {
             image dif = copie(I2);
             negatif(&dif);
-            return dif
+            return dif;
           }
   }
-  // Si la seconde image est unie mais pas la première
-  else if(I2 == NULL || I2 -> toutnoir){
-          // cf avant.
-          if (I2 == NULL) return = I1;
-          // cf avant.
-          else{
-            image dif = copie(I2);
-            negatif(&dif);
-            return dif
-          }
-      }
-    }
-    else {// Cas ou au moins une des 2 images n'est pas unie.
-      if((Image1 == NULL || Image1 -> toutnoir) && (Image2 != NULL || !(Image2 -> toutnoir) )){ // cas ou image2 a des fils mais pas image1
-        if (Image1 == NULL){                                                                 // Si l'image qui n'a pas de fils est blanche, on copie les fils de celle qui en a
-          *imagedif = Image2;                                                                 //  la on veut copier les fils de image2 et les mettre dans l'image qu'on vient de construire.
-        }
-        else{                                                                           //Si l'image qui n'a pas de fils est noir
-          *imagedif = copie(Image2);
-          negatif(imagedif);
-        }
-      }
-      if((Image2 == NULL || Image2 -> toutnoir) && (Image1 != NULL || !(Image1 -> toutnoir) )){ // cas ou image1 a des fils mais pas image2
-         if (Image2 == NULL){ // Si l'image qui n'a pas de fils est blanche, on copie les fils de celle qui en a
-             *imagedif = Image1;
-        }
-        else{
-          *imagedif = copie(Image1);
-          negatif(imagedif);
-        }
-      }
-      else{ //aucune des 2 n'est unies.
-        for (int i = 0; i<4 ; i++){
-          difference(I1 -> fils[i], I2 -> fils[i]);
-        }
-      }
-    }
-  }
+  else //aucune des 2 n'est unie.
+    return construit_compose(difference(I1 -> fils[0], I2 -> fils[0]),
+                             difference(I1 -> fils[1], I2 -> fils[1]),
+                             difference(I1 -> fils[2], I2 -> fils[2]),
+                             difference(I1 -> fils[3], I2 -> fils[3]));
 }
 
 
@@ -792,7 +762,7 @@ int main() {
 
             //                      1   2    3    4        5    6    7    8        9   10  11   12       13  14  15   16   17      18  19  20      21  22  23  24      25  26  27          28   29  30  31     32  33  34  35      36  37  38  39      40  41  42  43        N     . N   B   N     . B   B     N   B  .  B   N     B  .  .   B   B   N     B   . N     B   B   N   .   B N   B   N   .     N   B   N   B
   char phrase[58] = {'.','.','.','B','B', 'N', 'B','.', 'N', 'N', 'B', 'N', '.','B','B','B', 'N', '.','N','N','N', 'B', 'N','.','N','B','N','.','B','B','N','B','.','B','N','B','.','.','B','B','N','B','.','N','B','B','N','.','B','N','B','N','.','N','B','N','B', '\n'};
-
+  /*
   affiche_normal(tabdechar_to_image(phrase));
   printf(" est phrase\n" );
   for (int j = 0; j < 5; j++) {
@@ -801,6 +771,7 @@ int main() {
     CompteSousImagePleine(tabdechar_to_image(phrase), j, &i, &b, -1);
     printf("Valeur = %d, Compteur = %d\n", j, i);
   }
+  */
   // 0 = 43 ok
   // 1 = 9 ok
   // 2 = 3 (devrait etre 2)
@@ -822,7 +793,8 @@ int main() {
 
   //printf("%d\n", donne_profondeur_max(Image1) );
   //printf("%d\n", donne_profondeur_max(Image2) );
-//  affiche_normal(Division(Image1));
-//  printf("\n");
+  //  affiche_normal(Division(Image1));
+  //  printf("\n");
   //affichage2kpixel(Image1);
+  return 0;
 }
