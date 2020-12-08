@@ -1,43 +1,82 @@
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <errno.h>
+#include <stdio.h> // printf, ...
+#include <stdlib.h> // malloc, free, ...
+#include <math.h> // pow, ...
 
+/* Sucre syntaxique */
 typedef enum { FALSE, TRUE} bool;
 
 
-
-
+/*
+------------------------
+Définition de la structure de nos images :
+- Une image blanche est modélisée par un pointeur NULL
+- Une image noire est noire si son champ toutnoir est vrai
+- Une image qui est ni noire ni blanche possède 4 fils
+------------------------
+*/
 typedef struct bloc_image
   { bool toutnoir ;
   struct bloc_image * fils[4] ;
   } bloc_image ;
 typedef bloc_image *image ;
 
-//Ce compteur nous permettra de vérifier qu'on libère bien la mémoire...
+/*
+Ce compteur nous permettra de vérifier qu'on libère bien la mémoire...
+Il n'est pas nécessaire mais est pratique pour vérifier que notre code est propre.
+*/
 int compteur_memoire = 0;
 
 
+
+/* ----------------------------------------------------------------------
+
+
+                            CONSTRUCTEURS
+
+
+---------------------------------------------------------------------- */
+
+
+/* Fonction qui crée une nouvelle image blanche
+@param : Aucun
+@return : Une nouvelle image blanche
+*/
 image construit_blanc()
 {
   image I = NULL ;
   compteur_memoire++;
+  /* En réalité, on n'utilise pas vraiment la mémoire dans ce cas-ci,
+  puisque le pointeur ne pointe sur rien.
+  Il faudra enlever cette incrémentation à la fin, MAIS il faut d'abord
+  faire en sorte qu'on n'appelle pas free() sur une image blanche dans les autres fonctions ! */
   return I ;
 }
 
+
+/* Fonction qui crée une nouvelle image noire
+@param : Aucun
+@return : Une nouvelle image noire
+*/
 image construit_noir()
 {
-  image I = (bloc_image*) malloc(sizeof(bloc_image)) ;
-  compteur_memoire++;
+  image I = (bloc_image*) malloc(sizeof(bloc_image)) ; // On alloue de la mémoire ...
+  compteur_memoire++; // On la compte (cette fois-ci on utilise réellement de la mémoire !)
   I->toutnoir = TRUE ;
   for (int i = 0; i < 4; i++) {
     I->fils[i] = NULL ;
   }
+  /* Il n'est pas obligatoire d'initialiser les fils à NULL parce que dans les faits si le paramètre
+  toutnoir vaut TRUE, on ne cherchera pas à accéder aux fils, mais ça ne coûte rien et ça évite de faire des conneries */
   return I ;
 }
 
+
+
+/* Fonction qui compose une image à partir de 4 fils
+@param : 4 images valides (élémentaires, i.e. noire ou blanche, ou composée)
+@return : L'image ayant pour fils les paramètres
+*/
 image construit_compose(image i1, image i2, image i3, image i4)
 {
   image I = (bloc_image*) malloc(sizeof(bloc_image)) ;
@@ -50,330 +89,64 @@ image construit_compose(image i1, image i2, image i3, image i4)
   return I ;
 }
 
-void affiche_normal(image I)
-{
-  if (I == NULL) printf("B") ;
-  else {
-    if (I->toutnoir) printf("N") ;
-    else {
-      printf(".") ; //CF. plus bas pour comprendre la notation
-      for (int i = 0; i < 4; i++) {
-      affiche_normal(I->fils[i]) ;
-      }
+/* ----------------------------------------------------------------------
 
-    }
-  }
-}
-/* Explications sur la notation du point pour Doriane :
-Dans le sujet on a l'exemple de .N.BBNBB.N.NNB.NBNNBN,
-en fait le point est print avant l'appel récursif, la suite suivante se lirait
-plus naturellement par (N (BBNB) B (N(NNB(NBNN))BN))
-On doit toujours se retrouver avec 4 fils, donc décomposer en 4 images
--> N est une image à lui seul
--> BBNB est bien une image car 4 fils élémentaires
--> NBNN est une image élémentaire, donc NNB(NBNN) en est une aussi, finalement (N(NNB(NBNN))BN) en est une
-En combinant les 4, on obtient bien une image. Le point sert donc à montrer l'appel récursif */
+                            DESTRUCTEURS
 
-void affiche_prof_aux(image I, int profondeur) // On définit une fonction auxiliaire qui garde en mémoire la profondeur
-{
-  if (I == NULL) printf("B%d", profondeur) ;
-  else {
-    if (I->toutnoir) printf("N%d", profondeur) ;
-    else {
-      printf(".%d", profondeur) ;
-      for (int i = 0; i < 4; i++) {
-      affiche_prof_aux(I->fils[i], profondeur+1) ; //We go deeper inside
-      }
+---------------------------------------------------------------------- */
 
-    }
-  }
-}
-
-void affiche_profondeur(image I)
-{
-  affiche_prof_aux(I, 0) ;
-}
-
-
-
-bool est_blanche(image I)
-{
-  if (I == NULL) return TRUE;
-  if (I->toutnoir) return FALSE;
-  return (est_blanche(I->fils[0])
-       && est_blanche(I->fils[1])
-       && est_blanche(I->fils[2])
-       && est_blanche(I->fils[3]));
-
-}
-
-bool est_noire(image I)
-{
-  if (I == NULL) return FALSE;
-  if (I->toutnoir) return TRUE;
-  return (est_noire(I->fils[0])
-       && est_noire(I->fils[1])
-       && est_noire(I->fils[2])
-       && est_noire(I->fils[3]));
-}
-
-
-
-int donne_profondeur_max_aux(image I, int profondeur){
-  int max = 0;
-  if ((I == NULL) || I->toutnoir)  return profondeur+1 ;
-  else {
-      for (int i = 0; i < 4; i++) {
-        int resultat = donne_profondeur_max_aux(I->fils[i], profondeur+1) ; //We go deeper inside
-        if (resultat > max){
-          max = resultat;
-        }
-      }
-  }
-  return max;
-}
-
-int donne_profondeur_max(image I){
-  return donne_profondeur_max_aux(I, 0);
-}
-
-
-
-
-
-
-image copie(image I)
-{
-  image I_copie = (bloc_image*) malloc(sizeof(bloc_image)) ;
-  if (I == NULL) I_copie = construit_blanc() ;
-  else if (I->toutnoir) I_copie = construit_noir() ; //On construit une nouvelle image noire
-    else
-    {
-      I_copie->toutnoir = FALSE ;
-      for (int i = 0; i < 4; i++) {
-        I_copie->fils[i] = copie(I->fils[i]) ; //Il faut appeler sur copie pour créer de nouvelles images
-      }
-      compteur_memoire++;
-    }
-  return I_copie ;
-}
-/* Pourquoi ne pas juste faire I_copie = I ?
-Parce que ce sont des pointeurs, et donc ce ne serait pas une copie mais un pointeur vers le même
-Il faut donc créer de nouvelles images */
-
-double aire_aux(image I, double cote){
-  if (I == NULL) return 0 ;
-  if (I->toutnoir) return cote*cote ;
-  return (aire_aux(I->fils[0], cote/2) +
-          aire_aux(I->fils[1], cote/2) +
-          aire_aux(I->fils[2], cote/2) +
-          aire_aux(I->fils[3], cote/2)) ;
-}
-
-
-double aire(image I)
-{
-  if (est_noire(I)) return 1 ;
-  return aire_aux(I, 0.5);
-}
-
-
-
+/* Procédure qui permet de libérer la mémoire des images dont on n'a plus l'utilité
+@param : L'image a libérer
+@return : Aucun
+*/
 void rendmemoire(image* I){
 
-  if (*I != NULL && !((*I)->toutnoir)) {
+  if ((*I != NULL) && !((*I)->toutnoir)) {
     for (int i = 0; i < 4; i++) {
       rendmemoire(&((*I)->fils[i]));
     }
   }
   compteur_memoire--;
   free(*I);
-
-}
-
-
-//-----------
-bool is_divided(image I)
-{
-  // Est-ce 4 images blanches ?
-  if (I->fils[0] == NULL &&
-      I->fils[1] == NULL &&
-      I->fils[2] == NULL &&
-      I->fils[3] == NULL) return TRUE ;
-  // Est-ce 4 images noires ?
-  if  (((I->fils[0]) != NULL && (I->fils[0])->toutnoir)
-    && ((I->fils[1]) != NULL && (I->fils[1])->toutnoir)
-    && ((I->fils[2]) != NULL && (I->fils[2])->toutnoir)
-    && ((I->fils[3]) != NULL && (I->fils[3])->toutnoir)) return TRUE ;
-  // Sinon...
-  return FALSE ;
-}
-
-// On peut optimiser cette fonction grâce à "est_blanche" et "est_noire" (si noir -> on renvoie noir, si blanc -> on renvoie blanc)
-// La simplification se fait alors naturellement
-void simplifie(image* I){
-  if (*I != NULL && !((*I)->toutnoir)) {
-    for (int i = 0; i < 4; i++) {
-          simplifie(&((*I)->fils[i])) ;
-    }
-    if (is_divided(*I)) {
-        if ((*I)->fils[0] == NULL) {
-          for (int i = 0; i < 4; i++) {
-                rendmemoire(&((*I)->fils[i])) ;
-          }
-          (*I) = NULL ;
-
-        }
-        else
-        {
-          for (int i = 0; i < 4; i++) {
-                rendmemoire(&((*I)->fils[i])) ;
-          }
-          (*I)->toutnoir = TRUE ;
-        }
-    }
-  }
-}
-//------------
-
-
-bool meme_dessin_aux(image I, image I2){
-
-       if (I  == NULL)     return (I2 == NULL) ;
-  else if (I  -> toutnoir) return (I2 -> toutnoir) ;
-  else if (I2 == NULL)     return (I  == NULL);
-  else if (I2 -> toutnoir) return (I  -> toutnoir);
-
-  return (meme_dessin_aux(I->fils[0], I2->fils[0])
-       && meme_dessin_aux(I->fils[1], I2->fils[1])
-       && meme_dessin_aux(I->fils[2], I2->fils[2])
-       && meme_dessin_aux(I->fils[3], I2->fils[3]) ) ;
 }
 
 
 
-bool meme_dessin(image I, image I2)
-{
-  image I_copie = copie(I) ;
-  simplifie(&I_copie) ;
-  image I2_copie = copie(I2) ;
-  simplifie(&I2_copie) ;
-  return meme_dessin_aux(I_copie, I2_copie);
-}
 
 
 
-void negatif(image* I) {
-  if (*I == NULL) {
-    rendmemoire(I);
-    *I = construit_noir();
-  }
-  else if ((*I)->toutnoir) {
-          rendmemoire(I);
-          *I = construit_blanc();
-       } else {
-           for (int i = 0; i < 4; i++) {
-             negatif(&((*I)->fils[i]));
-           }
-       }
-}
-
-void arrondit_elementaire(image *I) {
-  if (((*I) != NULL) && !((*I)->toutnoir)) {
-    for (int i = 0; i < 4; i++) {
-          arrondit_elementaire(&((*I)->fils[i])) ;
-    }
-    int compte_blanc = 0;
-    for (int i = 0; i < 4; i++) {
-      if (((*I)->fils[i]) == NULL) compte_blanc++;
-    }
-    if (compte_blanc >= 2) {
-      for (int i = 0; i < 4; i++) {
-            rendmemoire(&((*I)->fils[i])) ;
-      }
-      (*I) = NULL ;
-    } else {
-      for (int i = 0; i < 4; i++) {
-            rendmemoire(&((*I)->fils[i])) ;
-      }
-      (*I)->toutnoir = TRUE ;
-    }
-  }
-}
+/* ----------------------------------------------------------------------
 
 
+              FONCTIONS SUPPLEMENTAIRES / UTILITAIRES
 
-void arrondit_aux(image* I, int k, int n) {
-  if (k <= n) {
-    arrondit_elementaire(I);
-  }
+
+---------------------------------------------------------------------- */
+
+/* Fonction qui cherche la profondeur maximale d'une image
+@param L'image dont on veut connaître la profondeur
+@return La profondeur maximale de l'image
+*/
+/* Fonction auxiliaire */
+int donne_profondeur_max_aux(image I, int profondeur){
+  int max = 0;
+  if ((I == NULL) || I->toutnoir) return profondeur;
   else {
-    if (((*I) != NULL) && !((*I)->toutnoir)) {
       for (int i = 0; i < 4; i++) {
-      arrondit_aux(&((*I)->fils[i]), k, n+1);
+        if (donne_profondeur_max_aux(I->fils[i], profondeur+1) > max) max = resultat;
       }
-    }
   }
+  return max;
 }
-
-void arrondit(image* I, int k) {
-  arrondit_aux(I, k, 0);
-}
+/* Fonction principale */
+int donne_profondeur_max(image I){ return donne_profondeur_max_aux(I, 1); }
 
 
-
-void difference (image Image1, image Image2, image* imagedif){
-  // --- On travaille sur des images qui n'ont pas de fils identiques ---
-  simplifie(&Image1);
-  simplifie(&Image2);
-  // ---
-
-  // Si les deux images sont identiques, il n'y a aucune différence donc on renvoie une imge blanche
-  if(meme_dessin(Image1,Image2)){
-    *imagedif = construit_blanc();
-  }
-
-  // Si les deux images sont unies mais opposées, on renvoie une image noire
-  else if ((Image1 == NULL && Image2 -> toutnoir) || (Image1->toutnoir && Image2 == NULL))
-    *imagedif = construit_noir();
-
-  // Si la première image est unie mais pas la seconde (si la seconde était unie on serait rentrés dans un cas précédent)
-  else if (Image1 == NULL || Image1 -> toutnoir){
-          // Si la première est blanche, la différence correspond simplement à l'autre image :
-          // En effet, si le fils est blanc alors la différence est blanche car ils sont identiques,
-          // si le fils est noir alors la différence est noire car les deux sont opposés
-          if (Image1 == NULL) *imagedif = Image2;
-          // Si la première est noire, la différence correspond à l'opposé de l'autre image par un raisonnement analogue
-          else {
-            *imagedif = copie(Image2);
-            negatif(imagedif);
-          }
-  }
-
-  // Si la seconde image est unie mais pas la première
-  else if(Image2 == NULL || Image2 -> toutnoir){
-          // cf avant.
-          if (Image2 == NULL) *imagedif = Image1;
-          // cf avant.
-          else{
-            *imagedif = copie(Image1);
-            negatif(imagedif);
-          }
-      }
-
-  // On gère désormais le cas où ni l'une ni l'autre n'est uni
-  else {
-        for (int i = 0; i<4 ; i++){
-          difference(Image1 -> fils[i], Image2 -> fils[i], imagedif);
-        }
-  }
-}
-
-
-
-
+/* Fonction identique à construit_compose mais qui construit dans le sens inverse
+@param : Les 4 images à composer
+@return : L'image composée en sens inverse
+*/
 image construit_compose_retourne(image i1, image i2, image i3, image i4) {
-
   image I = (bloc_image*) malloc(sizeof(bloc_image)) ;
   compteur_memoire++;
   I->toutnoir = FALSE ;
@@ -385,15 +158,15 @@ image construit_compose_retourne(image i1, image i2, image i3, image i4) {
 }
 
 
-// en fait il faudrait modifier une image passée en refference.
-/*a chaque fois que je vois un point, je crée des fils a imagelue.
-je remplis les fils avec les 4 prochaines cases, en sachant que si je vois un point,
-je recrée des fils que je remplis avec les 4 prochaines cases etc.
-*/
-image image_from_tabchar_aux(char image[], int indice, int* shift){
 
-  if (image[indice+(*shift)] == 'N') { return construit_noir(); }
-  if (image[indice+(*shift)] == 'B') { return construit_blanc(); }
+/* Fonction qui construit une image à partir d'un tableau de caractère
+@param La chaîne de caractère
+@return L'image décrite par cette chaîne
+*/
+/* Fonction auxiliaure */
+image image_from_tabchar_aux(char image[], int indice, int* shift){
+  if (image[indice+(*shift)] == 'N') return construit_noir();
+  if (image[indice+(*shift)] == 'B') return construit_blanc();
   if (image[indice+(*shift)] == '.') {
     (*shift) += 4;
     return construit_compose_retourne( image_from_tabchar_aux(image, indice, shift),
@@ -405,32 +178,13 @@ image image_from_tabchar_aux(char image[], int indice, int* shift){
   printf("La valeur entrée suivante n'est pas valide :");
   putchar(s);
   printf("\n");
-  return construit_noir();
+  return construit_noir(); // Si un caractère n'est pas valide, on part du principe que ça ne sert pas d'essayer de réparer l'erreur.
 }
-
-
-
-
-
-// La fonction fait deux passes, ce qui est à l'origine du shift, on peut bien
-// la simplifier en ne faisant qu'une passe
-image lecture_au_clavier(){
-  char image1[256];
-  char flag = 's';
-  int i = 0;
-  while (flag != '\n'){
-    flag = getchar();
-    image1[i] = flag;
-    i++;
-  }
-  int shift = 0;
-
-  return image_from_tabchar_aux(image1, 0, &shift);
-}
-
-image tabdechar_to_image( char phrase[]){
+/* Fonction principale */
+image tabdechar_to_image(char phrase[]){
   char image1[256];
   int i = 0;
+  // On enlève le retour chariot
   while(phrase[i] != '\n'){
     image1[i] = phrase[i];
     i++;
@@ -439,113 +193,14 @@ image tabdechar_to_image( char phrase[]){
   return image_from_tabchar_aux(image1, 0, &shift);
 }
 
-/*image string_to_image(string mot){
-  char image1[mot.length];
-  for(int i =0; i< mot.length; i++){
-    image1[i] = mot.tab[i];
-  }
-  int shift=0;
-  return lecture_au_clavier_aux(image1, 0, &shift);
-}*/
-/*
-bool est_pleine(image image1){
-  if((est_noire(image1)) || (est_blanche(image1))){
-    return FALSE;
-  }
-  else{
-    for(int j = 0; j<4;j++){
-      if(!(est_noire(image1 -> fils[j])) && !(est_blanche(image1 -> fils[j]))){
-        return FALSE;
-      }
-    }
-    return TRUE;
-  }
-}
-//on teste sur la prmiere couche
-//on teste sur la deuxieme couxhe
-//on apelle est pleine sur les fils de image1, tant qu'il y en a
-void CompteSousImagePleine(image I, int hauteur, int* cpt, bool* is_full, int profondeur){
-  // Si la hauteur vaut 0, on regarde qu'il n'y a pas de fils,
-  if (hauteur == profondeur) {
-      if (est_blanche(I) || est_noire(I)) {
-        *(is_full) = TRUE ;
-        affiche_normal(I);
-        printf(" cpt = %d\n", *cpt) ;
-        if (hauteur == 0) (*cpt)++;
-
-      }
-      else {
-         CompteSousImagePleine(I, hauteur, cpt, is_full, profondeur-1) ;
-      }
-
-
-
-
-  } else {
-    if (est_blanche(I) || est_noire(I)) {
-      *(is_full) = FALSE ;
-    }
-    else {
-
-      for(int i = 0; i < 4; i++) {
-        CompteSousImagePleine(I->fils[i], hauteur, cpt, is_full, profondeur+1) ;
-        //if (!(*(is_full))) break;
-      }
-
-    }
-
-    if (*(is_full) && hauteur != 0 && profondeur == 0) {
-      (*cpt)++;
-      *(is_full) = FALSE ;
-    }
-    affiche_normal(I);
-    printf(" cpt = %d, p = %d\n ", *cpt, profondeur) ;
-  }
-}
-
+/* Fonction qui renvoie une image où tous les fils de l'image entrée sont à la même profondeur,
+En fait, c'est l'inverse de la fonction arrondit() : Si on a une image élémentaire moins profond qu'une autre, on lui crée
+artificiellement des fils qui lui sont identiques.
+@param : L'image que l'on souhaite diviser
+@return : L'image où tous les fils sont à la même profondeur
 */
-
-  /*On rentre une image. Si c'est une image pleine, on renvoie true, plus le
-  compteur
-  comment on sait que y a une image pleine?
-  Quand tous ses fils sont a la meme profondeur.
-  on regarde une image. Si elle a un fils, on regarde le premier :
-  si lui aussi a des fils,
-  En gros on va dans la profondeur de chaque fils. Si parmi les 4 fils,
-  il y en a un qui a pas la meme profondeur que les autres, on renvoie false, surement,
-  enfin on fait comprendre que c'est pas la qu'on trouvera une image pleine.
-  si les 4 fils ont la meme profondeur, on renvoie true, et on incremente le
-  compteur d'image pleine.
-  a la fin on renvoie cpt.
-  Une image pleine a 4 fils, qui sont composé de 4 fils qui sont soit tout blanc, soit tout noir. */
-
-/*
-  int p=0;
-  if(est_noire(image1) OR est_blanche(image1)){
-
-    return cpt; // la je sais pas quoi faire
-  }
-  else{
-    p++;
-    for (int i = 0; i < 4; i++) {
-      (*image1)->fils[i] = NULL ;
-    }
-  }
-}*/
-
-/*Si il y a une image blanche, on afiche un point
-  Si il y a une image noir, on affiche un 8*/
-/*Il faut une fonction auxilliaire qui retourne un string_to_image
-la fonction principale parcourera le string et coupera a 2^k*/
-
-
-/*cadeau pour roxane : a peu presque */
-
-/*Il faut une fonction qui réarrange.*/
-
-
+/* Fonction auxiliaire */
 image Division_aux (image I, int profondeur){
-
   if(est_blanche(I) || est_noire(I)){
     if(profondeur == 0) {
       if (est_blanche(I)) return construit_blanc();
@@ -556,24 +211,24 @@ image Division_aux (image I, int profondeur){
                                   Division_aux(I,profondeur-1),
                                   Division_aux(I,profondeur-1));
   }
-
   profondeur--;
-  for(int i = 0; i<4; i++){
-    I->fils[i] = Division_aux(I->fils[i],profondeur);
-  }
-  return I;
+  return construit_compose(Division_aux(I->fils[0], profondeur),
+                           Division_aux(I->fils[1], profondeur),
+                           Division_aux(I->fils[2], profondeur),
+                           Division_aux(I->fils[3], profondeur));
 }
-
+/* Fonction principale */
 image Division (image I){
   // la profondeur a laquelle il faudra diviser tout les carrés qui ne le sont pas deja
   Division_aux(I, donne_profondeur_max(I));
 }
 
-
-// cette fonction
-
+/* Procédure qui nous permet de transformer une image en tableau de caractères
+@param : L'image que l'on souhaite transcrire
+@return : La chaîne de caractère associée
+*/
+/* Procédure auxiliaire */
 void image_divise_to_char_aux(image I, int* i, char(* imageI)[]){
-
   if(I == NULL){
     (*imageI)[*i]='B';
     (*i)++;
@@ -586,22 +241,81 @@ void image_divise_to_char_aux(image I, int* i, char(* imageI)[]){
       }
   }
 }
-
-
+/* Procédure principale */
 void image_divise_to_char(image I, char(* imageI)[]){
   int i = 0;
   image_divise_to_char_aux(Division(I), &i, imageI);
 }
 
-/*
-if(est_blanche(image1)){
-  printf(".");
-}
-else{
-  printf("8");
-}
 
+
+
+
+
+/* ----------------------------------------------------------------------
+
+
+                            AFFICHAGE
+
+
+---------------------------------------------------------------------- */
+
+
+
+/* Fonction qui affiche une image selon la notation [.,N,B]
+@param : L'image que l'on souhaite afficher
+@return : Aucun
 */
+void affiche_normal(image I)
+{
+  if (I == NULL) printf("B") ;
+  else if (I->toutnoir) printf("N") ;
+  else {
+    printf(".") ; //CF. plus bas pour comprendre la notation
+    for (int i = 0; i < 4; i++) {
+      affiche_normal(I->fils[i]) ;
+    }
+  }
+}
+/* Explications sur la notation du "point" :
+Dans le sujet on a l'exemple de .N.BBNBB.N.NNB.NBNNBN,
+en fait le point est print avant l'appel récursif, la suite suivante se lirait
+plus naturellement par (N (BBNB) B (N(NNB(NBNN))BN))
+On doit toujours se retrouver avec 4 fils, donc décomposer en 4 images
+-> N est une image à lui seul
+-> BBNB est bien une image car 4 fils élémentaires
+-> NBNN est une image ayant des fils élémentaires, donc NNB(NBNN) est aussi une image, finalement (N(NNB(NBNN))BN) en est une
+En combinant les 4, on obtient bien une image. Le point sert donc à montrer l'appel récursif */
+
+
+
+/* Fonction qui affiche l'image en précisant la profondeur de chaque noeud
+@param : L'image à afficher
+@return : Aucun
+*/
+
+/* Fonction auxiliaire */
+void affiche_prof_aux(image I, int profondeur) // On définit une fonction auxiliaire qui garde en mémoire la profondeur
+{
+  if (I == NULL) printf("B%d", profondeur) ;
+  else if (I->toutnoir) printf("N%d", profondeur) ;
+  else {
+    printf(".%d", profondeur) ;
+    for (int i = 0; i < 4; i++) {
+      affiche_prof_aux(I->fils[i], profondeur+1) ;
+    }
+  }
+}
+/* Fonction principale */
+void affiche_profondeur(image I) { affiche_prof_aux(I, 0) ; }
+
+
+/* Procédure qui permet d'afficher une image en 2D
+@param : L'image à afficher
+@return : Aucun
+*/
+/* A FINIR */
+/*
 void affichage2kpixel(image image1){
   int profondeur = donne_profondeur_max(image1);
   int cases = pow(2,2*profondeur);
@@ -621,12 +335,7 @@ void affichage2kpixel(image image1){
         printf("i=%d   ",i );
         printf("j=%d \n",j );
         printf("indice = %d\n", indice);
-        /*if(I[indice]=='N'){
-          printf("8");
-        }
-        else{
-          printf(".");
-        }*/
+
       }
       printf("\n");
     }
@@ -637,21 +346,360 @@ void affichage2kpixel(image image1){
         printf("i=%d   ",i );
         printf("j=%d \n",j );
         printf("indice = %d\n", indice);
-        /*if(I[indice]=='N'){
-          printf("8");
-        }
-        else{
-          printf(".");
-        }*/
       }
     }
     printf("\n");
   }
 }
+*/
+
+/*
+if(est_blanche(image1)){
+  printf(".");
+}
+else{
+  printf("8");
+}
+
+*/
+
+/* ----------------------------------------------------------------------
+
+
+                    FONCTIONS DEMANDEES
+
+
+---------------------------------------------------------------------- */
+
+/* Fonction qui vérifie si une image est toute blanche
+@param L'image que l'on veut tester
+@return TRUE si l'image est toute blanche
+*/
+bool est_blanche(image I)
+{
+  if (I == NULL) return TRUE;
+  if (I->toutnoir) return FALSE;
+  return (est_blanche(I->fils[0])
+       && est_blanche(I->fils[1])
+       && est_blanche(I->fils[2])
+       && est_blanche(I->fils[3]));
+}
+
+/* Fonction qui vérifie si une image est toute noire
+@param L'image que l'on veut tester
+@return TRUE si l'image est toute noire
+*/
+bool est_noire(image I)
+{
+  if (I == NULL) return FALSE;
+  if (I->toutnoir) return TRUE;
+  return (est_noire(I->fils[0])
+       && est_noire(I->fils[1])
+       && est_noire(I->fils[2])
+       && est_noire(I->fils[3]));
+}
+
+
+
+/* Fonction qui copie une image dans un nouvel emplacement mémoire
+@param L'image à copier
+@return Une copie de l'image, que l'on peut modifier sans modifier l'originale
+*/
+image copie(image I)
+{
+  image I_copie = (bloc_image*) malloc(sizeof(bloc_image)) ;
+  if (I == NULL) I_copie = construit_blanc() ;
+  else if (I->toutnoir) I_copie = construit_noir() ;
+  else I_copie = construit_compose(copie(I->fils[0]),
+                                   copie(I->fils[1]),
+                                   copie(I->fils[2]),
+                                   copie(I->fils[3])) ;
+  return I_copie ;
+}
+/* Pourquoi ne pas juste faire I_copie = I ?
+Parce que ce sont des pointeurs, et donc ce ne serait pas une copie mais un pointeur vers le même
+Il faut donc créer de nouvelles images */
+
+
+
+
+/* Fonction qui calcule l'aire d'une image
+Note : On considère que l'aire de l'image est la surface de ses carrés noirs, en partant du principe que l'image
+de base est représentée par un carré de taille 1x1
+@param : L'image dont on cherche l'aire
+@return : Un flottant qui représente cette aire
+*/
+/* Fonction auxiliaire */
+double aire_aux(image I, double cote){
+  if (I == NULL) return 0 ;
+  if (I->toutnoir) return cote*cote ;
+  return (aire_aux(I->fils[0], cote/2) +
+          aire_aux(I->fils[1], cote/2) +
+          aire_aux(I->fils[2], cote/2) +
+          aire_aux(I->fils[3], cote/2)) ;
+}
+/* Fonction principale */
+double aire(image I)
+{
+  if (est_noire(I)) return 1 ;
+  return aire_aux(I, 0.5);
+}
+
+
+/* Procédure qui simplifie une image :
+C'est à dire que si tous les enfants d'une image sont de la même couleur, on considère qu'il n'est pas utile
+d'avoir des fils et on les remplace par un élément simple (noir ou blanc)
+@param : L'image que l'on souhaite simplifier
+@return : Aucun
+*/
+void simplifie(image* I){
+  if (*I != NULL && !((*I)->toutnoir)) {
+    for (int i = 0; i < 4; i++) {
+          simplifie(&((*I)->fils[i])) ;
+    }
+    if (est_blanche(*I)) { // En fait on regarde ici si les enfants sont unis
+          rendmemoire(I);
+          (*I) = construit_blanc() ;
+    } else if (est_noire(*I)) {
+          rendmemoire(I);
+          (*I) = construit_noir();
+    }
+  }
+}
+
+
+/* Fonction qui vérifie si deux images représentent la même chose
+@param : Les deux images que l'on souhaite comparer
+@return : TRUE si les deux images sont identiques
+*/
+/* Fonction auxiliaire */
+bool meme_dessin_aux(image I, image I2){
+
+       if (I  == NULL)     return (I2 == NULL) ;
+  else if (I  -> toutnoir) return (I2 -> toutnoir) ;
+  else if (I2 == NULL)     return (I  == NULL);
+  else if (I2 -> toutnoir) return (I  -> toutnoir);
+
+  return (meme_dessin_aux(I->fils[0], I2->fils[0])
+       && meme_dessin_aux(I->fils[1], I2->fils[1])
+       && meme_dessin_aux(I->fils[2], I2->fils[2])
+       && meme_dessin_aux(I->fils[3], I2->fils[3]) ) ;
+}
+/* Fonction principale */
+bool meme_dessin(image I, image I2)
+{
+  /* Il est plus simple de simplifier au maximum nos images, on sait ainsi que si l'on tombe
+  sur un élément blanc ou noir, c'est qu'il est à la profondeur minimale telle qu'il représente l'image,
+  on peut donc comparer plus facilement les images (mais de manière moins optimisée...) */
+  image I_copie = copie(I) ;
+  simplifie(&I_copie) ;
+  image I2_copie = copie(I2) ;
+  simplifie(&I2_copie) ;
+  return meme_dessin_aux(I_copie, I2_copie);
+}
+
+
+
+
+/* Procédure qui transforme une image en sa forme négative,
+c'est à dire que les cases blanches deviennent noires et réciproquement.
+@param : L'image que l'on souhaite inverser
+@return : Aucun */
+void negatif(image* I) {
+  if (*I == NULL) {
+    rendmemoire(I);
+    *I = construit_noir();
+  }
+  else if ((*I)->toutnoir) {
+    rendmemoire(I);
+    *I = construit_blanc();
+  } else {
+    rendmemoire(I);
+    *I =  construit_compose((*I)->fils[0],
+                            (*I)->fils[1],
+                            (*I)->fils[2],
+                            (*I)->fils[3]))
+  }
+}
+
+
+/* Procédure qui arrondit les fils à une profondeur demandée d'une image
+@param : L'image que l'on souhaite arrondir, la profondeur a partir de laquelle on souhaite arrondir
+@return : Aucun
+*/
+
+/* Fonction auxiliaire */
+void arrondit_elementaire(image *I) {
+  if (((*I) != NULL) && !((*I)->toutnoir)) {
+    for (int i = 0; i < 4; i++) {
+          arrondit_elementaire(&((*I)->fils[i])) ;
+    }
+    int compte_blanc = 0; // Cette variable permet de savoir si l'on doit arrondir en blanc ou en noir (la majorité l'emporte)
+    for (int i = 0; i < 4; i++) {
+      if (((*I)->fils[i]) == NULL) compte_blanc++;
+    }
+    if (compte_blanc >= 2) {
+      rendmemoire(I);
+      (*I) = NULL ;
+    } else {
+      rendmemoire(I);
+      (*I)->toutnoir = TRUE ;
+    }
+  }
+}
+/* Fonction auxiliaire */
+void arrondit_aux(image* I, int k, int n) {
+  if (k <= n) arrondit_elementaire(I); // Si l'on est à la profondeur recherchée, on arrondit notre image en un élément (noir ou blanc)
+  else if (((*I) != NULL) && !((*I)->toutnoir)) {
+      for (int i = 0; i < 4; i++) {
+        arrondit_aux(&((*I)->fils[i]), k, n+1);
+      }
+  }
+}
+/* Fonction principale */
+void arrondit(image* I, int k) {
+  arrondit_aux(I, k, 0);
+}
+
+
+/* Fonction qui renvoie une image représentant la différence entre deux images :
+L'image rendue est noire là où l'une des deux images de départ est noire mais l'autre blanche
+@param Les deux images que l'on compare
+@return L'image de la différence
+*/
+void difference (image I1, image I2){
+  // --- On travaille sur des images qui n'ont pas de fils identiques ---
+  simplifie(&I1);
+  simplifie(&I2);
+  // ---
+
+  // Si les deux images sont identiques, il n'y a aucune différence donc on renvoie une imge blanche
+  if(meme_dessin(I1,I2)){
+    return construit_blanc();
+  }
+
+  // Si les deux images sont unies mais opposées, on renvoie une image noire
+  else if ((I1 == NULL && I2 -> toutnoir) || (I1->toutnoir && I2 == NULL))
+    return = construit_noir();
+
+  // Si la première image est unie mais pas la seconde (si la seconde était unie on serait rentrés dans un cas précédent)
+  else if (I1 == NULL || I1 -> toutnoir){
+          /* Si la première est blanche, la différence correspond simplement à l'autre image :
+             En effet, si le fils est blanc alors la différence est blanche car ils sont identiques,
+             si le fils est noir alors la différence est noire car les deux sont opposés */
+          if (I1 == NULL) return I2;
+          // Si la première est noire, la différence correspond à l'opposé de l'autre image par un raisonnement analogue
+          else {
+            image dif = copie(I2);
+            negatif(&dif);
+            return dif
+          }
+  }
+  // Si la seconde image est unie mais pas la première
+  else if(I2 == NULL || I2 -> toutnoir){
+          // cf avant.
+          if (I2 == NULL) return = I1;
+          // cf avant.
+          else{
+            image dif = copie(I2);
+            negatif(&dif);
+            return dif
+          }
+      }
+
+  // On gère désormais le cas où ni l'une ni l'autre n'est uni
+  else {
+        for (int i = 0; i<4 ; i++){
+          difference(I1 -> fils[i], I2 -> fils[i]);
+        }
+  }
+}
+
+
+
+
+/* Fonction qui permet à l'utilisateur de rentrer une image depuis le terminal
+@param : Aucun
+@return : L'image construite à partir des indications de l'utilisateur
+*/
+// La fonction fait deux passes, ce qui est à l'origine du shift, on peut bien
+// la simplifier en ne faisant qu'une passe
+image lecture_au_clavier(){
+  char image1[256];
+  char flag = 's';
+  int i = 0;
+  while (flag != '\n'){
+    flag = getchar();
+    image1[i] = flag;
+    i++;
+  }
+  int shift = 0;
+  return image_from_tabchar_aux(image1, 0, &shift);
+}
+
+
+/* Fonction qui compte le nombre de sous image pleine à une profondeur donnée
+@param : L'image que l'on examine, la hauteur qui nous intéresse
+@return : Le nombre de sous images pleines
+*/
+/* A FINIR */
+/*
+void CompteSousImagePleine(image I, int hauteur, int* cpt, bool* is_full, int profondeur){
+  if (hauteur == profondeur) {
+      if (!(est_blanche(I) || est_noire(I))) CompteSousImagePleine(I, hauteur, cpt, is_full, profondeur-1) ;
+      else {
+         *(is_full) = TRUE ;
+         if (hauteur == 0) (*cpt)++;
+      }
+
+  }
+  else if (est_blanche(I) || est_noire(I)) *(is_full) = FALSE ;
+  else {
+    for(int i = 0; i < 4; i++) {
+      CompteSousImagePleine(I->fils[i], hauteur, cpt, is_full, profondeur+1) ;
+    }
+  }
+
+  if (*(is_full) && hauteur != 0 && profondeur == 0) {
+    (*cpt)++;
+    printf("incr. ici, h = %d, p = %d\n", hauteur, profondeur);
+    *(is_full) = FALSE ;
+  }
+
+  affiche_normal(I);
+  printf(" cpt = %d, p = %d\n ", *cpt, profondeur) ;
+}
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ----------------------------------------------------------------------
+
+
+                                MAIN
+
+
+---------------------------------------------------------------------- */
+
+
+
+
 
 int main() {
 
-  //printf("\n - Memory - %d\n", compteur_memoire);
   image Image1 = construit_compose(construit_noir(),
                                    construit_blanc(),
                                    construit_noir(),
@@ -662,7 +710,6 @@ int main() {
                                                                        construit_noir(),
                                                                        construit_noir(),
                                                                        construit_noir()))) ;
-  //  printf("\n - Memory - %d\n", compteur_memoire);
   image Image2 = construit_compose(construit_compose(construit_noir(),
                                                      construit_noir(),
                                                      construit_noir(),
@@ -682,119 +729,33 @@ int main() {
                                                                         construit_blanc()),
                                                       construit_blanc(),
                                                       construit_noir())) ;
-  /*
-  printf("\n - Memory - %d\n", compteur_memoire);
-  printf("Image 1 AVANT : \n");
-  affiche_profondeur(Image1) ;
-  printf("\nImage 2 AVANT : \n");
-  affiche_profondeur(Image2) ;
-  printf("\n");
-  */
 
   image Image3 = construit_compose(construit_noir(),
                                    construit_blanc(),
                                    construit_noir(),
                                    construit_noir());
   image Image4 = construit_noir();
-
-
-
   image I_copie = copie(Image1) ;
-  /*
-  printf("\n - Memory - %d\n", compteur_memoire);
-  simplifie(&I_copie) ;
-  printf("\n - Memory - %d\n", compteur_memoire);
-  */
   image I2_copie = copie(Image2) ;
 
-  meme_dessin(Image3,Image4);
-  /*
-  printf("\n - Memory - %d\n", compteur_memoire);
-  simplifie(&I2_copie) ;
-  printf("\n - Memory - %d\n", compteur_memoire);
+            //                      1   2    3    4        5    6    7    8        9   10  11   12       13  14  15   16   17      18  19  20      21  22  23  24      25  26  27          28   29  30  31     32  33  34  35      36  37  38  39      40  41  42  43        N     . N   B   N     . B   B     N   B  .  B   N     B  .  .   B   B   N     B   . N     B   B   N   .   B N   B   N   .     N   B   N   B
+  char phrase[58] = {'.','.','.','B','B', 'N', 'B','.', 'N', 'N', 'B', 'N', '.','B','B','B', 'N', '.','N','N','N', 'B', 'N','.','N','B','N','.','B','B','N','B','.','B','N','B','.','.','B','B','N','B','.','N','B','B','N','.','B','N','B','N','.','N','B','N','B', '\n'};
 
-  printf("Image 1 APRES : \n");
-  affiche_profondeur(I_copie) ;
-  printf("\nImage 2 APRES : \n");
-  affiche_profondeur(I2_copie) ;
-  printf("\n") ;
-
-  bool val = meme_dessin(Image1, Image2);
-
-  printf("Meme dessin ? : %d", val) ;
-  printf("\n - Memory - %d\n", compteur_memoire);
-  */
-
-
-
-  /*
-  printf("\n\n NEGATIF \n");
-  affiche_normal(I_copie);
-  printf("\n");
-  negatif(&I_copie);
-  affiche_normal(I_copie);
-  printf("\n - Memory - %d\n", compteur_memoire);
-  */
-
-
-  /*
-  printf("\n\n RENDMEMOIRE \n");
-  affiche_normal(I2_copie);
-
-  printf("\n %d \n", compteur_memoire);
-
-  printf("\n - Memory - %d\n", compteur_memoire);
-  rendmemoire(&I2_copie);
-  rendmemoire(&I_copie);
-  rendmemoire(&Image1);
-  rendmemoire(&Image2);
-  printf("\n - Memory - %d\n", compteur_memoire);
-  */
-
-  /*
-  affiche_normal(I2_copie);
-  printf("\n");
-  arrondit(&I2_copie,2);
-  affiche_normal(I2_copie);
-  */
-
-  /*
-  simplifie(&Image1);
-  affiche_normal(Image1);
-  printf("\n" );
-  simplifie(&Image2);
-  affiche_normal(Image2);
-  printf("\n" );
-
-  image imagedif = (bloc_image*) malloc(sizeof(bloc_image)) ;
-  imagedif = construit_noir();
-
-  difference(Image3,Image4,&imagedif);
-  affiche_normal(imagedif);
-  printf("\n" );
-  */
-  /*
-  printf(" entrez une image en mode normal\n" );
-  affiche_normal(lecture_au_clavier());
-  printf(" est ce que vous avez entré\n" );
-//. ..BBNB.NNBN.BBBN.NNNB
-                                    1   2    3    4        5    6    7    8        9   10  11   12       13  14  15   16   17      18  19  20      21  22  23  24      25  26  27          28   29  30  31     32  33  34  35      36  37  38  39      40  41  42  43        N     . N   B   N     . B   B     N   B  .  B   N     B  .  .   B   B   N     B   . N     B   B   N   .   B N   B   N   .     N   B   N   B
-*/  char phrase[58] = {'.','.','.','B','B', 'N', 'B','.', 'N', 'N', 'B', 'N', '.','B','B','B', 'N', '.','N','N','N', 'B', 'N','.','N','B','N','.','B','B','N','B','.','B','N','B','.','.','B','B','N','B','.','N','B','B','N','.','B','N','B','N','.','N','B','N','B', '\n'};
-
-/*  affiche_normal(tabdechar_to_image(phrase));
+  affiche_normal(tabdechar_to_image(phrase));
   printf(" est phrase\n" );
-  int i = 0;
-  bool b = TRUE;
-  CompteSousImagePleine(tabdechar_to_image(phrase), 2, &i, &b, -1);
+  for (int j = 0; j < 5; j++) {
+    int i = 0;
+    bool b = TRUE;
+    CompteSousImagePleine(tabdechar_to_image(phrase), j, &i, &b, -1);
+    printf("Valeur = %d, Compteur = %d\n", j, i);
+  }
   // 0 = 43 ok
   // 1 = 9 ok
   // 2 = 3 (devrait etre 2)
   // 3 = 1 (devrait etre 0)
   // 4 ou + = 0 ok
-  printf("Compteur = %d", i);
 
 
-*/
   //affiche_normal(tabdechar_to_image(phrase));
   //printf(" est phrase\n" );
   //int i = 0;
@@ -810,6 +771,6 @@ int main() {
   //printf("%d\n", donne_profondeur_max(Image1) );
   //printf("%d\n", donne_profondeur_max(Image2) );
 //  affiche_normal(Division(Image1));
-  printf("\n");
-  affichage2kpixel(Image1);
+//  printf("\n");
+  //affichage2kpixel(Image1);
 }
