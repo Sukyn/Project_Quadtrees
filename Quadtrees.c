@@ -46,13 +46,12 @@ int compteur_memoire = 0;
 */
 image construit_blanc()
 {
-  image I = NULL ;
   compteur_memoire++;
   /* En réalité, on n'utilise pas vraiment la mémoire dans ce cas-ci,
   puisque le pointeur ne pointe sur rien.
   Il faudra enlever cette incrémentation à la fin, MAIS il faut d'abord
   faire en sorte qu'on n'appelle pas free() sur une image blanche dans les autres fonctions ! */
-  return I ;
+  return NULL ;
 }
 
 
@@ -116,7 +115,7 @@ void rendmemoire(image* I){
 /* ----------------------------------------------------------------------
 
 
-              BRIQUES DE BASE
+                            BRIQUES DE BASE
 
 
 ---------------------------------------------------------------------- */
@@ -374,53 +373,20 @@ void affiche_profondeur(image I) { affiche_prof_aux(I, 0) ; }
 @return : Aucun
 */
 /* A FINIR */
-/*
+
+
+
 void affichage2kpixel(image image1){
   int profondeur = donne_profondeur_max(image1);
-  int cases = pow(2,2*profondeur);
+  int cases = pow(4,profondeur);
   char I[cases];
+  printf("cases = %d", cases);
   image_divise_to_char(image1, &I);
 
-  int debut = 0;
-  int ligne = pow(2,profondeur)/2;
-  char signe = '$';
-  int indice = 0;
 
-  for(int t = 0; t< ligne; t +=ligne ){ // ligne par ligne
-    for(int i = 1; i<=ligne; i++){
-      for(int j = 0; j< 2; j++){
-        indice = pow(2, i+t)+j-2;
-        printf("t=%d   ",t );
-        printf("i=%d   ",i );
-        printf("j=%d \n",j );
-        printf("indice = %d\n", indice);
-
-      }
-      printf("\n");
-    }
-    for(int i = 0; i<ligne; i++){
-      for(int j=2; j<4; j++){
-        indice = pow(2, i+t)+j-1;
-        printf("t=%d   ",t );
-        printf("i=%d   ",i );
-        printf("j=%d \n",j );
-        printf("indice = %d\n", indice);
-      }
-    }
-    printf("\n");
-  }
-}
-*/
-
-/*
-if(est_blanche(image1)){
-  printf(".");
-}
-else{
-  printf("8");
+  printf("\n");
 }
 
-*/
 
 /* ----------------------------------------------------------------------
 
@@ -488,21 +454,13 @@ bool meme_dessin_aux(image I, image I2){
   if (I == NULL){
     return (I2 == NULL) ;
   }
-  else{
-    if (I->toutnoir){
+  else if (I->toutnoir){
       return (I2->toutnoir) ;
     }
-    else{
-      if (I2==NULL){
-        return (I==NULL);
-      }
-      else{
-        if (I2 -> toutnoir){
-          return (I -> toutnoir);
-        }
-      }
+  else if (I2==NULL || I2->toutnoir){
+      return FALSE;
     }
-  }
+
   return (meme_dessin_aux(I->fils[0], I2->fils[0])
        && meme_dessin_aux(I->fils[1], I2->fils[1])
        && meme_dessin_aux(I->fils[2], I2->fils[2])
@@ -588,10 +546,12 @@ L'image rendue est noire là où l'une des deux images de départ est noire mais
 @param Les deux images que l'on compare
 @return L'image de la différence
 */
-image difference (image I1, image I2){
+image difference (image I1a, image I2a){
   // --- On travaille sur des images qui n'ont pas de fils identiques ---
-  simplifie(&I1);
-  simplifie(&I2);
+  image I1 = copie(I1a) ;
+  simplifie(&I1) ;
+  image I2 = copie(I2a) ;
+  simplifie(&I2) ;
   // ---
 
   // Si les deux images sont identiques, il n'y a aucune différence donc on renvoie une imge blanche
@@ -643,55 +603,54 @@ image lecture_au_clavier(){
 }
 
 
+
+
 /* Fonction qui compte le nombre de sous image pleine à une profondeur donnée
 @param : L'image que l'on examine, la hauteur qui nous intéresse
 @return : Le nombre de sous images pleines
 */
-/* A FINIR */
-/*
-void CompteSousImagePleine(image I, int hauteur, int* cpt, bool* is_full, int profondeur){
-  if (hauteur == profondeur) {
-      if (est_blanche(I) || est_noire(I)) {
-        *(is_full) = TRUE ;
-        if (hauteur == 0) (*cpt)++;
-
-      }
-      else {
-        for(int i = 0; i < 4; i++) {
-          CompteSousImagePleine(I->fils[i], hauteur, cpt, is_full, 0) ;
-        }
-      }
-
-
-
-  } else {
-    if (est_blanche(I) || est_noire(I)) {
-      *(is_full) = FALSE ;
-    }
-    else {
-
-      for(int i = 0; i < 4; i++) {
-        CompteSousImagePleine(I->fils[i], hauteur, cpt, is_full, profondeur+1) ;
-      }
-
+int CompteSousImagePleine(image I, int n) {
+  if (I == NULL || I->toutnoir) {
+    if (n == 0) return 1;
+    else return 0;
   }
-  else if (est_blanche(I) || est_noire(I)) *(is_full) = FALSE ;
   else {
-    for(int i = 0; i < 4; i++) {
-      CompteSousImagePleine(I->fils[i], hauteur, cpt, is_full, profondeur+1) ;
-    }
-  }
+    int v1 = donne_profondeur_max(I->fils[0]);
+    if (v1 > n)
+        return (CompteSousImagePleine(I->fils[0], n) +
+                CompteSousImagePleine(I->fils[1], n) +
+                CompteSousImagePleine(I->fils[2], n) +
+                CompteSousImagePleine(I->fils[3], n));
 
-    if (*(is_full)) (*cpt)++;
+    int v2 = donne_profondeur_max(I->fils[1]);
+    if (v2 > n)
+        return (CompteSousImagePleine(I->fils[0], n) +
+                CompteSousImagePleine(I->fils[1], n) +
+                CompteSousImagePleine(I->fils[2], n) +
+                CompteSousImagePleine(I->fils[3], n));
+
+    int v3 = donne_profondeur_max(I->fils[2]);
+    if (v3 > n)
+        return (CompteSousImagePleine(I->fils[0], n) +
+                CompteSousImagePleine(I->fils[1], n) +
+                CompteSousImagePleine(I->fils[2], n) +
+                CompteSousImagePleine(I->fils[3], n));
+
+    int v4 = donne_profondeur_max(I->fils[3]);
+    if (v4 > n)
+        return (CompteSousImagePleine(I->fils[0], n) +
+                CompteSousImagePleine(I->fils[1], n) +
+                CompteSousImagePleine(I->fils[2], n) +
+                CompteSousImagePleine(I->fils[3], n));
+
+    if (v1 == n && v2 == n && v3 == n && v4 == n)
+      return 1;
+
+
+   return 0;
   }
-  affiche_normal(I);
-  printf(" cpt = %d\n", *cpt) ;
 }
 
-  affiche_normal(I);
-  printf(" cpt = %d, p = %d\n ", *cpt, profondeur) ;
-}
-*/
 
 
 
@@ -762,31 +721,20 @@ int main() {
 
             //                      1   2    3    4        5    6    7    8        9   10  11   12       13  14  15   16   17      18  19  20      21  22  23  24      25  26  27          28   29  30  31     32  33  34  35      36  37  38  39      40  41  42  43        N     . N   B   N     . B   B     N   B  .  B   N     B  .  .   B   B   N     B   . N     B   B   N   .   B N   B   N   .     N   B   N   B
   char phrase[58] = {'.','.','.','B','B', 'N', 'B','.', 'N', 'N', 'B', 'N', '.','B','B','B', 'N', '.','N','N','N', 'B', 'N','.','N','B','N','.','B','B','N','B','.','B','N','B','.','.','B','B','N','B','.','N','B','B','N','.','B','N','B','N','.','N','B','N','B', '\n'};
+
+
   /*
   affiche_normal(tabdechar_to_image(phrase));
   printf(" est phrase\n" );
   for (int j = 0; j < 5; j++) {
-    int i = 0;
-    bool b = TRUE;
-    CompteSousImagePleine(tabdechar_to_image(phrase), j, &i, &b, -1);
+    int i = CompteSousImagePleine(tabdechar_to_image(phrase), j);
     printf("Valeur = %d, Compteur = %d\n", j, i);
   }
   */
-  // 0 = 43 ok
-  // 1 = 9 ok
-  // 2 = 3 (devrait etre 2)
-  // 3 = 1 (devrait etre 0)
-  // 4 ou + = 0 ok
 
 
-  //affiche_normal(tabdechar_to_image(phrase));
-  //printf(" est phrase\n" );
-  //int i = 0;
-  //bool b = TRUE;
-  //CompteSousImagePleine(tabdechar_to_image(phrase), 1, &i, &b, 0);
-  //printf("Compteur = %d", i);
 
-  //affichage2kpixel(tabdechar_to_image(phrase));
+  affichage2kpixel(tabdechar_to_image(phrase));
 
   //image_divise_to_char(Image1);
   //image_divise_to_char(Image1);
@@ -798,3 +746,28 @@ int main() {
   //affichage2kpixel(Image1);
   return 0;
 }
+
+
+/* LISTE DES FONCTIONS A FAIRE
+  // construit_blanc()
+  // construit_noir()
+  // construit_compose()
+  // affiche_normal()
+  // affiche_profondeur()
+  // est_noire()
+  // est_blanche
+  // copie
+  // aire
+  // meme_dessin
+  // difference
+  // rendmemoire
+  A OPTIMISER lecture_au_clavier
+  // CompteSousImagePleine
+  // arrondit
+  // negatif
+  // simplifie
+  affichage2kpixel
+  alea
+  nebuleuse
+  main()
+*/
