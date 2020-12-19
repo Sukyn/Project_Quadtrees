@@ -2,11 +2,10 @@
 #include <stdio.h> // printf, ...
 #include <stdlib.h> // malloc, free, ...
 #include <math.h> // pow, ...
+#include <time.h>
 
 /* Sucre syntaxique */
 typedef enum { FALSE, TRUE} bool;
-//gfg
-
 
 
 /*
@@ -197,7 +196,7 @@ int donne_profondeur_max_aux(image I, int profondeur){
   return max;
 }
 /* Fonction principale */
-int donne_profondeur_max(image I){ return donne_profondeur_max_aux(I, 1); }
+int donne_profondeur_max(image I){ return donne_profondeur_max_aux(I, 0); }
 
 
 /* Fonction identique à construit_compose mais qui construit dans le sens inverse
@@ -281,31 +280,50 @@ image Division (image I){
   Division_aux(I, donne_profondeur_max(I));
 }
 
+
+
+
+
+
+
+
 /* Procédure qui nous permet de transformer une image en tableau de caractères
 @param : L'image que l'on souhaite transcrire
 @return : La chaîne de caractère associée
 */
 /* Procédure auxiliaire */
-void image_divise_to_char_aux(image I, int* i, char(* imageI)[]){
-  if(I == NULL){
-    (*imageI)[*i]='B';
-    (*i)++;
+
+void image_divise_to_char_aux(image I, int pos_x, int pos_y, char(* imageI)[], int length, int original){
+if(I == NULL){
+    (*imageI)[pos_y*original+pos_x]='B';
+
   } else if (I->toutnoir) {
-      (*imageI)[*i]='N';
-      (*i)++;
+      (*imageI)[pos_y*original+pos_x]='N';
+
   } else{
-      for(int j=0; j<4; j++){
-        image_divise_to_char_aux(I->fils[j], i, imageI);
-      }
+    length = length/2;
+      image_divise_to_char_aux(I->fils[0], pos_x, pos_y,                   imageI, length, original);
+      image_divise_to_char_aux(I->fils[1], pos_x + length, pos_y,          imageI, length, original);
+      image_divise_to_char_aux(I->fils[2], pos_x, pos_y + length,          imageI, length, original);
+      image_divise_to_char_aux(I->fils[3], pos_x + length, pos_y + length, imageI, length, original);
   }
 }
 /* Procédure principale */
-void image_divise_to_char(image I, char(* imageI)[]){
-  int i = 0;
-  image_divise_to_char_aux(Division(I), &i, imageI);
+void image_divise_to_char(image I, char(* imageI)[], int length){
+  image_divise_to_char_aux(Division(I), 0, 0, imageI, length, length);
 }
 
-
+/* Fonction qui construit une image de profondeur de n, toute blanche
+@param : n la donne_profondeur
+@return : Une image blanche de profondeur n
+*/
+image construit_image_prof(int n){
+  if (n == 0) return construit_blanc();
+  else return construit_compose(construit_image_prof(n -1),
+                                construit_image_prof(n -1),
+                                construit_image_prof(n -1),
+                                construit_image_prof(n -1));
+}
 
 
 
@@ -378,11 +396,16 @@ void affiche_profondeur(image I) { affiche_prof_aux(I, 0) ; }
 
 void affichage2kpixel(image image1){
   int profondeur = donne_profondeur_max(image1);
-  int cases = pow(4,profondeur);
-  char I[cases];
-  printf("cases = %d", cases);
-  image_divise_to_char(image1, &I);
+  int length = pow(2, profondeur);
+  char I[length*length];
+  image_divise_to_char(image1, &I, length);
 
+
+  for (int i = 0; i < cases; i++){
+    if (i%length == 0) putchar('\n');
+    putchar(I[i]);
+
+  }
 
   printf("\n");
 }
@@ -665,8 +688,6 @@ int CompteSousImagePleine(image I, int n) {
 
 
 
-
-
 /* ----------------------------------------------------------------------
 
 
@@ -731,10 +752,12 @@ int main() {
     printf("Valeur = %d, Compteur = %d\n", j, i);
   }
   */
+  //affiche_normal(Image1);
 
+  //image I_alea = Alea(1, 2);
+  //affiche_normal(I_alea);
 
-
-  affichage2kpixel(tabdechar_to_image(phrase));
+  //affichage2kpixel(tabdechar_to_image(phrase));
 
   //image_divise_to_char(Image1);
   //image_divise_to_char(Image1);
@@ -743,7 +766,9 @@ int main() {
   //printf("%d\n", donne_profondeur_max(Image2) );
   //  affiche_normal(Division(Image1));
   //  printf("\n");
-  //affichage2kpixel(Image1);
+
+
+  affichage2kpixel(tabdechar_to_image(phrase));
   return 0;
 }
 
@@ -766,7 +791,7 @@ int main() {
   // arrondit
   // negatif
   // simplifie
-  affichage2kpixel
+  // affichage2kpixel
   alea
   nebuleuse
   main()
