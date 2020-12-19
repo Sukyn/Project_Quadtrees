@@ -401,7 +401,7 @@ void affichage2kpixel(image image1){
   image_divise_to_char(image1, &I, length);
 
 
-  for (int i = 0; i < cases; i++){
+  for (int i = 0; i < length*length; i++){
     if (i%length == 0) putchar('\n');
     putchar(I[i]);
 
@@ -674,10 +674,44 @@ int CompteSousImagePleine(image I, int n) {
   }
 }
 
+/* Fonction qui prend en argument la profondeur k, et un entier n et quir
+endra une image dont la partie noire sera constistuée de n pixels noirs à profondeur k,
+positionnées aléatoirement.  Chaque image pouvant sortir de préférence avec équiprobabilité.
+@param : profondeur et dot_count le nombre de points à placer
+@return : une image avec dot_count points noirs
+*/
+image Alea(int profondeur, int dot_count) {
+
+}
 
 
 
+/* Fonction qui prend en argument la profondeur k et renvoie une image de profondeur k
+choisie aléatoirement tel qu'au centre la densité de noirs soit proche de 1 et au bord proche de 0
+@param : la profondeur
+@return : Une image de cette profondeur qui ressemble à une nebuleuse
+*/
+image nebuleuse_aux(int profondeur, int pos_x, int pos_y, int length, int original){
+  if (profondeur == 0) {
+    int random = rand();
+    int far_from_center = sqrt(pow(2,(original/2 - pos_x)) + pow(2,(original/2 - pos_y))); // Distance Euclidienne
+    int n = 1111111; // Définir un moyen d'avoir 0 si proche du centre, 1 sinon
+    if (n == 0) return construit_noir();
+    else return construit_blanc();
+  }
+  else {
+    length = length/2;
+    return construit_compose(nebuleuse_aux(profondeur-1, pos_x, pos_y, length, original),
+                             nebuleuse_aux(profondeur-1, pos_x + length, pos_y, length, original),
+                             nebuleuse_aux(profondeur-1, pos_x, pos_y + length, length, original),
+                             nebuleuse_aux(profondeur-1, pos_x + length, pos_y + length, length, original));
+  }
+}
 
+image nebuleuse(int profondeur){
+  int length = (int)pow(2, profondeur);
+  return nebuleuse_aux(profondeur, 0, 0, length, length);
+}
 
 
 
@@ -742,31 +776,6 @@ int main() {
 
             //                      1   2    3    4        5    6    7    8        9   10  11   12       13  14  15   16   17      18  19  20      21  22  23  24      25  26  27          28   29  30  31     32  33  34  35      36  37  38  39      40  41  42  43        N     . N   B   N     . B   B     N   B  .  B   N     B  .  .   B   B   N     B   . N     B   B   N   .   B N   B   N   .     N   B   N   B
   char phrase[58] = {'.','.','.','B','B', 'N', 'B','.', 'N', 'N', 'B', 'N', '.','B','B','B', 'N', '.','N','N','N', 'B', 'N','.','N','B','N','.','B','B','N','B','.','B','N','B','.','.','B','B','N','B','.','N','B','B','N','.','B','N','B','N','.','N','B','N','B', '\n'};
-
-
-  /*
-  affiche_normal(tabdechar_to_image(phrase));
-  printf(" est phrase\n" );
-  for (int j = 0; j < 5; j++) {
-    int i = CompteSousImagePleine(tabdechar_to_image(phrase), j);
-    printf("Valeur = %d, Compteur = %d\n", j, i);
-  }
-  */
-  //affiche_normal(Image1);
-
-  //image I_alea = Alea(1, 2);
-  //affiche_normal(I_alea);
-
-  //affichage2kpixel(tabdechar_to_image(phrase));
-
-  //image_divise_to_char(Image1);
-  //image_divise_to_char(Image1);
-
-  //printf("%d\n", donne_profondeur_max(Image1) );
-  //printf("%d\n", donne_profondeur_max(Image2) );
-  //  affiche_normal(Division(Image1));
-  //  printf("\n");
-
 
   affichage2kpixel(tabdechar_to_image(phrase));
   return 0;
