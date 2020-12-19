@@ -682,6 +682,30 @@ positionnées aléatoirement.  Chaque image pouvant sortir de préférence avec 
 */
 image Alea(int profondeur, int dot_count) {
 
+  /* Idée 1 : On construit une image de la bonne profondeur, toute blanche,
+  on la transforme en tableau de caractère et on place les points noirs aléatoirement
+
+  image I1 = construit_image_prof(profondeur);
+
+  int length = pow(2, profondeur);
+  char I[length*length];
+  image_divise_to_char(I1, &I, length);
+
+  while (dot_count > 0) {
+    int random = rand()%(length*length);
+    printf("r = %d", random);
+    if (I[random] == 'B') {
+      I[random] = 'N';
+      dot_count--;
+    }
+  }
+
+  PROBLEME : On n'a pas de fonction qui transforme un tableau de caractère comme celui-ci en image
+  (On n'a pas le . avant l'appel sur le fils)
+  SOLUTIONS : Construire notre tableau de caractère autrement/Créer une fonction qui transforme un tel tableau en image
+  Exemple de forme de notre tableau : [B,B,N,B,B,N,N,B,N,B,B,B,B,N,B]
+  */
+
 }
 
 
@@ -695,7 +719,7 @@ image nebuleuse_aux(int profondeur, int pos_x, int pos_y, int length, int origin
   if (profondeur == 0) {
     int random = rand();
     int far_from_center = sqrt(pow(2,(original/2 - pos_x)) + pow(2,(original/2 - pos_y))); // Distance Euclidienne
-    int n = 1111111; // Définir un moyen d'avoir 0 si proche du centre, 1 sinon
+    int n = 1111111; // Définir ici un moyen d'avoir 0 si proche du centre, 1 sinon, qui dépend donc de la distance au centre
     if (n == 0) return construit_noir();
     else return construit_blanc();
   }
