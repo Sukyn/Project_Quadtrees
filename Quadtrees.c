@@ -3,6 +3,7 @@
 #include <stdlib.h> // malloc, free, ...
 #include <math.h> // pow, ...
 #include <time.h>
+#include <assert.h>
 
 /* Sucre syntaxique */
 typedef enum { FALSE, TRUE} bool;
@@ -42,7 +43,7 @@ int compteur_memoire = 0;
 /* Fonction qui crée une nouvelle image blanche
 @param : Aucun
 @return : Une nouvelle image blanche
-*/
+*/ // test OK
 image construit_blanc()
 {
   compteur_memoire++;
@@ -54,10 +55,11 @@ image construit_blanc()
 }
 
 
+
 /* Fonction qui crée une nouvelle image noire
 @param : Aucun
 @return : Une nouvelle image noire
-*/
+*/  // test OK
 image construit_noir()
 {
   image I = (bloc_image*) malloc(sizeof(bloc_image)) ; // On alloue de la mémoire ...
@@ -77,7 +79,7 @@ image construit_noir()
 @param : 4 images valides (élémentaires, i.e. noire ou blanche, ou composée)
 @return : L'image ayant pour fils les paramètres
 */
-image construit_compose(image i1, image i2, image i3, image i4)
+image construit_compose(image i1, image i2, image i3, image i4)  // Test OK
 {
   image I = (bloc_image*) malloc(sizeof(bloc_image)) ;
   compteur_memoire++;
@@ -147,12 +149,21 @@ bool est_noire(image I)
        && est_noire(I->fils[3]));
 }
 
+/*
+void testConstruitBlanc(){
+  bool estBlanc = est_blanche(construit_blanc)
+  assert(estBlanc);
+}
+void testConstruitNoir(){
+  assert(est_noire(construit_noir));
+}*/
+
 
 
 /* Fonction qui copie une image dans un nouvel emplacement mémoire
 @param L'image à copier
 @return Une copie de l'image, que l'on peut modifier sans modifier l'originale
-*/
+*/  // Test ok
 image copie(image I)
 {
   image I_copie = (bloc_image*) malloc(sizeof(bloc_image)) ;
@@ -196,7 +207,8 @@ int donne_profondeur_max_aux(image I, int profondeur){
   return max;
 }
 /* Fonction principale */
-int donne_profondeur_max(image I){ return donne_profondeur_max_aux(I, 0); }
+int donne_profondeur_max(image I){
+  return donne_profondeur_max_aux(I, 0); }      // Test ok
 
 
 /* Fonction identique à construit_compose mais qui construit dans le sens inverse
@@ -220,6 +232,7 @@ image construit_compose_retourne(image i1, image i2, image i3, image i4) {
 @param La chaîne de caractère
 @return L'image décrite par cette chaîne
 */
+
 /* Fonction auxiliaure */
 image image_from_tabchar_aux(char image[], int indice, int* shift){
   if (image[indice+(*shift)] == 'N') return construit_noir();
@@ -248,7 +261,7 @@ image tabdechar_to_image(char phrase[]){
   }
   int shift=0;
   return image_from_tabchar_aux(image1, 0, &shift);
-}
+}   // test OK
 
 /* Fonction qui renvoie une image où tous les fils de l'image entrée sont à la même profondeur,
 En fait, c'est l'inverse de la fonction arrondit() : Si on a une image élémentaire moins profond qu'une autre, on lui crée
@@ -278,7 +291,7 @@ image Division_aux (image I, int profondeur){
 image Division (image I){
   // la profondeur a laquelle il faudra diviser tout les carrés qui ne le sont pas deja
   Division_aux(I, donne_profondeur_max(I));
-}
+}  // Test OK
 
 
 
@@ -323,7 +336,7 @@ image construit_image_prof(int n){
                                 construit_image_prof(n -1),
                                 construit_image_prof(n -1),
                                 construit_image_prof(n -1));
-}
+}  // Test OK
 
 
 
@@ -735,10 +748,149 @@ image nebuleuse(int profondeur){
 
 
 
+/* ----------------------------------------------------------------------
 
 
+                          FONCTIONS DE TEST
 
 
+---------------------------------------------------------------------- */
+
+void testConstruitBlanc(){
+  image I1 = construit_blanc();
+  assert(est_blanche(I1));
+}
+
+void testConstruitNoir(){
+  image I2 = construit_noir();
+  assert(est_noire(I2));
+}
+
+void testConstruitCompose(){
+  image I1 = construit_compose(construit_blanc(),
+                               construit_blanc(),
+                               construit_blanc(),
+                               construit_blanc());
+  assert(est_blanche(I1));
+
+  image I2 = construit_compose(construit_noir(),
+                               construit_noir(),
+                               construit_noir(),
+                               construit_noir());
+  assert(est_noire(I2));
+
+  image I3 = construit_compose(construit_blanc(),
+                               construit_noir(),
+                               construit_blanc(),
+                               construit_blanc());
+
+  assert(est_blanche(I1->fils[0]) && est_noire(I3->fils[1]));
+
+
+}
+
+void testCopie(){
+  image nebu;
+  nebu = nebuleuse(3);
+  image nebu2;
+  nebu2=copie(nebu);
+  assert(meme_dessin(nebu,nebu2));
+}
+
+void testDonneProfondeurMax(){
+  image Image1 = construit_compose(construit_noir(),
+                                   construit_blanc(),
+                                   construit_noir(),
+                                   construit_compose(construit_blanc(),
+                                                     construit_blanc(),
+                                                     construit_blanc(),
+                                                     construit_compose(construit_noir(),
+                                                                       construit_noir(),
+                                                                       construit_noir(),
+                                                                       construit_noir()))) ;
+
+  assert(donne_profondeur_max(Image1)==3);
+}
+
+void testTabdeChartoImage(){
+
+  char imagetest[10] = {'.','B','B','N','.','B','B','B','N'};
+  image imagetest1 = tabdechar_to_image(imagetest);
+  image imagetest2 = construit_compose(construit_blanc(),
+                                       construit_blanc(),
+                                       construit_noir(),
+                                       construit_compose(construit_blanc(),
+                                                         construit_blanc(),
+                                                         construit_blanc(),
+                                                         construit_noir()));
+  assert(meme_dessin(imagetest1,imagetest2));
+
+
+}
+
+void testDivision(){
+  image I1 = construit_compose(construit_noir(),
+                               construit_blanc(),
+                               construit_noir(),
+                               construit_compose(construit_blanc(),
+                                                 construit_blanc(),
+                                                 construit_blanc(),
+                                                 construit_noir()));
+  image I2 = construit_compose(construit_compose(construit_noir(),
+                                                 construit_noir(),
+                                                 construit_noir(),
+                                                 construit_noir()),
+                               construit_compose(construit_blanc(),
+                                                 construit_blanc(),
+                                                 construit_blanc(),
+                                                 construit_blanc()),
+                               construit_compose(construit_noir(),
+                                                 construit_noir(),
+                                                 construit_noir(),
+                                                 construit_noir()),
+                               construit_compose(construit_blanc(),
+                                                 construit_blanc(),
+                                                 construit_blanc(),
+                                                 construit_noir()));
+  image I3 = Division(I1);
+
+  assert(meme_dessin(I3,I2));
+}
+
+void testConstruitImageProf(){
+  image I1 = construit_image_prof(2);
+  image I2 = construit_compose(construit_compose(construit_blanc(),
+                                                construit_blanc(),
+                                                construit_blanc(),
+                                                construit_blanc()),
+                              construit_compose(construit_blanc(),
+                                                construit_blanc(),
+                                                construit_blanc(),
+                                                construit_blanc()),
+                              construit_compose(construit_blanc(),
+                                                construit_blanc(),
+                                                construit_blanc(),
+                                                construit_blanc()),
+                              construit_compose(construit_blanc(),
+                                                construit_blanc(),
+                                                construit_blanc(),
+                                                construit_blanc()));
+  assert(meme_dessin(I1,I2));
+}
+
+void testAire(){
+  image I1 = construit_compose(construit_noir(),
+                               construit_blanc(),
+                               construit_noir(),
+                               construit_compose(construit_blanc(),
+                                                 construit_blanc(),
+                                                 construit_blanc(),
+                                                 construit_noir()));
+
+  //assert(aire(I1)==1);
+
+
+}
 
 
 
@@ -798,6 +950,19 @@ int main() {
   char phrase[58] = {'.','.','.','B','B', 'N', 'B','.', 'N', 'N', 'B', 'N', '.','B','B','B', 'N', '.','N','N','N', 'B', 'N','.','N','B','N','.','B','B','N','B','.','B','N','B','.','.','B','B','N','B','.','N','B','B','N','.','B','N','B','N','.','N','B','N','B', '\n'};
 
   affichage2kpixel(tabdechar_to_image(phrase));
+
+
+  //Fonctions de tests.
+  testConstruitBlanc();
+  testConstruitNoir();
+  testConstruitCompose();
+  testCopie();
+  testDonneProfondeurMax();
+  testTabdeChartoImage();
+  testDivision();
+  testConstruitImageProf();
+  testAire();
+
   return 0;
 }
 
