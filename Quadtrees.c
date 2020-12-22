@@ -308,10 +308,10 @@ image Division (image I){
 
 void image_divise_to_char_aux(image I, int pos_x, int pos_y, char(* imageI)[], int length, int original){
 if(I == NULL){
-    (*imageI)[pos_y*original+pos_x]='B';
+    (*imageI)[pos_y*original+pos_x]='8';
 
   } else if (I->toutnoir) {
-      (*imageI)[pos_y*original+pos_x]='N';
+      (*imageI)[pos_y*original+pos_x]='.';
 
   } else{
     length = length/2;
@@ -726,10 +726,13 @@ choisie aléatoirement tel qu'au centre la densité de noirs soit proche de 1 et
 */
 image nebuleuse_aux(int profondeur, int pos_x, int pos_y, int length, int original){
   if (profondeur == 0) {
-    int random = rand();
-    double far_from_center = sqrt(pow(2,(original/2 - pos_x)) + pow(2,(original/2 - pos_y))); // Distance Euclidienne
-    int n = 1111111; // Définir ici un moyen d'avoir 0 si proche du centre, 1 sinon, qui dépend donc de la distance au centre
-    if (n == 0) return construit_noir();
+
+    float random = (float)(rand()%100)/100;
+    double far_from_center = sqrt(pow((original/2 - pos_x), 2) + pow((original/2 - pos_y), 2)); // Distance Euclidienne
+    double max_distance = (double)original/sqrt(2);
+    double n = far_from_center/max_distance; // Définir ici un moyen d'avoir 0 si proche du centre, 1 sinon, qui dépend donc de la distance au centre
+    //printf("Distance : %f\n", far_from_center);
+    if (random < n) return construit_noir();
     else return construit_blanc();
   }
   else {
@@ -949,7 +952,11 @@ int main() {
             //                      1   2    3    4        5    6    7    8        9   10  11   12       13  14  15   16   17      18  19  20      21  22  23  24      25  26  27          28   29  30  31     32  33  34  35      36  37  38  39      40  41  42  43        N     . N   B   N     . B   B     N   B  .  B   N     B  .  .   B   B   N     B   . N     B   B   N   .   B N   B   N   .     N   B   N   B
   char phrase[58] = {'.','.','.','B','B', 'N', 'B','.', 'N', 'N', 'B', 'N', '.','B','B','B', 'N', '.','N','N','N', 'B', 'N','.','N','B','N','.','B','B','N','B','.','B','N','B','.','.','B','B','N','B','.','N','B','B','N','.','B','N','B','N','.','N','B','N','B', '\n'};
 
-  affichage2kpixel(tabdechar_to_image(phrase));
+  //affichage2kpixel(tabdechar_to_image(phrase));
+
+  image I = nebuleuse(6);
+
+  affichage2kpixel(I);
 
 
   //Fonctions de tests.
