@@ -291,7 +291,7 @@ image Division_aux (image I, int profondeur){
 image Division (image I){
   // la profondeur a laquelle il faudra diviser tout les carrés qui ne le sont pas deja
   Division_aux(I, donne_profondeur_max(I));
-}
+}  // Test OK
 
 
 
@@ -336,7 +336,7 @@ image construit_image_prof(int n){
                                 construit_image_prof(n -1),
                                 construit_image_prof(n -1),
                                 construit_image_prof(n -1));
-}
+}  // Test OK
 
 
 
@@ -861,6 +861,40 @@ void testDivision(){
   assert(meme_dessin(I3,I2));
 }
 
+void testConstruitImageProf(){
+  image I1 = construit_image_prof(2);
+  image I2 = construit_compose(construit_compose(construit_blanc(),
+                                                construit_blanc(),
+                                                construit_blanc(),
+                                                construit_blanc()),
+                              construit_compose(construit_blanc(),
+                                                construit_blanc(),
+                                                construit_blanc(),
+                                                construit_blanc()),
+                              construit_compose(construit_blanc(),
+                                                construit_blanc(),
+                                                construit_blanc(),
+                                                construit_blanc()),
+                              construit_compose(construit_blanc(),
+                                                construit_blanc(),
+                                                construit_blanc(),
+                                                construit_blanc()));
+  assert(meme_dessin(I1,I2));
+}
+
+void testAire(){
+  image I1 = construit_compose(construit_noir(),
+                               construit_blanc(),
+                               construit_noir(),
+                               construit_compose(construit_blanc(),
+                                                 construit_blanc(),
+                                                 construit_blanc(),
+                                                 construit_noir()));
+
+  //assert(aire(I1)==1);
+
+
+}
 
 
 
@@ -930,6 +964,8 @@ int main() {
   testDonneProfondeurMax();
   testTabdeChartoImage();
   testDivision();
+  testConstruitImageProf();
+  testAire();
 
   return 0;
 }
