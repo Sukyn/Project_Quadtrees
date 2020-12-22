@@ -390,10 +390,6 @@ void affiche_profondeur(image I) { affiche_prof_aux(I, 0) ; }
 @param : L'image à afficher
 @return : Aucun
 */
-/* A FINIR */
-
-
-
 void affichage2kpixel(image image1){
   int profondeur = donne_profondeur_max(image1);
   int length = pow(2, profondeur);
@@ -718,7 +714,7 @@ choisie aléatoirement tel qu'au centre la densité de noirs soit proche de 1 et
 image nebuleuse_aux(int profondeur, int pos_x, int pos_y, int length, int original){
   if (profondeur == 0) {
     int random = rand();
-    int far_from_center = sqrt(pow(2,(original/2 - pos_x)) + pow(2,(original/2 - pos_y))); // Distance Euclidienne
+    double far_from_center = sqrt(pow(2,(original/2 - pos_x)) + pow(2,(original/2 - pos_y))); // Distance Euclidienne
     int n = 1111111; // Définir ici un moyen d'avoir 0 si proche du centre, 1 sinon, qui dépend donc de la distance au centre
     if (n == 0) return construit_noir();
     else return construit_blanc();
@@ -828,4 +824,5 @@ int main() {
   alea
   nebuleuse
   main()
+  Permutations dans PilesLR.c
 */
