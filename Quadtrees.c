@@ -308,10 +308,10 @@ image Division (image I){
 
 void image_divise_to_char_aux(image I, int pos_x, int pos_y, char(* imageI)[], int length, int original){
 if(I == NULL){
-    (*imageI)[pos_y*original+pos_x]='8';
+    (*imageI)[pos_y*original+pos_x]='.';
 
   } else if (I->toutnoir) {
-      (*imageI)[pos_y*original+pos_x]='.';
+      (*imageI)[pos_y*original+pos_x]='8';
 
   } else{
     length = length/2;
@@ -689,33 +689,38 @@ positionnées aléatoirement.  Chaque image pouvant sortir de préférence avec 
 @param : profondeur et dot_count le nombre de points à placer
 @return : une image avec dot_count points noirs
 */
-image Alea(int profondeur, int dot_count) {
 
-  /* Idée 1 : On construit une image de la bonne profondeur, toute blanche,
-  on la transforme en tableau de caractère et on place les points noirs aléatoirement
+  image alea(int profondeur, int dot_count){
+    if (profondeur == 0) {
 
-  image I1 = construit_image_prof(profondeur);
 
-  int length = pow(2, profondeur);
-  char I[length*length];
-  image_divise_to_char(I1, &I, length);
+      if (dot_count > 0) {
+        return construit_noir();
+      }
+      else return construit_blanc();
+    }
+    else {
 
-  while (dot_count > 0) {
-    int random = rand()%(length*length);
-    printf("r = %d", random);
-    if (I[random] == 'B') {
-      I[random] = 'N';
-      dot_count--;
+      // S'il y a plus de points que de capacité...
+      if (dot_count > 2*pow(2, profondeur)) return construit_noir();
+
+      // Sinon
+
+      /* TROUVER UN MOYEN DE REPARTIR LES POINTS ALEATOIREMENT ENTRE LES 4 FILS
+      int random = rand()%4
+      int n1 = dot_count*random/4;
+      int n2 = dot_count/4;
+      int n3 = dot_count/4;
+      int n4 = dot_count - n3 - n2 - n1;
+      */
+      printf("DOT = %d, 1 = %d, 2 = %d, 3 = %d; 4 = %d\n", dot_count, n1, n2, n3, n4);
+      return construit_compose(alea(profondeur-1, n1),
+                               alea(profondeur-1, n2),
+                               alea(profondeur-1, n3),
+                               alea(profondeur-1, n4));
     }
   }
 
-  PROBLEME : On n'a pas de fonction qui transforme un tableau de caractère comme celui-ci en image
-  (On n'a pas le . avant l'appel sur le fils)
-  SOLUTIONS : Construire notre tableau de caractère autrement/Créer une fonction qui transforme un tel tableau en image
-  Exemple de forme de notre tableau : [B,B,N,B,B,N,N,B,N,B,B,B,B,N,B]
-  */
-
-}
 
 
 
@@ -732,7 +737,7 @@ image nebuleuse_aux(int profondeur, int pos_x, int pos_y, int length, int origin
     double max_distance = (double)original/sqrt(2);
     double n = far_from_center/max_distance; // Définir ici un moyen d'avoir 0 si proche du centre, 1 sinon, qui dépend donc de la distance au centre
     //printf("Distance : %f\n", far_from_center);
-    if (random < n) return construit_noir();
+    if (random > n) return construit_noir();
     else return construit_blanc();
   }
   else {
@@ -953,8 +958,7 @@ int main() {
   char phrase[58] = {'.','.','.','B','B', 'N', 'B','.', 'N', 'N', 'B', 'N', '.','B','B','B', 'N', '.','N','N','N', 'B', 'N','.','N','B','N','.','B','B','N','B','.','B','N','B','.','.','B','B','N','B','.','N','B','B','N','.','B','N','B','N','.','N','B','N','B', '\n'};
 
   //affichage2kpixel(tabdechar_to_image(phrase));
-
-  image I = nebuleuse(6);
+  image I = alea(3, 5);
 
   affichage2kpixel(I);
 
