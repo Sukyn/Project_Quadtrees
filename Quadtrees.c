@@ -39,9 +39,8 @@ int compteur_memoire = 0;
 /* Fonction qui crée une nouvelle image blanche
 @param : Aucun
 @return : Une nouvelle image blanche
-*/ // test OK
-image construit_blanc()
-{
+*/
+image construit_blanc(){
   compteur_memoire++;
   /* En réalité, on n'utilise pas vraiment la mémoire dans ce cas-ci,
   puisque le pointeur ne pointe sur rien.
@@ -53,9 +52,8 @@ image construit_blanc()
 /* Fonction qui crée une nouvelle image noire
 @param : Aucun
 @return : Une nouvelle image noire
-*/  // test OK
-image construit_noir()
-{
+*/
+image construit_noir(){
   image I = (bloc_image*) malloc(sizeof(bloc_image)) ; // On alloue de la mémoire ...
   compteur_memoire++; // On la compte (cette fois-ci on utilise réellement de la mémoire !)
   I->toutnoir = TRUE ;
@@ -71,8 +69,7 @@ image construit_noir()
 @param : 4 images valides (élémentaires, i.e. noire ou blanche, ou composée)
 @return : L'image ayant pour fils les paramètres
 */
-image construit_compose(image i1, image i2, image i3, image i4)  // Test OK
-{
+image construit_compose(image i1, image i2, image i3, image i4){
   image I = (bloc_image*) malloc(sizeof(bloc_image)) ;
   compteur_memoire++;
   I->toutnoir = FALSE ;
@@ -116,8 +113,7 @@ void rendmemoire(image* I){
 @param L'image que l'on veut tester
 @return TRUE si l'image est toute blanche
 */
-bool est_blanche(image I)
-{
+bool est_blanche(image I){
   if (I == NULL) return TRUE;
   if (I->toutnoir) return FALSE;
   return (est_blanche(I->fils[0])
@@ -130,8 +126,7 @@ bool est_blanche(image I)
 @param L'image que l'on veut tester
 @return TRUE si l'image est toute noire
 */
-bool est_noire(image I)
-{
+bool est_noire(image I){
   if (I == NULL) return FALSE;
   if (I->toutnoir) return TRUE;
   return (est_noire(I->fils[0])
@@ -152,9 +147,8 @@ void testConstruitNoir(){
 /* Fonction qui copie une image dans un nouvel emplacement mémoire
 @param L'image à copier
 @return Une copie de l'image, que l'on peut modifier sans modifier l'originale
-*/  // Test ok
-image copie(image I)
-{
+*/
+image copie(image I){
   image I_copie = (bloc_image*) malloc(sizeof(bloc_image)) ;
   if (I == NULL) I_copie = construit_blanc() ;
   else if (I->toutnoir) I_copie = construit_noir() ;
@@ -215,8 +209,7 @@ int donne_profondeur_max_aux(image I, int profondeur){
 }
 /* Fonction principale */
 int donne_profondeur_max(image I){
-  return donne_profondeur_max_aux(I, 0);
-}      // Test ok
+  return donne_profondeur_max_aux(I, 0);}
 
 /* Fonction identique à construit_compose mais qui construit dans le sens inverse
 @param : Les 4 images à composer
@@ -265,8 +258,7 @@ image tabdechar_to_image(char phrase[]){
     i++;
   }
   int shift=0;
-  return image_from_tabchar_aux(image1, 0, &shift);
-}   // test OK
+  return image_from_tabchar_aux(image1, 0, &shift);}
 
 /* Fonction qui renvoie une image où tous les fils de l'image entrée sont à la même profondeur,
 En fait, c'est l'inverse de la fonction arrondit() : Si on a une image élémentaire moins profond qu'une autre, on lui crée
@@ -295,15 +287,13 @@ image Division_aux (image I, int profondeur){
 /* Fonction principale */
 image Division (image I){
   // la profondeur a laquelle il faudra diviser tout les carrés qui ne le sont pas deja
-  Division_aux(I, donne_profondeur_max(I));
-}  // Test OK
+  Division_aux(I, donne_profondeur_max(I));}
 
 /* Procédure qui nous permet de transformer une image en tableau de caractères
 @param : L'image que l'on souhaite transcrire
 @return : La chaîne de caractère associée
 */
 /* Procédure auxiliaire */
-
 void image_divise_to_char_aux(image I, int pos_x, int pos_y, char(* imageI)[], int length, int original){
 if(I == NULL){
     (*imageI)[pos_y*original+pos_x]='.';
@@ -333,8 +323,7 @@ image construit_image_prof(int n){
   else return construit_compose(construit_image_prof(n -1),
                                 construit_image_prof(n -1),
                                 construit_image_prof(n -1),
-                                construit_image_prof(n -1));
-}  // Test OK
+                                construit_image_prof(n -1));}
 
 /* ----------------------------------------------------------------------
 
@@ -348,8 +337,7 @@ image construit_image_prof(int n){
 @param : L'image que l'on souhaite afficher
 @return : Aucun
 */
-void affiche_normal(image I)
-{
+void affiche_normal(image I){
   if (I == NULL) printf("B") ;
   else if (I->toutnoir) printf("N") ;
   else {
@@ -375,8 +363,7 @@ En combinant les 4, on obtient bien une image. Le point sert donc à montrer l'a
 */
 
 /* Fonction auxiliaire */
-void affiche_prof_aux(image I, int profondeur) // On définit une fonction auxiliaire qui garde en mémoire la profondeur
-{
+void affiche_prof_aux(image I, int profondeur){ // On définit une fonction auxiliaire qui garde en mémoire la profondeur{
   if (I == NULL) printf("B%d", profondeur) ;
   else if (I->toutnoir) printf("N%d", profondeur) ;
   else {
@@ -443,8 +430,7 @@ double aire_aux(image I, double cote){
 
 /* Fonction principale */
 double aire(image I){
-  aire_aux(I,1);
-}   // Test OK
+  aire_aux(I,1);}
 
 
 /* Procédure qui simplifie une image :
@@ -467,9 +453,6 @@ void simplifie(image* I){
     }
   }
 }
-
-
-
 
 /* Fonction qui vérifie si deux images représentent la même chose
 @param : Les deux images que l'on souhaite comparer
@@ -633,9 +616,9 @@ image difference (image I1a, image I2a){
 /* Fonction qui permet à l'utilisateur de rentrer une image depuis le terminal
 @param : Aucun
 @return : L'image construite à partir des indications de l'utilisateur
+La fonction fait deux passes, ce qui est à l'origine du shift, on peut bien
+la simplifier en ne faisant qu'une passe
 */
-// La fonction fait deux passes, ce qui est à l'origine du shift, on peut bien
-// la simplifier en ne faisant qu'une passe
 image lecture_au_clavier(){
   char image1[256];
   char flag = 's';
@@ -653,7 +636,7 @@ image lecture_au_clavier(){
 @param : L'image que l'on examine, la hauteur qui nous intéresse
 @return : Le nombre de sous images pleines
 */
-int CompteSousImagePleine(image I, int n) {
+int CompteSousImagePleine_aux(image I, int n) {
   if (I == NULL || I->toutnoir) {
     if (n == 0) return 1;
     else return 0;
@@ -661,31 +644,31 @@ int CompteSousImagePleine(image I, int n) {
   else {
     int v1 = donne_profondeur_max(I->fils[0]);
     if (v1 > n)
-        return (CompteSousImagePleine(I->fils[0], n) +
-                CompteSousImagePleine(I->fils[1], n) +
-                CompteSousImagePleine(I->fils[2], n) +
-                CompteSousImagePleine(I->fils[3], n));
+        return (CompteSousImagePleine_aux(I->fils[0], n) +
+                CompteSousImagePleine_aux(I->fils[1], n) +
+                CompteSousImagePleine_aux(I->fils[2], n) +
+                CompteSousImagePleine_aux(I->fils[3], n));
 
     int v2 = donne_profondeur_max(I->fils[1]);
     if (v2 > n)
-        return (CompteSousImagePleine(I->fils[0], n) +
-                CompteSousImagePleine(I->fils[1], n) +
-                CompteSousImagePleine(I->fils[2], n) +
-                CompteSousImagePleine(I->fils[3], n));
+        return (CompteSousImagePleine_aux(I->fils[0], n) +
+                CompteSousImagePleine_aux(I->fils[1], n) +
+                CompteSousImagePleine_aux(I->fils[2], n) +
+                CompteSousImagePleine_aux(I->fils[3], n));
 
     int v3 = donne_profondeur_max(I->fils[2]);
     if (v3 > n)
-        return (CompteSousImagePleine(I->fils[0], n) +
-                CompteSousImagePleine(I->fils[1], n) +
-                CompteSousImagePleine(I->fils[2], n) +
-                CompteSousImagePleine(I->fils[3], n));
+        return (CompteSousImagePleine_aux(I->fils[0], n) +
+                CompteSousImagePleine_aux(I->fils[1], n) +
+                CompteSousImagePleine_aux(I->fils[2], n) +
+                CompteSousImagePleine_aux(I->fils[3], n));
 
     int v4 = donne_profondeur_max(I->fils[3]);
     if (v4 > n)
-        return (CompteSousImagePleine(I->fils[0], n) +
-                CompteSousImagePleine(I->fils[1], n) +
-                CompteSousImagePleine(I->fils[2], n) +
-                CompteSousImagePleine(I->fils[3], n));
+        return (CompteSousImagePleine_aux(I->fils[0], n) +
+                CompteSousImagePleine_aux(I->fils[1], n) +
+                CompteSousImagePleine_aux(I->fils[2], n) +
+                CompteSousImagePleine_aux(I->fils[3], n));
 
     if (v1 == n && v2 == n && v3 == n && v4 == n)
       return 1;
@@ -693,6 +676,10 @@ int CompteSousImagePleine(image I, int n) {
 
    return 0;
   }
+}
+
+int CompteSousImagePleine(image I, int n){
+  CompteSousImagePleine_aux(I, n-1);
 }
 
 /* Fonction qui prend en argument la profondeur k, et un entier n et quir
@@ -1012,8 +999,7 @@ void testNegatif(){
                                                      construit_blanc())) ;
 
   negatif(&Image1);
-  assert(meme_dessin(Image1, Image2));
-} //Probleme avec les free() (double free detected in tcache 2)
+  assert(meme_dessin(Image1, Image2));} //Probleme avec les free() (double free detected in tcache 2)
 
 void testArrondit(){ //Probleme avec les free() (double free detected in tcache 2)
   image Image1 = construit_compose(construit_noir(),
@@ -1083,9 +1069,49 @@ void testDifference(){
   printf("Après l'appel de difference dans testDifference\n");
 
   //assert(meme_dessin(Image3,diff12));
-
 } //Segmentation Fault
 
+void testLectureAuClavier(){
+  printf("Rentrez .NNB.NNB.BNNN svp\n");
+  image I = construit_compose(construit_noir(),
+                              construit_noir(),
+                              construit_blanc(),
+                              construit_compose(construit_noir(),
+                                                construit_noir(),
+                                                construit_blanc(),
+                                                construit_compose(construit_blanc(),
+                                                                  construit_noir(),
+                                                                  construit_noir(),
+                                                                  construit_noir())));
+  image Ilue = lecture_au_clavier();
+  assert(meme_dessin(I,Ilue));
+
+}
+
+void testCompteSousImagePleine(){
+   image I1 = construit_compose(construit_compose(construit_blanc(),
+                                                  construit_blanc(),
+                                                  construit_noir(),
+                                                  construit_blanc()),
+                                construit_compose(construit_blanc(),
+                                                  construit_blanc(),
+                                                  construit_noir(),
+                                                  construit_blanc()),
+                                construit_compose(construit_blanc(),
+                                                  construit_blanc(),
+                                                  construit_blanc(),
+                                                  construit_noir()),
+                                construit_compose(construit_noir(),
+                                                  construit_noir(),
+                                                  construit_noir(),
+                                                  construit_blanc()));
+
+  char phrase[58] = {'.','.','.','B','B', 'N', 'B','.', 'N', 'N', 'B', 'N', '.','B','B','B', 'N', '.','N','N','N', 'B', 'N','.','N','B','N','.','B','B','N','B','.','B','N','B','.','.','B','B','N','B','.','N','B','B','N','.','B','N','B','N','.','N','B','N','B', '\n'};
+  image I2 = tabdechar_to_image(phrase);
+
+  assert(CompteSousImagePleine(I1,2)==1);
+  assert(CompteSousImagePleine(I2,2)==2);
+}
 
 
 /* ----------------------------------------------------------------------
@@ -1162,8 +1188,8 @@ int main() {
   //testNegatif();
   //testArrondit();
   //testDifference();
-
-
+  //testLectureAuClavier(); //Elle fonctionne, c'est juste qu'il faut rentrer un truc si on le met pas en commentaire et c'est chiant
+  testCompteSousImagePleine();
   return 0;
 }
 
