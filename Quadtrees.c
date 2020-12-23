@@ -176,6 +176,27 @@ Il faut donc créer de nouvelles images */
 
 ---------------------------------------------------------------------- */
 
+/*Fonction qui vérifie si 2 images sont parfaitement identiques, sans les simplifier.
+@param : les 2 images que l'on souhaite comparer
+@return : TRUE si les 2 images sont parfaitement identiques, FALSE sinon
+*/
+bool meme_dessin_parfait(image I, image I2){
+  if (I == NULL){
+    return (I2 == NULL) ;
+  }
+  else if (I->toutnoir){
+      return (I2->toutnoir) ;
+    }
+  else if (I2==NULL || I2->toutnoir){
+      return FALSE;
+    }
+
+  return (meme_dessin_parfait(I->fils[0], I2->fils[0])
+       && meme_dessin_parfait(I->fils[1], I2->fils[1])
+       && meme_dessin_parfait(I->fils[2], I2->fils[2])
+       && meme_dessin_parfait(I->fils[3], I2->fils[3]) ) ;
+}
+
 /* Fonction qui cherche la profondeur maximale d'une image
 @param L'image dont on veut connaître la profondeur
 @return La profondeur maximale de l'image
@@ -423,7 +444,7 @@ double aire_aux(image I, double cote){
 /* Fonction principale */
 double aire(image I){
   aire_aux(I,1);
-}
+}   // Test OK
 
 
 /* Procédure qui simplifie une image :
@@ -446,6 +467,9 @@ void simplifie(image* I){
     }
   }
 }
+
+
+
 
 /* Fonction qui vérifie si deux images représentent la même chose
 @param : Les deux images que l'on souhaite comparer
@@ -484,7 +508,8 @@ bool meme_dessin(image I, image I2) {
 /* Procédure qui transforme une image en sa forme négative,
 c'est à dire que les cases blanches deviennent noires et réciproquement.
 @param : L'image que l'on souhaite inverser
-@return : Aucun */
+@return : Aucun
+*/
 void negatif(image* I) {
   if (*I == NULL) {
     rendmemoire(I);
@@ -866,6 +891,83 @@ void testAire(){
   assert(aire(I4)==0.5);
 }
 
+void testSimplifie(){
+  image Image1 = construit_compose(construit_noir(),
+                                   construit_blanc(),
+                                   construit_noir(),
+                                   construit_compose(construit_blanc(),
+                                                     construit_blanc(),
+                                                     construit_blanc(),
+                                                     construit_compose(construit_noir(),
+                                                                       construit_noir(),
+                                                                       construit_noir(),
+                                                                       construit_noir()))) ;
+
+  //image* Image1ptr -> Image1;
+
+  image Image2 = construit_compose(construit_noir(),
+                                       construit_blanc(),
+                                       construit_noir(),
+                                       construit_compose(construit_blanc(),
+                                                         construit_blanc(),
+                                                         construit_blanc(),
+                                                         construit_noir())) ;
+
+  simplifie(&Image1);
+
+  assert(meme_dessin_parfait(Image2, Image1));
+
+}
+
+void testMemeDessin(){
+  image Image1 = construit_compose(construit_noir(),
+                                   construit_blanc(),
+                                   construit_noir(),
+                                   construit_compose(construit_blanc(),
+                                                     construit_blanc(),
+                                                     construit_blanc(),
+                                                     construit_compose(construit_noir(),
+                                                                       construit_noir(),
+                                                                       construit_noir(),
+                                                                       construit_noir()))) ;
+  image Image2 = construit_compose(construit_noir(),
+                                   construit_blanc(),
+                                   construit_noir(),
+                                   construit_compose(construit_blanc(),
+                                                     construit_blanc(),
+                                                     construit_blanc(),
+                                                     construit_noir())) ;
+
+  image Image3 = construit_noir();
+  image Image4 = construit_compose(construit_noir(),
+                                   construit_noir(),
+                                   construit_noir(),
+                                   construit_noir());
+  assert(meme_dessin(Image1, Image2));
+  assert(meme_dessin(Image3, Image4));
+}
+
+void testNegatif(){
+  image Image1 = construit_compose(construit_noir(),
+                                   construit_blanc(),
+                                   construit_noir(),
+                                   construit_compose(construit_blanc(),
+                                                     construit_blanc(),
+                                                     construit_blanc(),
+                                                     construit_noir())) ;
+
+  image Image2 = construit_compose(construit_blanc(),
+                                   construit_noir(),
+                                   construit_blanc(),
+                                   construit_compose(construit_noir(),
+                                                     construit_noir(),
+                                                     construit_noir(),
+                                                     construit_blanc())) ;
+
+  negatif(&Image1);
+  assert(meme_dessin(Image1, Image2));
+}
+
 /* ----------------------------------------------------------------------
 
 
@@ -933,6 +1035,9 @@ int main() {
   testDivision();
   testConstruitImageProf();
   testAire();
+  testSimplifie();
+  testMemeDessin();
+  testNegatif();
 
   return 0;
 }
