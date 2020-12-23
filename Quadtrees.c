@@ -8,7 +8,6 @@
 /* Sucre syntaxique */
 typedef enum { FALSE, TRUE} bool;
 
-
 /*
 ------------------------
 Définition de la structure de nos images :
@@ -29,8 +28,6 @@ Il n'est pas nécessaire mais est pratique pour vérifier que notre code est pro
 */
 int compteur_memoire = 0;
 
-
-
 /* ----------------------------------------------------------------------
 
 
@@ -38,7 +35,6 @@ int compteur_memoire = 0;
 
 
 ---------------------------------------------------------------------- */
-
 
 /* Fonction qui crée une nouvelle image blanche
 @param : Aucun
@@ -53,8 +49,6 @@ image construit_blanc()
   faire en sorte qu'on n'appelle pas free() sur une image blanche dans les autres fonctions ! */
   return NULL ;
 }
-
-
 
 /* Fonction qui crée une nouvelle image noire
 @param : Aucun
@@ -72,8 +66,6 @@ image construit_noir()
   toutnoir vaut TRUE, on ne cherchera pas à accéder aux fils, mais ça ne coûte rien et ça évite de faire des conneries */
   return I ;
 }
-
-
 
 /* Fonction qui compose une image à partir de 4 fils
 @param : 4 images valides (élémentaires, i.e. noire ou blanche, ou composée)
@@ -111,7 +103,6 @@ void rendmemoire(image* I){
   compteur_memoire--;
   free(*I);
 }
-
 
 /* ----------------------------------------------------------------------
 
@@ -158,8 +149,6 @@ void testConstruitNoir(){
   assert(est_noire(construit_noir));
 }*/
 
-
-
 /* Fonction qui copie une image dans un nouvel emplacement mémoire
 @param L'image à copier
 @return Une copie de l'image, que l'on peut modifier sans modifier l'originale
@@ -178,9 +167,6 @@ image copie(image I)
 /* Pourquoi ne pas juste faire I_copie = I ?
 Parce que ce sont des pointeurs, et donc ce ne serait pas une copie mais un pointeur vers le même
 Il faut donc créer de nouvelles images */
-
-
-
 
 /* ----------------------------------------------------------------------
 
@@ -208,8 +194,8 @@ int donne_profondeur_max_aux(image I, int profondeur){
 }
 /* Fonction principale */
 int donne_profondeur_max(image I){
-  return donne_profondeur_max_aux(I, 0); }      // Test ok
-
+  return donne_profondeur_max_aux(I, 0);
+}      // Test ok
 
 /* Fonction identique à construit_compose mais qui construit dans le sens inverse
 @param : Les 4 images à composer
@@ -225,8 +211,6 @@ image construit_compose_retourne(image i1, image i2, image i3, image i4) {
   I->fils[3] = i1 ;
   return I ;
 }
-
-
 
 /* Fonction qui construit une image à partir d'un tableau de caractère
 @param La chaîne de caractère
@@ -293,13 +277,6 @@ image Division (image I){
   Division_aux(I, donne_profondeur_max(I));
 }  // Test OK
 
-
-
-
-
-
-
-
 /* Procédure qui nous permet de transformer une image en tableau de caractères
 @param : L'image que l'on souhaite transcrire
 @return : La chaîne de caractère associée
@@ -338,9 +315,6 @@ image construit_image_prof(int n){
                                 construit_image_prof(n -1));
 }  // Test OK
 
-
-
-
 /* ----------------------------------------------------------------------
 
 
@@ -348,8 +322,6 @@ image construit_image_prof(int n){
 
 
 ---------------------------------------------------------------------- */
-
-
 
 /* Fonction qui affiche une image selon la notation [.,N,B]
 @param : L'image que l'on souhaite afficher
@@ -376,8 +348,6 @@ On doit toujours se retrouver avec 4 fils, donc décomposer en 4 images
 -> NBNN est une image ayant des fils élémentaires, donc NNB(NBNN) est aussi une image, finalement (N(NNB(NBNN))BN) en est une
 En combinant les 4, on obtient bien une image. Le point sert donc à montrer l'appel récursif */
 
-
-
 /* Fonction qui affiche l'image en précisant la profondeur de chaque noeud
 @param : L'image à afficher
 @return : Aucun
@@ -397,7 +367,6 @@ void affiche_prof_aux(image I, int profondeur) // On définit une fonction auxil
 }
 /* Fonction principale */
 void affiche_profondeur(image I) { affiche_prof_aux(I, 0) ; }
-
 
 /* Procédure qui permet d'afficher une image en 2D
 @param : L'image à afficher
@@ -419,7 +388,6 @@ void affichage2kpixel(image image1){
   printf("\n");
 }
 
-
 /* ----------------------------------------------------------------------
 
 
@@ -427,10 +395,6 @@ void affichage2kpixel(image image1){
 
 
 ---------------------------------------------------------------------- */
-
-
-
-
 
 /* Fonction qui calcule l'aire d'une image
 Note : On considère que l'aire de l'image est la surface de ses carrés noirs, en partant du principe que l'image
@@ -440,17 +404,25 @@ de base est représentée par un carré de taille 1x1
 */
 /* Fonction auxiliaire */
 double aire_aux(image I, double cote){
-  if (I == NULL) return 0 ;
-  if (I->toutnoir) return cote*cote ;
-  return (aire_aux(I->fils[0], cote/2) +
-          aire_aux(I->fils[1], cote/2) +
-          aire_aux(I->fils[2], cote/2) +
-          aire_aux(I->fils[3], cote/2)) ;
+  if (est_blanche(I)){
+    return 0;
+  }
+  else{
+    if (est_noire(I)){
+      return cote*cote;
+    }
+    else{
+      return (aire_aux(I->fils[0], cote/2) +
+              aire_aux(I->fils[1], cote/2) +
+              aire_aux(I->fils[2], cote/2) +
+              aire_aux(I->fils[3], cote/2)) ;
+    }
+  }
 }
+
 /* Fonction principale */
 double aire(image I){
-  if (est_noire(I)) return 1 ;
-  return aire_aux(I, 0.5);
+  aire_aux(I,1);
 }
 
 
@@ -474,7 +446,6 @@ void simplifie(image* I){
     }
   }
 }
-
 
 /* Fonction qui vérifie si deux images représentent la même chose
 @param : Les deux images que l'on souhaite comparer
@@ -510,9 +481,6 @@ bool meme_dessin(image I, image I2) {
   return meme_dessin_aux(I_copie, I2_copie);
 }
 
-
-
-
 /* Procédure qui transforme une image en sa forme négative,
 c'est à dire que les cases blanches deviennent noires et réciproquement.
 @param : L'image que l'on souhaite inverser
@@ -532,7 +500,6 @@ void negatif(image* I) {
     }
   }
 }
-
 
 /* Procédure qui arrondit les fils à une profondeur demandée d'une image
 @param : L'image que l'on souhaite arrondir, la profondeur a partir de laquelle on souhaite arrondir
@@ -571,7 +538,6 @@ void arrondit_aux(image* I, int k, int n) {
 void arrondit(image* I, int k) {
   arrondit_aux(I, k, 0);
 }
-
 
 /* Fonction qui renvoie une image représentant la différence entre deux images :
 L'image rendue est noire là où l'une des deux images de départ est noire mais l'autre blanche
@@ -612,9 +578,6 @@ image difference (image I1a, image I2a){
                              difference(I1 -> fils[3], I2 -> fils[3]));
 }
 
-
-
-
 /* Fonction qui permet à l'utilisateur de rentrer une image depuis le terminal
 @param : Aucun
 @return : L'image construite à partir des indications de l'utilisateur
@@ -633,9 +596,6 @@ image lecture_au_clavier(){
   int shift = 0;
   return image_from_tabchar_aux(image1, 0, &shift);
 }
-
-
-
 
 /* Fonction qui compte le nombre de sous image pleine à une profondeur donnée
 @param : L'image que l'on examine, la hauteur qui nous intéresse
@@ -690,7 +650,7 @@ positionnées aléatoirement.  Chaque image pouvant sortir de préférence avec 
 @return : une image avec dot_count points noirs
 */
 
-  image alea(int profondeur, int dot_count){
+/*image alea(int profondeur, int dot_count){
     if (profondeur == 0) {
 
 
@@ -712,7 +672,7 @@ positionnées aléatoirement.  Chaque image pouvant sortir de préférence avec 
       int n2 = dot_count/4;
       int n3 = dot_count/4;
       int n4 = dot_count - n3 - n2 - n1;
-      */
+
       printf("DOT = %d, 1 = %d, 2 = %d, 3 = %d; 4 = %d\n", dot_count, n1, n2, n3, n4);
       return construit_compose(alea(profondeur-1, n1),
                                alea(profondeur-1, n2),
@@ -720,9 +680,7 @@ positionnées aléatoirement.  Chaque image pouvant sortir de préférence avec 
                                alea(profondeur-1, n4));
     }
   }
-
-
-
+*/
 
 /* Fonction qui prend en argument la profondeur k et renvoie une image de profondeur k
 choisie aléatoirement tel qu'au centre la densité de noirs soit proche de 1 et au bord proche de 0
@@ -753,8 +711,6 @@ image nebuleuse(int profondeur){
   int length = (int)pow(2, profondeur);
   return nebuleuse_aux(profondeur, 0, 0, length, length);
 }
-
-
 
 /* ----------------------------------------------------------------------
 
@@ -894,13 +850,21 @@ void testAire(){
                                                  construit_blanc(),
                                                  construit_blanc(),
                                                  construit_noir()));
-
-  //assert(aire(I1)==1);
-
-
+  image Image3 = construit_compose(construit_noir(),
+                                  construit_blanc(),
+                                  construit_noir(),
+                                  construit_noir());
+  image I2 = construit_blanc();
+  image I3 = construit_noir();
+  image I4 = construit_compose(construit_noir(),
+                               construit_blanc(),
+                               construit_noir(),
+                               construit_blanc());
+  assert(aire(Image3)==0.75);
+  assert(aire(I2)==0);
+  assert(aire(I3)==1);
+  assert(aire(I4)==0.5);
 }
-
-
 
 /* ----------------------------------------------------------------------
 
@@ -909,10 +873,6 @@ void testAire(){
 
 
 ---------------------------------------------------------------------- */
-
-
-
-
 
 int main() {
 
@@ -958,9 +918,9 @@ int main() {
   char phrase[58] = {'.','.','.','B','B', 'N', 'B','.', 'N', 'N', 'B', 'N', '.','B','B','B', 'N', '.','N','N','N', 'B', 'N','.','N','B','N','.','B','B','N','B','.','B','N','B','.','.','B','B','N','B','.','N','B','B','N','.','B','N','B','N','.','N','B','N','B', '\n'};
 
   //affichage2kpixel(tabdechar_to_image(phrase));
-  image I = alea(3, 5);
+  //image I = alea(3, 5);
 
-  affichage2kpixel(I);
+  //affichage2kpixel(I);
 
 
   //Fonctions de tests.
@@ -976,7 +936,6 @@ int main() {
 
   return 0;
 }
-
 
 /* LISTE DES FONCTIONS A FAIRE
   // construit_blanc()
