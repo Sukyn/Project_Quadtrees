@@ -325,6 +325,23 @@ image construit_image_prof(int n){
                                 construit_image_prof(n -1),
                                 construit_image_prof(n -1));}
 
+image construit_alea(){
+  int random = rand()%2;
+  if(random == 1){
+    construit_blanc();
+  }
+  else{
+    construit_noir();
+  }
+}
+
+image alea(int k){
+  if (k == 0) return construit_alea();
+  else return construit_compose(alea(k-1),
+                                alea(k-1),
+                                alea(k-1),
+                                alea(k-1));
+}
 /* ----------------------------------------------------------------------
 
 
@@ -636,7 +653,7 @@ image lecture_au_clavier(){
 @param : L'image que l'on examine, la hauteur qui nous intéresse
 @return : Le nombre de sous images pleines
 */
-int CompteSousImagePleine_aux(image I, int n) {
+int CompteSousImagePleine_aux(image I, int n){
   if (I == NULL || I->toutnoir) {
     if (n == 0) return 1;
     else return 0;
@@ -720,6 +737,13 @@ positionnées aléatoirement.  Chaque image pouvant sortir de préférence avec 
     }
   }
 */
+
+
+
+
+
+
+//image
 
 /* Fonction qui prend en argument la profondeur k et renvoie une image de profondeur k
 choisie aléatoirement tel qu'au centre la densité de noirs soit proche de 1 et au bord proche de 0
@@ -809,6 +833,12 @@ void testConstruitCompose(){
 
   assert(est_blanche(I1->fils[0]) && est_noire(I3->fils[1]));
 
+
+}
+
+void testConstruitAlea(){
+  image Image1 = construit_alea(5);
+  assert(donne_profondeur_max(Image1)==5);
 
 }
 
@@ -1165,13 +1195,20 @@ int main() {
             //                      1   2    3    4        5    6    7    8        9   10  11   12       13  14  15   16   17      18  19  20      21  22  23  24      25  26  27          28   29  30  31     32  33  34  35      36  37  38  39      40  41  42  43        N     . N   B   N     . B   B     N   B  .  B   N     B  .  .   B   B   N     B   . N     B   B   N   .   B N   B   N   .     N   B   N   B
   char phrase[58] = {'.','.','.','B','B', 'N', 'B','.', 'N', 'N', 'B', 'N', '.','B','B','B', 'N', '.','N','N','N', 'B', 'N','.','N','B','N','.','B','B','N','B','.','B','N','B','.','.','B','B','N','B','.','N','B','B','N','.','B','N','B','N','.','N','B','N','B', '\n'};
 
+
   //affichage2kpixel(tabdechar_to_image(phrase));
   //image I = alea(3, 5);
 
   //affichage2kpixel(I);
 
-
   //Fonctions de tests.
+
+  image Image5 = alea(5);
+  affichage2kpixel(Image5);
+
+  image Image6 = construit_image_prof(5);
+  affichage2kpixel(Image6);
+
   testEstBlanche();
   testEstNoire();
   testConstruitBlanc();
