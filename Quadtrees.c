@@ -447,7 +447,8 @@ double aire_aux(image I, double cote){
 
 /* Fonction principale */
 double aire(image I){
-  aire_aux(I,1);}
+  return aire_aux(I,1);
+}
 
 
 /* Procédure qui simplifie une image :
@@ -949,7 +950,13 @@ void testAire(){
                                construit_blanc(),
                                construit_noir(),
                                construit_blanc());
+  printf("%f\n", aire(Image3) );
+  printf("%f\n", aire(I1) );
+  printf("%f\n", aire(I2) );
+  printf("%f\n", aire(I3) );
+  printf("%f\n", aire(I4) );
   assert(aire(Image3)==0.75);
+  assert(aire(I1)==0,5625);
   assert(aire(I2)==0);
   assert(aire(I3)==1);
   assert(aire(I4)==0.5);
@@ -1098,9 +1105,8 @@ void testDifference(){
   Image3 = difference(Image1,Image2);
   printf("Après l'appel de difference dans testDifference\n");
 
-  //assert(meme_dessin(Image3,diff12));
-} //Segmentation Fault
-
+  //assert(meme_dessin(Image3,diff12));} //Segmentation Fault
+}
 void testLectureAuClavier(){
   printf("Rentrez .NNB.NNB.BNNN svp\n");
   image I = construit_compose(construit_noir(),
