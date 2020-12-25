@@ -1139,8 +1139,8 @@ void testCompteSousImagePleine(){
                                                   construit_noir(),
                                                   construit_blanc()));
 
-  char phrase[58] = {'.','.','.','B','B', 'N', 'B','.', 'N', 'N', 'B', 'N', '.','B','B','B', 'N', '.','N','N','N', 'B', 'N','.','N','B','N','.','B','B','N','B','.','B','N','B','.','.','B','B','N','B','.','N','B','B','N','.','B','N','B','N','.','N','B','N','B', '\n'};
-  image I2 = tabdechar_to_image(phrase);
+  char phrase2[58] = {'.','.','.','B','B', 'N', 'B','.', 'N', 'N', 'B', 'N', '.','B','B','B', 'N', '.','N','N','N', 'B', 'N','.','N','B','N','.','B','B','N','B','.','B','N','B','.','.','B','B','N','B','.','N','B','B','N','.','B','N','B','N','.','N','B','N','B', '\n'};
+  image I2 = tabdechar_to_image(phrase2);
   assert(CompteSousImagePleine(I1,2)==1);
   assert(CompteSousImagePleine(I2,2)==2);
 }
@@ -1157,7 +1157,8 @@ void testCompteSousImagePleine(){
 int main() {
 
   srand(time(NULL));
-  image Image1 = construit_compose(construit_noir(),
+
+  /*image Image1 = construit_compose(construit_noir(),
                                    construit_blanc(),
                                    construit_noir(),
                                    construit_compose(construit_blanc(),
@@ -1166,8 +1167,8 @@ int main() {
                                                      construit_compose(construit_noir(),
                                                                        construit_noir(),
                                                                        construit_noir(),
-                                                                       construit_noir()))) ;
-  image Image2 = construit_compose(construit_compose(construit_noir(),
+                                                                       construit_noir()))) ;*/
+  /*image Image2 = construit_compose(construit_compose(construit_noir(),
                                                      construit_noir(),
                                                      construit_noir(),
                                                      construit_compose(construit_noir(),
@@ -1186,31 +1187,32 @@ int main() {
                                                                         construit_blanc()),
                                                       construit_blanc(),
                                                       construit_noir())) ;
+  */
+  //image Image3 = construit_compose(construit_noir(),
+  //                                 construit_blanc(),
+  //                                 construit_noir(),
+  //                                 construit_noir());
+  //image Image4 = construit_noir();
+  //image I_copie = copie(Image1) ;
+  //image I2_copie = copie(Image2) ;
 
-  image Image3 = construit_compose(construit_noir(),
-                                   construit_blanc(),
-                                   construit_noir(),
-                                   construit_noir());
-  image Image4 = construit_noir();
-  image I_copie = copie(Image1) ;
-  image I2_copie = copie(Image2) ;
-
-            //                      1   2    3    4        5    6    7    8        9   10  11   12       13  14  15   16   17      18  19  20      21  22  23  24      25  26  27          28   29  30  31     32  33  34  35      36  37  38  39      40  41  42  43        N     . N   B   N     . B   B     N   B  .  B   N     B  .  .   B   B   N     B   . N     B   B   N   .   B N   B   N   .     N   B   N   B
-  char phrase[58] = {'.','.','.','B','B', 'N', 'B','.', 'N', 'N', 'B', 'N', '.','B','B','B', 'N', '.','N','N','N', 'B', 'N','.','N','B','N','.','B','B','N','B','.','B','N','B','.','.','B','B','N','B','.','N','B','B','N','.','B','N','B','N','.','N','B','N','B', '\n'};
+  //                      1   2    3    4        5    6    7    8        9   10  11   12       13  14  15   16   17      18  19  20      21  22  23  24      25  26  27          28   29  30  31     32  33  34  35      36  37  38  39      40  41  42  43        N     . N   B   N     . B   B     N   B  .  B   N     B  .  .   B   B   N     B   . N     B   B   N   .   B N   B   N   .     N   B   N   B
+  //char phrase3[58] = {'.','.','.','B','B', 'N', 'B','.', 'N', 'N', 'B', 'N', '.','B','B','B', 'N', '.','N','N','N', 'B', 'N','.','N','B','N','.','B','B','N','B','.','B','N','B','.','.','B','B','N','B','.','N','B','B','N','.','B','N','B','N','.','N','B','N','B', '\n'};
 
 
-  //affichage2kpixel(tabdechar_to_image(phrase));
+  //affichage2kpixel(tabdechar_to_image(phrase3));
   //image I = alea(3, 5);
 
   //affichage2kpixel(I);
 
   //Fonctions de tests.
 
-  image Image5 = alea(5);
-  affichage2kpixel(Image5);
+  //image Image5 = alea(5);
+  //affichage2kpixel(Image5);
 
-  image Image6 = construit_image_prof(5);
-  affichage2kpixel(Image6);
+  //image Image6 = construit_image_prof(5);
+  //affichage2kpixel(Image6);
+
 
   testEstBlanche();
   testEstNoire();
@@ -1229,7 +1231,7 @@ int main() {
   //testArrondit();
   //testDifference();
   //testLectureAuClavier(); //Elle fonctionne, c'est juste qu'il faut rentrer un truc si on le met pas en commentaire et c'est chiant
-  testCompteSousImagePleine();
+  //testCompteSousImagePleine();
   return 0;
 }
 
