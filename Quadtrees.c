@@ -950,13 +950,9 @@ void testAire(){
                                construit_blanc(),
                                construit_noir(),
                                construit_blanc());
-  printf("%f\n", aire(Image3) );
-  printf("%f\n", aire(I1) );
-  printf("%f\n", aire(I2) );
-  printf("%f\n", aire(I3) );
-  printf("%f\n", aire(I4) );
+
   assert(aire(Image3)==0.75);
-  assert(aire(I1)==0,5625);
+  assert(aire(I1)==0.5625);
   assert(aire(I2)==0);
   assert(aire(I3)==1);
   assert(aire(I4)==0.5);
@@ -1107,6 +1103,7 @@ void testDifference(){
 
   //assert(meme_dessin(Image3,diff12));} //Segmentation Fault
 }
+
 void testLectureAuClavier(){
   printf("Rentrez .NNB.NNB.BNNN svp\n");
   image I = construit_compose(construit_noir(),
@@ -1144,7 +1141,6 @@ void testCompteSousImagePleine(){
 
   char phrase[58] = {'.','.','.','B','B', 'N', 'B','.', 'N', 'N', 'B', 'N', '.','B','B','B', 'N', '.','N','N','N', 'B', 'N','.','N','B','N','.','B','B','N','B','.','B','N','B','.','.','B','B','N','B','.','N','B','B','N','.','B','N','B','N','.','N','B','N','B', '\n'};
   image I2 = tabdechar_to_image(phrase);
-
   assert(CompteSousImagePleine(I1,2)==1);
   assert(CompteSousImagePleine(I2,2)==2);
 }
@@ -1209,12 +1205,12 @@ int main() {
 
   //Fonctions de tests.
 
-  image Image5 = alea(5);
+  /*image Image5 = alea(5);
   affichage2kpixel(Image5);
 
   image Image6 = construit_image_prof(5);
   affichage2kpixel(Image6);
-
+  */
   testEstBlanche();
   testEstNoire();
   testConstruitBlanc();
