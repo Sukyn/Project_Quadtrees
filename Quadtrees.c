@@ -1,5 +1,5 @@
 
-#include <stdio.h> // printf, ...
+#include <stdio.h> // printf, random ...
 #include <stdlib.h> // malloc, free, ...
 #include <math.h> // pow, ...
 #include <time.h>
@@ -1156,6 +1156,7 @@ void testCompteSousImagePleine(){
 
 int main() {
 
+  srand(time(NULL));
   image Image1 = construit_compose(construit_noir(),
                                    construit_blanc(),
                                    construit_noir(),
@@ -1205,12 +1206,12 @@ int main() {
 
   //Fonctions de tests.
 
-  /*image Image5 = alea(5);
+  image Image5 = alea(5);
   affichage2kpixel(Image5);
 
   image Image6 = construit_image_prof(5);
   affichage2kpixel(Image6);
-  */
+
   testEstBlanche();
   testEstNoire();
   testConstruitBlanc();
