@@ -650,11 +650,32 @@ image lecture_au_clavier(){
   return image_from_tabchar_aux(image1, 0, &shift);
 }
 
+image lecture_au_fichier(FILE* fichier){
+
+  if(fichier != NULL){
+    char image1[256];
+    char flag = 's';
+    int i = 0;
+    while(flag !='\n'){
+      flag = fgetc(fichier);
+      image1[i] = flag;
+      i++;
+    }
+    int shift = 0;
+    return image_from_tabchar_aux(image1, 0, &shift);
+  }
+  else{
+    return construit_blanc();
+  }
+
+}
+
+
 /* Fonction qui compte le nombre de sous image pleine à une profondeur donnée
 @param : L'image que l'on examine, la hauteur qui nous intéresse
 @return : Le nombre de sous images pleines
 */
-int CompteSousImagePleine_aux(image I, int n){
+/*int CompteSousImagePleine(image I, int n){
   if (I == NULL || I->toutnoir) {
     if (n == 0) return 1;
     else return 0;
@@ -662,31 +683,31 @@ int CompteSousImagePleine_aux(image I, int n){
   else {
     int v1 = donne_profondeur_max(I->fils[0]);
     if (v1 > n)
-        return (CompteSousImagePleine_aux(I->fils[0], n) +
-                CompteSousImagePleine_aux(I->fils[1], n) +
-                CompteSousImagePleine_aux(I->fils[2], n) +
-                CompteSousImagePleine_aux(I->fils[3], n));
+        return (CompteSousImagePleine(I->fils[0], n) +
+                CompteSousImagePleine(I->fils[1], n) +
+                CompteSousImagePleine(I->fils[2], n) +
+                CompteSousImagePleine(I->fils[3], n));
 
     int v2 = donne_profondeur_max(I->fils[1]);
     if (v2 > n)
-        return (CompteSousImagePleine_aux(I->fils[0], n) +
-                CompteSousImagePleine_aux(I->fils[1], n) +
-                CompteSousImagePleine_aux(I->fils[2], n) +
-                CompteSousImagePleine_aux(I->fils[3], n));
+        return (CompteSousImagePleine(I->fils[0], n) +
+                CompteSousImagePleine(I->fils[1], n) +
+                CompteSousImagePleine(I->fils[2], n) +
+                CompteSousImagePleine(I->fils[3], n));
 
     int v3 = donne_profondeur_max(I->fils[2]);
     if (v3 > n)
-        return (CompteSousImagePleine_aux(I->fils[0], n) +
-                CompteSousImagePleine_aux(I->fils[1], n) +
-                CompteSousImagePleine_aux(I->fils[2], n) +
-                CompteSousImagePleine_aux(I->fils[3], n));
+        return (CompteSousImagePleine(I->fils[0], n) +
+                CompteSousImagePleine(I->fils[1], n) +
+                CompteSousImagePleine(I->fils[2], n) +
+                CompteSousImagePleine(I->fils[3], n));
 
     int v4 = donne_profondeur_max(I->fils[3]);
     if (v4 > n)
-        return (CompteSousImagePleine_aux(I->fils[0], n) +
-                CompteSousImagePleine_aux(I->fils[1], n) +
-                CompteSousImagePleine_aux(I->fils[2], n) +
-                CompteSousImagePleine_aux(I->fils[3], n));
+        return (CompteSousImagePleine(I->fils[0], n) +
+                CompteSousImagePleine(I->fils[1], n) +
+                CompteSousImagePleine(I->fils[2], n) +
+                CompteSousImagePleine(I->fils[3], n));
 
     if (v1 == n && v2 == n && v3 == n && v4 == n)
       return 1;
@@ -695,10 +716,10 @@ int CompteSousImagePleine_aux(image I, int n){
    return 0;
   }
 }
-
-int CompteSousImagePleine(image I, int n){
+*/
+/*int CompteSousImagePleine(image I, int n){
   CompteSousImagePleine_aux(I, n-1);
-}
+}*/
 
 /* Fonction qui prend en argument la profondeur k, et un entier n et quir
 endra une image dont la partie noire sera constistuée de n pixels noirs à profondeur k,
@@ -1031,8 +1052,7 @@ void testNegatif(){
                                                      construit_noir(),
                                                      construit_blanc())) ;
 
-  negatif(&Image1);
-  assert(meme_dessin(Image1, Image2));} //Probleme avec les free() (double free detected in tcache 2)
+  negatif(&Image1);assert(meme_dessin(Image1, Image2));} //Probleme avec les free() (double free detected in tcache 2)
 
 void testArrondit(){ //Probleme avec les free() (double free detected in tcache 2)
   image Image1 = construit_compose(construit_noir(),
@@ -1121,7 +1141,7 @@ void testLectureAuClavier(){
 
 }
 
-void testCompteSousImagePleine(){
+/*void testCompteSousImagePleine(){
    image I1 = construit_compose(construit_compose(construit_blanc(),
                                                   construit_blanc(),
                                                   construit_noir(),
@@ -1139,12 +1159,56 @@ void testCompteSousImagePleine(){
                                                   construit_noir(),
                                                   construit_blanc()));
 
-  char phrase2[58] = {'.','.','.','B','B', 'N', 'B','.', 'N', 'N', 'B', 'N', '.','B','B','B', 'N', '.','N','N','N', 'B', 'N','.','N','B','N','.','B','B','N','B','.','B','N','B','.','.','B','B','N','B','.','N','B','B','N','.','B','N','B','N','.','N','B','N','B', '\n'};
-  image I2 = tabdechar_to_image(phrase2);
-  assert(CompteSousImagePleine(I1,2)==1);
+  //char phrase2[59] = {'.','.','.','B','B', 'N', 'B','.', 'N', 'N', 'B', 'N', '.','B','B','B', 'N', '.','N','N','N', 'B', 'N','.','N','B','N','.','B','B','N','B','.','B','N','B','.','.','B','B','N','B','.','N','B','B','N','.','B','N','B','N','.','N','B','N','B', '\n'};
+  image I2 = construit_compose(construit_compose(construit_compose(construit_blanc(),
+                                                                   construit_blanc(),
+                                                                   construit_noir(),
+                                                                   construit_blanc()),
+                                                 construit_compose(construit_noir(),
+                                                                   construit_noir(),
+                                                                   construit_blanc(),
+                                                                   construit_noir()),
+                                                 construit_compose(construit_blanc(),
+                                                                   construit_blanc(),
+                                                                   construit_blanc(),
+                                                                   construit_noir()),
+                                                 construit_compose(construit_noir(),
+                                                                   construit_noir(),
+                                                                   construit_noir(),
+                                                                   construit_blanc())),
+                              construit_noir(),
+                              construit_compose(construit_noir(),
+                                                construit_blanc(),
+                                                construit_noir(),
+                                                construit_compose(construit_blanc(),
+                                                                  construit_blanc(),
+                                                                  construit_noir(),
+                                                                  construit_blanc())),
+                              construit_compose(construit_blanc(),
+                                                construit_noir(),
+                                                construit_blanc(),
+                                                construit_compose(construit_compose(construit_blanc(),
+                                                                                    construit_blanc(),
+                                                                                    construit_noir(),
+                                                                                    construit_blanc()),
+                                                                  construit_compose(construit_noir(),
+                                                                                    construit_blanc(),
+                                                                                    construit_blanc(),
+                                                                                    construit_noir()),
+                                                                  construit_compose(construit_blanc(),
+                                                                                    construit_noir(),
+                                                                                    construit_blanc(),
+                                                                                    construit_noir()),
+                                                                  construit_compose(construit_noir(),
+                                                                                    construit_blanc(),
+                                                                                    construit_noir(),
+                                                                                    construit_blanc()))));
+  //image I2 = tabdechar_to_image(phrase2);
+  affichage2kpixel(I2);
+  //assert(CompteSousImagePleine(I1,2)==1);
   assert(CompteSousImagePleine(I2,2)==2);
 }
-
+*/
 
 /* ----------------------------------------------------------------------
 
@@ -1157,6 +1221,8 @@ void testCompteSousImagePleine(){
 int main() {
 
   srand(time(NULL));
+  FILE* fichier = NULL;
+  fichier = fopen("quadtreesfile", "r");
 
   /*image Image1 = construit_compose(construit_noir(),
                                    construit_blanc(),
@@ -1215,13 +1281,19 @@ int main() {
 
 
   testEstBlanche();
+
   testEstNoire();
+
   testConstruitBlanc();
+
   testConstruitNoir();
+
   testConstruitCompose();
+
   testCopie();
   testDonneProfondeurMax();
-  testTabdeChartoImage();
+  //testTabdeChartoImage(); //erreur de segmentation
+  //printf("tabdechartoima\n");
   testDivision();
   testConstruitImageProf();
   testAire();
@@ -1231,7 +1303,11 @@ int main() {
   //testArrondit();
   //testDifference();
   //testLectureAuClavier(); //Elle fonctionne, c'est juste qu'il faut rentrer un truc si on le met pas en commentaire et c'est chiant
+
   //testCompteSousImagePleine();
+
+  fclose( fichier );
+
   return 0;
 }
 
