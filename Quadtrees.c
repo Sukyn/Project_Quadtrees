@@ -520,7 +520,6 @@ void negatif(image* I) {
     rendmemoire(I);
     *I = construit_blanc();
   } else {
-    rendmemoire(I);
     for (int i = 0; i < 4; i++) {
       negatif(&((*I)->fils[i]));
     }
@@ -546,7 +545,7 @@ void arrondit_elementaire(image *I) {
       rendmemoire(I);
       (*I) = NULL ;
     } else {
-      rendmemoire(I);
+      //rendmemoire(I);
       (*I)->toutnoir = TRUE ;
     }
   }
@@ -572,30 +571,30 @@ L'image rendue est noire là où l'une des deux images de départ est noire mais
 */
 image difference (image I1a, image I2a){
   // --- On travaille sur des images qui n'ont pas de fils identiques ---
-  printf("copie de la premiere image\n");
+
   image I1 = copie(I1a) ;
-  printf("copie de la deuxieme image\n");
   image I2 = copie(I2a) ;
-  printf("les 2 images ont été copiées\n");
 
-
-  // ---
+    // ---
 
   // Si les deux images sont identiques, il n'y a aucune différence donc on renvoie une imge blanche
-
+  printf("les 2 images copiées \n");
   if(meme_dessin(I1,I2)){
     printf("Les 2 sont les memes\n");
     return construit_blanc();
   }
+  printf("apres les 2 images sont identiques \n");
+
+
   // Si les deux images sont unies mais opposées, on renvoie une image noire
 
-  else if ((I1 == NULL && I2 -> toutnoir) || (I1->toutnoir && I2 == NULL)){
+  if ((est_blanche(I1) && est_noire(I2)) || (est_noire(I1) && est_blanche(I2))){
     printf("Si les deux images sont unies mais opposées\n");
     return construit_noir();
   }
 
   // Si la première image est unie mais pas la seconde (si la seconde était unie on serait rentrés dans un cas précédent)
-  else if (I1 == NULL || I1 -> toutnoir){
+  else if (est_blanche(I1) || est_noire(I1)){
           printf("la première image est unie mais pas la seconde\n");
           /* Si la première est blanche, la différence correspond simplement à l'autre image :
              En effet, si le fils est blanc alors la différence est blanche car ils sont identiques,
@@ -1052,9 +1051,10 @@ void testNegatif(){
                                                      construit_noir(),
                                                      construit_blanc())) ;
 
-  negatif(&Image1);assert(meme_dessin(Image1, Image2));} //Probleme avec les free() (double free detected in tcache 2)
+  negatif(&Image1);
+  assert(meme_dessin(Image1, Image2));} //Probleme avec les free() (double free detected in tcache 2) - résolu
 
-void testArrondit(){ //Probleme avec les free() (double free detected in tcache 2)
+void testArrondit(){ //Probleme avec les free() (double free detected in tcache 2) - résolu
   image Image1 = construit_compose(construit_noir(),
                                    construit_blanc(),
                                    construit_noir(),
@@ -1119,10 +1119,9 @@ void testDifference(){
   image Image3;
   printf("Avant l'appel de difference dans testDifference\n");
   Image3 = difference(Image1,Image2);
-  printf("Après l'appel de difference dans testDifference\n");
 
-  //assert(meme_dessin(Image3,diff12));} //Segmentation Fault
-}
+
+  assert(meme_dessin(Image3,diff12));} //Segmentation Fault
 
 void testLectureAuClavier(){
   printf("Rentrez .NNB.NNB.BNNN svp\n");
@@ -1281,28 +1280,24 @@ int main() {
 
 
   testEstBlanche();
-
   testEstNoire();
-
   testConstruitBlanc();
-
   testConstruitNoir();
-
   testConstruitCompose();
-
   testCopie();
   testDonneProfondeurMax();
   //testTabdeChartoImage(); //erreur de segmentation
-  //printf("tabdechartoima\n");
   testDivision();
   testConstruitImageProf();
   testAire();
   testSimplifie();
   testMemeDessin();
-  //testNegatif();
-  //testArrondit();
-  //testDifference();
-  //testLectureAuClavier(); //Elle fonctionne, c'est juste qu'il faut rentrer un truc si on le met pas en commentaire et c'est chiant
+  testNegatif(); //double free detected - résolu
+  testArrondit(); // double free detected - résolu
+  //image diff = difference(lecture_au_fichier(fichier),lecture_au_fichier(fichier));
+
+  //testDifference(); // segmentation fault
+  //testLectureAuClavier(); //Elle fonctionne, c'est juste qu'il faut rentrer un truc si on la met pas en commentaire et c'est chiant
 
   //testCompteSousImagePleine();
 
