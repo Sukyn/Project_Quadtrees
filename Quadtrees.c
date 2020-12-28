@@ -335,13 +335,87 @@ image construit_alea(){
   }
 }
 
-image alea(int k){
-  if (k == 0) return construit_alea();
-  else return construit_compose(alea(k-1),
-                                alea(k-1),
-                                alea(k-1),
-                                alea(k-1));
+/*image alea(int k, int* noir, int n){
+  if (k == 0 ){
+    if (*noir < n){
+      image I= construit_alea();
+      if (est_noire(I)){
+        noir ++;
+      }
+      return I;
+    }
+    else{
+      construit_blanc;
+    }
+  }
+  else return construit_compose(alea_aux((k-1), noir, n),
+                                alea_aux((k-1), noir, n),
+                                alea_aux((k-1), noir, n),
+                                alea_aux((k-1), noir, n));
 }
+*/
+/* On construit une image toute blanche a la bonne profondeur. On tire un nombre
+au hasard entre 0 et le nombre de cases dans l'image. Il faut tirer autant de numéros
+que l'on veut de pixel noir dans l'image. puis on remplace les images correspondants
+aux numéros de cases tirés par des images noires.
+
+*/
+
+image remplaceBlancParNoir(image I){
+  if(est_blanche(I)){
+    I = construit_noir();
+  }
+  return I;
+}
+
+image alea_boucle(image I, int* i, int aleas[], int j){
+  printf("Rentrée dans alea_boucle ok\n");
+  if(*i == aleas[j]){
+    j++;
+    printf("remplacement d'une image blanche par une image noire\n");
+    return remplaceBlancParNoir(I);
+  }
+  if(!(I==NULL) && !(I->toutnoir)){
+    printf("test de l'unicité ok\n");
+    for(int k = 0; k<4; k++){
+      i++;
+      printf("boucle de rentrée dans chaque fils\n");
+      return alea_boucle(I->fils[k], i, aleas, j);
+    }
+    printf("Rentrer dans chaque fils ok\n");
+  }
+
+  return I;
+}
+
+image alea_aux(int profondeur, int pixelsnoir, int* compteur){
+
+  image I = construit_image_prof(profondeur);
+  printf("Construction d'une image blanche ok\n");
+  int aleas[pixelsnoir];
+  for(int j = 0 ; j < pixelsnoir; j++){
+    aleas[j]=rand()%(profondeur*profondeur); // les positions ou placer les images noirs
+  }
+  printf("Remplissage du tableau de random ok ok\n");
+  //Ici trier le tableau alea.
+  // Ici regarder si on a pas choisi 2 fois le meme chiffre pour aleas[]
+
+
+  int j = 0;
+  printf("Appel dans alea_aux de alea_boucle\n");
+  return alea_boucle(I,0,aleas,0);
+}
+
+image alea(int profondeur,int pixelsnoir){
+  int compteur=0;
+  printf("Appel dans Alea de alea_aux\n" );
+  return alea_aux(profondeur, pixelsnoir, &compteur);
+
+}
+
+
+
+
 /* ----------------------------------------------------------------------
 
 
@@ -588,13 +662,13 @@ image difference (image I1a, image I2a){
 
   // Si les deux images sont unies mais opposées, on renvoie une image noire
 
-  if ((est_blanche(I1) && est_noire(I2)) || (est_noire(I1) && est_blanche(I2))){
+  if ((est_noire(I2) && est_blanche(I1)) || (est_blanche(I2) && est_noire(I1) )){
     printf("Si les deux images sont unies mais opposées\n");
     return construit_noir();
   }
 
   // Si la première image est unie mais pas la seconde (si la seconde était unie on serait rentrés dans un cas précédent)
-  else if (est_blanche(I1) || est_noire(I1)){
+  else if ( est_noire(I1)||est_blanche(I1) ){
           printf("la première image est unie mais pas la seconde\n");
           /* Si la première est blanche, la différence correspond simplement à l'autre image :
              En effet, si le fils est blanc alors la différence est blanche car ils sont identiques,
@@ -1295,6 +1369,11 @@ int main() {
   testNegatif(); //double free detected - résolu
   testArrondit(); // double free detected - résolu
   //image diff = difference(lecture_au_fichier(fichier),lecture_au_fichier(fichier));
+  int noir = 1;
+  image Blanche = construit_blanc();
+  Blanche = remplaceBlancParNoir(Blanche);
+  printf("alea\n" );
+  affichage2kpixel(alea(5, 8));//segmentation fault
 
   //testDifference(); // segmentation fault
   //testLectureAuClavier(); //Elle fonctionne, c'est juste qu'il faut rentrer un truc si on la met pas en commentaire et c'est chiant
