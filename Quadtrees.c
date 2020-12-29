@@ -354,65 +354,6 @@ image construit_alea(){
                                 alea_aux((k-1), noir, n));
 }
 */
-/* On construit une image toute blanche a la bonne profondeur. On tire un nombre
-au hasard entre 0 et le nombre de cases dans l'image. Il faut tirer autant de numéros
-que l'on veut de pixel noir dans l'image. puis on remplace les images correspondants
-aux numéros de cases tirés par des images noires.
-
-*/
-
-image remplaceBlancParNoir(image I){
-  if(est_blanche(I)){
-    I = construit_noir();
-  }
-  return I;
-}
-
-image alea_boucle(image I, int* i, int aleas[], int j){
-  printf("Rentrée dans alea_boucle ok\n");
-  if(*i == aleas[j]){
-    j++;
-    printf("remplacement d'une image blanche par une image noire\n");
-    return remplaceBlancParNoir(I);
-  }
-  if(!(I==NULL) && !(I->toutnoir)){
-    printf("test de l'unicité ok\n");
-    for(int k = 0; k<4; k++){
-      i++;
-      printf("boucle de rentrée dans chaque fils\n");
-      return alea_boucle(I->fils[k], i, aleas, j);
-    }
-    printf("Rentrer dans chaque fils ok\n");
-  }
-
-  return I;
-}
-
-image alea_aux(int profondeur, int pixelsnoir, int* compteur){
-
-  image I = construit_image_prof(profondeur);
-  printf("Construction d'une image blanche ok\n");
-  int aleas[pixelsnoir];
-  for(int j = 0 ; j < pixelsnoir; j++){
-    aleas[j]=rand()%(profondeur*profondeur); // les positions ou placer les images noirs
-  }
-  printf("Remplissage du tableau de random ok ok\n");
-  //Ici trier le tableau alea.
-  // Ici regarder si on a pas choisi 2 fois le meme chiffre pour aleas[]
-
-
-  int j = 0;
-  printf("Appel dans alea_aux de alea_boucle\n");
-  return alea_boucle(I,0,aleas,0);
-}
-
-image alea(int profondeur,int pixelsnoir){
-  int compteur=0;
-  printf("Appel dans Alea de alea_aux\n" );
-  return alea_aux(profondeur, pixelsnoir, &compteur);
-
-}
-
 
 
 
@@ -869,6 +810,201 @@ image nebuleuse(int profondeur){
   int length = (int)pow(2, profondeur);
   return nebuleuse_aux(profondeur, 0, 0, length, length);
 }
+
+
+
+/* On construit une image toute blanche a la bonne profondeur. On tire un nombre
+au hasard entre 0 et le nombre de cases dans l'image. Il faut tirer autant de numéros
+que l'on veut de pixel noir dans l'image. puis on remplace les images correspondants
+aux numéros de cases tirés par des images noires.
+
+*/
+
+int trieTableau(int tab[], int taille){
+  for(int h = 1; h<taille; h++){
+    int pos = h;
+    while(pos>0 && tab[pos]<tab[pos-1]){
+      int tmp = tab[pos];
+      tab[pos]=tab[pos-1];
+      tab[pos-1]=tmp;
+      pos --;
+    }
+  }
+}
+
+int* enleveDoublon(int tab[], int taille, int profondeur){ //on fournit un tableau d'entier trié
+
+  //on compare un element avec le suivant.
+  /*Si on trouve un doublon :
+  - il est la premiere valeur : on regarde si la 2eme valeur est differente de 0. Si c'est le cas, on lui donne
+  une nouvelle valeur entre 0 et la valeur de la case suivante. Sinon, on decale la case suivante avec la premiere valeur, et on met doublonVersDroite a true, et on
+  sauvegarde l'indice dans lequel on a déposé la valeur en double( par exemple ici la 2eme case)
+  - il est la derniere valeur : on regarde si l'avant derniere valeur est differente de taille*taille -1. Si c'est le cas, on
+  attribue a la derniere case une valeur entre la valeur de l'avent derniere case et taille*taille - 1. Sinon, on décale la case prevédente dans la derniere case,
+  et on met doublonVersGauche a true.
+  -Il est au milieu du tableau : on regarde si la difference entre la valeur precendent et la valeur suivante est differente de 1.
+  Si c'est le cas, on attribue a la case une nouvelle valeur comprise entre les 2 qui l'encadre.
+  Sinon, on decale cette valeur vers la droite, et on met doublonVersDroite a true, en sauvegardant le nouvel indice de la case que l'on vient de decaler.
+
+  Si doublonVersDroite est vrai : Tant que c'est le cas, on vérifie si la différence et suivant et du précedent est superieur a 1.
+  Si c'est le cas, on attribue une nouvelle valeur entre ces 2 borne, et on met doublonVersDroite a false.
+  Sinon,  on donne a la case la valeur de la case suivante, et on sauvegarde l'indice de la case suivant (comme étant la case contenant le doublon du coup)
+  si l'indie de la nouvelle case est taille*taille -1; on met doublonVersDroite a false et doublonVersGauche a true.
+
+  Si doublonVersGauche est vrai : on fait la meme chose que pour doublonVersDroite, mais en décalant vers la gauche a chaque fois.
+
+  tant qu'un de ces 2 bool est TRUE, on ne sort pas de la boule.
+  */
+  bool doublon = FALSE;
+  for(int j = 0; j< taille-1; j++){
+    if(tab[j] == tab[j+1]){ // MINCE! on a trouvé un doublon !
+      doublon = TRUE;
+      if(j == 0) { // Premier cas particulier : le doublon se trouve dans la premiere case
+        if(tab[j+1] != 0){ // OUF ! on a de la chance ! on a le loisir de mettre une nouvelle valeur dans tab[0]
+          tab[j]=rand()%tab[j+1]; // On attribue une nouvelle valeur aléatoire entre 0 et la valeur de la case suivante.
+        }
+        else{ // Mince alors ! la prochaine case est egale a 0 !
+          if(taille>1){ // on essaye de ne pas sortir du tableau
+            int tmp = tab[j+1];
+            tab[j+1] = tab[j+2];
+            tab[j+2] = tmp;
+            j+=2;
+            tab[j]=(rand()%(tab[j+1]-tab[j-1] -1)) + tab[j-1]; // on a changé la valeur suivante
+          }
+        }
+      }
+      else{
+        if(j == taille - 2){ // Deuxieme cas particulier : le doublon se trouve dans l'avent avent derniere case
+          if(tab[j+1] != profondeur*profondeur -1){ //Ouf ! on a la place pour redonner une valeur !
+            tab[j]=rand()%(profondeur*profondeur-1)+tab[j-1] +1;
+          }
+          else{ // Quel Dommage... Il n'y a pas la place ! on va décaler toutes les valeurs vers la droite, et attribuer a la premiere valeur la meme valeur que la deuxieme, et tout recommencer.
+            if(taille>1){// on esaye toujours de rester dans le tableau
+              for(int g = taille-1; g>0; g--){
+                int tmp = tab[g-1];
+                tab[g]=tab[g-1];
+                tab[g-1]=tmp;
+              }
+            }
+          }
+        }
+        else{ //SI on est ni a la premiere case, ni a l'avent derniere
+          if(tab[j+1]-tab[j-1]>1){ // C'est bon! on a de la place!
+            tab[j]=rand()%(tab[j+1]-tab[j-1]-1) + tab[j-1]; // A verifier ce calcul la, je suis pas sure du tout
+          }
+          else{
+            if(taille>3){
+              int tmp = tab[j+1];
+              tab[j+1] = tab[j+2];
+              tab[j+2] = tmp;
+              j+=2;
+              tab[j]=(rand()%(tab[j+1]-tab[j-1] -1)) + tab[j-1]; // on a changé la valeur suivante
+            }
+          }
+        }
+      }
+    }
+  }
+  if(doublon){
+    return enleveDoublon(tab, taille, profondeur);
+  }
+  return tab;
+}
+
+/* ^ - - Dans cette Fonctin - - ^: le tableau trié que l'on obtient : 8 13 15 17 18 18 22 23
+l'erreur que l'on obtient : floating point exception (core dumped)
+*/
+
+image remplaceBlancParNoir(image I){
+  if(est_blanche(I)){
+    I = construit_noir();
+  }
+  return I;
+}
+
+image alea_boucle(image I, int* i, int aleas[], int j){
+  //printf("%d\n",(*i) );
+  if((I==NULL) || (I->toutnoir)){
+    (*i++);
+  }
+  if((*i) == aleas[j]){
+    j++;
+    //affiche_normal(I);
+    printf("\n" );
+    return remplaceBlancParNoir(I);
+  }
+  if(!(I==NULL) && !(I->toutnoir)){
+    printf("test de l'unicité ok\n");
+    for(int k = 0; k < 4; k++){
+      printf("i = %d\n",*i );
+      printf("j = %d\n",j );
+      //affiche_normal(I);
+      printf("\n");
+      return alea_boucle(I->fils[k], i, aleas, j);
+    }
+  }
+
+  return I;
+}
+
+image alea_aux(int profondeur, int pixelsnoir, int* compteur){
+
+  image I = construit_image_prof(profondeur);
+  I=Division_aux(I, profondeur);
+  printf("Construction d'une image blanche ok\n");
+  int aleas[pixelsnoir];
+  for(int j = 0 ; j < pixelsnoir; j++){
+    aleas[j]=rand()%(profondeur*profondeur); // les positions ou placer les images noirs
+    printf("%d\n", aleas[j] );
+  }
+
+  if(pixelsnoir>1){
+
+    printf("le tableau aleas non trié\n");
+    for(int d = 0; d < pixelsnoir; d++){
+      printf("%d\n", aleas[d] );
+    }
+    printf("\n");
+    //Ici on trie le tableau aleas
+    trieTableau(aleas, pixelsnoir);
+
+    printf("le tableau aleas trié\n");
+    for(int d = 0; d < pixelsnoir; d++){
+      printf("%d\n", aleas[d] );
+    }
+    printf("\n");
+
+  // 0  1 1 8 12  22  22
+
+
+    // Ici on s'occupe des doublons dans aleas si il y en a
+    enleveDoublon(aleas, pixelsnoir,profondeur);
+    printf("le tableau aleas sans doublon\n");
+    for(int d = 0; d < pixelsnoir; d++){
+      printf("%d\n", aleas[d] );
+    }
+    printf("\n");
+  }// if (pixelsnoir > 1) -> cette accolade est t elle reellement utile?
+
+
+
+  int j = 0;
+  printf("Appel dans alea_aux de alea_boucle\n");
+  int pi = 0;
+  int* i = &pi;
+  return alea_boucle(I,i,aleas,0);
+}
+
+image alea(int profondeur,int pixelsnoir){
+  int compteur=0;
+  printf("Appel dans Alea de alea_aux\n" );
+  return alea_aux(profondeur, pixelsnoir, &compteur);
+
+}
+
+
+
+
 
 /* ----------------------------------------------------------------------
 
