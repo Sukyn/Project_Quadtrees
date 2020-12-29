@@ -913,7 +913,7 @@ int* trieTableau(int tab[], int taille){
 }
 */
 
-int* enleveDoublon(int tab[], int taille, int profondeur){  // 1 1 2 5 8 11 14 -> 8 1 2 5 8 11 14
+int* enleveDoublon(int tab[], int taille, int profondeur){  
   tab = trieTableau(tab, taille);
   bool doublon = FALSE;
   for(int i = 0; i< taille -1; i++){
@@ -927,12 +927,6 @@ int* enleveDoublon(int tab[], int taille, int profondeur){  // 1 1 2 5 8 11 14 -
   }
   return tab;
 }
-
-
-
-/* ^ - - Dans cette Fonctin - - ^: le tableau trié que l'on obtient : 8 13 15 17 18 18 22 23
-l'erreur que l'on obtient : floating point exception (core dumped)
-*/
 
 void remplaceBlancParNoir(image* I){
   if(est_blanche(*I)){
@@ -957,7 +951,7 @@ void alea_boucle(image* I, int* i, int aleas[], int* j,int taille, int profondeu
   }
 }
 
-image alea_aux(int profondeur, int pixelsnoir, int* compteur){
+/*image alea_aux(int profondeur, int pixelsnoir){
 
   image I = construit_image_prof(profondeur);
   I=Division_aux(I, profondeur);
@@ -979,14 +973,33 @@ image alea_aux(int profondeur, int pixelsnoir, int* compteur){
   alea_boucle(&I,i,aleas,j,pixelsnoir, max);
   return I;
 }
-
+*/
 image alea(int profondeur,int pixelsnoir){
   if(pixelsnoir> (int) pow(4,profondeur)){
     return construit_noir();
   }
   int pcompteur=0;
   int* compteur = &pcompteur;
-  return alea_aux(profondeur, pixelsnoir, compteur);
+  image I = construit_image_prof(profondeur);
+  I=Division_aux(I, profondeur);
+
+  int aleas[pixelsnoir];
+  int max = (int) pow(4,profondeur);
+
+  for(int j = 0 ; j < pixelsnoir; j++){
+    aleas[j]=rand()%(max); // les positions ou placer les images noirs
+  }
+
+  // Ici on s'occupe des doublons dans aleas si il y en a, pour avoir le bon nombre d'images noires
+  enleveDoublon(aleas, pixelsnoir,max);
+
+  int pi = 0;
+  int* i = &pi;
+  int pj = 0;
+  int* j = &pj;
+  alea_boucle(&I,i,aleas,j,pixelsnoir, max);
+  return I;
+  //return alea_aux(profondeur, pixelsnoir);
 
 }
 
@@ -1523,7 +1536,7 @@ int main() {
   testAlea();
   //image diff = difference(lecture_au_fichier(fichier),lecture_au_fichier(fichier));
 
-  affichage2kpixel(alea(6, 100));//segmentation fault
+  affichage2kpixel(alea(6, 1000));//segmentation fault
 
   //testDifference(); // segmentation fault
   //testLectureAuClavier(); //Elle fonctionne, c'est juste qu'il faut rentrer un truc si on la met pas en commentaire et c'est chiant
