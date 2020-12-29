@@ -820,7 +820,7 @@ aux numéros de cases tirés par des images noires.
 
 */
 
-int trieTableau(int tab[], int taille){
+int* trieTableau(int tab[], int taille){
   for(int h = 1; h<taille; h++){
     int pos = h;
     while(pos>0 && tab[pos]<tab[pos-1]){
@@ -830,9 +830,10 @@ int trieTableau(int tab[], int taille){
       pos --;
     }
   }
+  return tab;
 }
 
-int* enleveDoublon(int tab[], int taille, int profondeur){ //on fournit un tableau d'entier trié
+/*int* enleveDoublon(int tab[], int taille, int profondeur){ //on fournit un tableau d'entier trié
 
   //on compare un element avec le suivant.
   /*Si on trouve un doublon :
@@ -854,7 +855,7 @@ int* enleveDoublon(int tab[], int taille, int profondeur){ //on fournit un table
   Si doublonVersGauche est vrai : on fait la meme chose que pour doublonVersDroite, mais en décalant vers la gauche a chaque fois.
 
   tant qu'un de ces 2 bool est TRUE, on ne sort pas de la boule.
-  */
+
   bool doublon = FALSE;
   for(int j = 0; j< taille-1; j++){
     if(tab[j] == tab[j+1]){ // MINCE! on a trouvé un doublon !
@@ -910,98 +911,98 @@ int* enleveDoublon(int tab[], int taille, int profondeur){ //on fournit un table
   }
   return tab;
 }
+*/
+
+int* enleveDoublon(int tab[], int taille, int profondeur){  // 1 1 2 5 8 11 14 -> 8 1 2 5 8 11 14
+  tab = trieTableau(tab, taille);
+  bool doublon = FALSE;
+  for(int i = 0; i< taille -1; i++){
+    if(tab[i] == tab[i+1]){
+      doublon=TRUE;
+      tab[i] = rand()%(profondeur);
+    }
+  }
+  if(doublon == TRUE){
+    tab = enleveDoublon(tab,taille,profondeur);
+  }
+  return tab;
+}
+
+
 
 /* ^ - - Dans cette Fonctin - - ^: le tableau trié que l'on obtient : 8 13 15 17 18 18 22 23
 l'erreur que l'on obtient : floating point exception (core dumped)
 */
 
-image remplaceBlancParNoir(image I){
-  if(est_blanche(I)){
-    I = construit_noir();
+void remplaceBlancParNoir(image* I){
+  if(est_blanche(*I)){
+    *I = construit_noir();
   }
-  return I;
 }
 
-image alea_boucle(image I, int* i, int aleas[], int j){
-  //printf("%d\n",(*i) );
-  if((I==NULL) || (I->toutnoir)){
-    (*i++);
-  }
-  if((*i) == aleas[j]){
-    j++;
-    //affiche_normal(I);
-    printf("\n" );
-    return remplaceBlancParNoir(I);
-  }
-  if(!(I==NULL) && !(I->toutnoir)){
-    printf("test de l'unicité ok\n");
-    for(int k = 0; k < 4; k++){
-      printf("i = %d\n",*i );
-      printf("j = %d\n",j );
-      //affiche_normal(I);
-      printf("\n");
-      return alea_boucle(I->fils[k], i, aleas, j);
+void alea_boucle(image* I, int* i, int aleas[], int* j,int taille, int profondeur){
+  if(*j != taille){
+    if((*I==NULL) || ((*I)->toutnoir)){
+      if((*i) == aleas[*j]){
+        (*j)++;
+        remplaceBlancParNoir(I);
+      }
+      (*i)++;
+    }
+    if(!((*I)==NULL) && !((*I)->toutnoir)){
+      for(int k = 0; k < 4; k++){
+        alea_boucle(&((*I)->fils[k]), i, aleas, j,taille, profondeur);
+      }
     }
   }
-
-  return I;
 }
 
 image alea_aux(int profondeur, int pixelsnoir, int* compteur){
 
   image I = construit_image_prof(profondeur);
   I=Division_aux(I, profondeur);
-  printf("Construction d'une image blanche ok\n");
+
   int aleas[pixelsnoir];
+  int max = (int) pow(4,profondeur);
+
   for(int j = 0 ; j < pixelsnoir; j++){
-    aleas[j]=rand()%(profondeur*profondeur); // les positions ou placer les images noirs
-    printf("%d\n", aleas[j] );
+    aleas[j]=rand()%(max); // les positions ou placer les images noirs
   }
 
-  if(pixelsnoir>1){
+  // Ici on s'occupe des doublons dans aleas si il y en a, pour avoir le bon nombre d'images noires
+  enleveDoublon(aleas, pixelsnoir,max);
 
-    printf("le tableau aleas non trié\n");
-    for(int d = 0; d < pixelsnoir; d++){
-      printf("%d\n", aleas[d] );
-    }
-    printf("\n");
-    //Ici on trie le tableau aleas
-    trieTableau(aleas, pixelsnoir);
-
-    printf("le tableau aleas trié\n");
-    for(int d = 0; d < pixelsnoir; d++){
-      printf("%d\n", aleas[d] );
-    }
-    printf("\n");
-
-  // 0  1 1 8 12  22  22
-
-
-    // Ici on s'occupe des doublons dans aleas si il y en a
-    enleveDoublon(aleas, pixelsnoir,profondeur);
-    printf("le tableau aleas sans doublon\n");
-    for(int d = 0; d < pixelsnoir; d++){
-      printf("%d\n", aleas[d] );
-    }
-    printf("\n");
-  }// if (pixelsnoir > 1) -> cette accolade est t elle reellement utile?
-
-
-
-  int j = 0;
-  printf("Appel dans alea_aux de alea_boucle\n");
   int pi = 0;
   int* i = &pi;
-  return alea_boucle(I,i,aleas,0);
+  int pj = 0;
+  int* j = &pj;
+  alea_boucle(&I,i,aleas,j,pixelsnoir, max);
+  return I;
 }
 
 image alea(int profondeur,int pixelsnoir){
-  int compteur=0;
-  printf("Appel dans Alea de alea_aux\n" );
-  return alea_aux(profondeur, pixelsnoir, &compteur);
+  if(pixelsnoir> (int) pow(4,profondeur)){
+    return construit_noir();
+  }
+  int pcompteur=0;
+  int* compteur = &pcompteur;
+  return alea_aux(profondeur, pixelsnoir, compteur);
 
 }
 
+void compteImageNoire(image I, int* cpt ){
+
+  if(est_noire(I) || est_blanche(I)){
+    if(est_noire(I)){
+      (*cpt)++;
+    }
+  }
+  else{
+    for(int i = 0; i<4; i++){
+      compteImageNoire(I -> fils[i], cpt);
+    }
+  }
+}
 
 
 
@@ -1350,6 +1351,21 @@ void testLectureAuClavier(){
 
 }
 
+void testAlea(){
+  image I = alea(5, 64);
+  int In = 0;
+  int* ptrIn = & In;
+  compteImageNoire(I, ptrIn);
+  assert(64 ==  *ptrIn);
+
+  image N = alea(2, 1024);
+  image noire = construit_noir();
+  assert(meme_dessin(N,noire));
+
+
+
+}
+
 /*void testCompteSousImagePleine(){
    image I1 = construit_compose(construit_compose(construit_blanc(),
                                                   construit_blanc(),
@@ -1504,12 +1520,10 @@ int main() {
   testMemeDessin();
   testNegatif(); //double free detected - résolu
   testArrondit(); // double free detected - résolu
+  testAlea();
   //image diff = difference(lecture_au_fichier(fichier),lecture_au_fichier(fichier));
-  int noir = 1;
-  image Blanche = construit_blanc();
-  Blanche = remplaceBlancParNoir(Blanche);
-  printf("alea\n" );
-  affichage2kpixel(alea(5, 8));//segmentation fault
+
+  affichage2kpixel(alea(6, 100));//segmentation fault
 
   //testDifference(); // segmentation fault
   //testLectureAuClavier(); //Elle fonctionne, c'est juste qu'il faut rentrer un truc si on la met pas en commentaire et c'est chiant
