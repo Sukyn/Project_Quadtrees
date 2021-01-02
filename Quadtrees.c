@@ -135,14 +135,16 @@ bool est_noire(image I){
        && est_noire(I->fils[3]));
 }
 
-/*
-void testConstruitBlanc(){
-  bool estBlanc = est_blanche(construit_blanc)
-  assert(estBlanc);
+/*Procédure qui remplace une image blanche par une image noire
+@param : image* I : une image en in/out
+@return : aucun
+*/
+void remplaceBlancParNoir(image* I){
+  if(est_blanche(*I)){
+    *I = construit_noir();
+  }
 }
-void testConstruitNoir(){
-  assert(est_noire(construit_noir));
-}*/
+
 
 /* Fonction qui copie une image dans un nouvel emplacement mémoire
 @param L'image à copier
@@ -252,7 +254,6 @@ image image_from_tabchar_aux(char image[], int indice, int* shift){
 image tabdechar_to_image(char phrase[]){
   char image1[256];
   int i = 0;
-  // On enlève le retour chariot
   while(phrase[i] != '\n'){
     image1[i] = phrase[i];
     i++;
@@ -325,35 +326,9 @@ image construit_image_prof(int n){
                                 construit_image_prof(n -1),
                                 construit_image_prof(n -1));}
 
-image construit_alea(){
-  int random = rand()%2;
-  if(random == 1){
-    construit_blanc();
-  }
-  else{
-    construit_noir();
-  }
-}
 
-/*image alea(int k, int* noir, int n){
-  if (k == 0 ){
-    if (*noir < n){
-      image I= construit_alea();
-      if (est_noire(I)){
-        noir ++;
-      }
-      return I;
-    }
-    else{
-      construit_blanc;
-    }
-  }
-  else return construit_compose(alea_aux((k-1), noir, n),
-                                alea_aux((k-1), noir, n),
-                                alea_aux((k-1), noir, n),
-                                alea_aux((k-1), noir, n));
-}
-*/
+
+
 
 
 
@@ -776,10 +751,108 @@ positionnées aléatoirement.  Chaque image pouvant sortir de préférence avec 
 
 
 
+/*Fonction qui trie un tableau d'entier
+@param :tab[] : le tableau a trier,
+        taille: la taille de tab.
+@return : un tableau trié.
+*/
+int* trieTableau(int tab[], int taille){
+  for(int h = 1; h<taille; h++){
+    int pos = h;
+    while(pos>0 && tab[pos]<tab[pos-1]){
+      int tmp = tab[pos];
+      tab[pos]=tab[pos-1];
+      tab[pos-1]=tmp;
+      pos --;
+    }
+  }
+  return tab;
+}
+
+
+/*fonction qui supprime les doublons dans un tableau d'entier, et les remplace par d'autres entier au hasard.
+@param : int tab[] : le tableu d'entier dont on veut supprimer les doublons
+         int taille : la taille du tableau
+         int max : la valeur maximum que peut prendre les entiers dans le tableau
+@ return : le tableau trié et sans doublons, ayant le meme nombre d'éléments que le tableau entré en parametre
+*/
+int* enleveDoublon(int tab[], int taille, int max){
+  tab = trieTableau(tab, taille);
+  bool doublon = FALSE;
+  for(int i = 0; i< taille -1; i++){
+    if(tab[i] == tab[i+1]){
+      doublon=TRUE;
+      tab[i] = rand()%(max);
+    }
+  }
+  if(doublon == TRUE){
+    tab = enleveDoublon(tab,taille, max);
+  }
+  return tab;
+}
 
 
 
-//image
+
+/*procédure auxiliaire de alea
+@param : image *I : une image I en in/out
+         int aleas[]: un tableau d'entier
+         int *j : un entier j nous servant de compteur
+         int taille : un entier indiquant la taille du tableau
+         int profondeur : un entier indiquant la profondeur de l'image I
+*/
+void alea_boucle(image* I, int* i, int aleas[], int* j,int taille, int profondeur){
+  if(*j != taille){
+    if((*I==NULL) || ((*I)->toutnoir)){
+      if((*i) == aleas[*j]){
+        (*j)++;
+        remplaceBlancParNoir(I);
+      }
+      (*i)++;
+    }
+    if(!((*I)==NULL) && !((*I)->toutnoir)){
+      for(int k = 0; k < 4; k++){
+        alea_boucle(&((*I)->fils[k]), i, aleas, j,taille, profondeur);
+      }
+    }
+  }
+}
+
+/* Fonction qui retourne une image de profondeur  choisit, comprenant un nombre
+donné de pixels noirs.
+@param : int profondeur : la profondeur voulue
+         int pixelsnoir : le nombre de pixels noir à placer
+@return : une image avec pixelsnoir points noirs
+*/
+image alea(int profondeur,int pixelsnoir){
+  if(pixelsnoir> (int) pow(4,profondeur)){
+    return construit_noir();
+  }
+  int pcompteur=0;
+  int* compteur = &pcompteur;
+  image I = construit_image_prof(profondeur);
+  I=Division_aux(I, profondeur);
+
+  int aleas[pixelsnoir];
+  int max = (int) pow(4,profondeur);
+
+  for(int j = 0 ; j < pixelsnoir; j++){
+    aleas[j]=rand()%(max);
+  }
+
+  enleveDoublon(aleas, pixelsnoir,max);
+
+  int pi = 0;
+  int* i = &pi;
+  int pj = 0;
+  int* j = &pj;
+  alea_boucle(&I,i,aleas,j,pixelsnoir, max);
+  return I;
+
+
+}
+
+
 
 /* Fonction qui prend en argument la profondeur k et renvoie une image de profondeur k
 choisie aléatoirement tel qu'au centre la densité de noirs soit proche de 1 et au bord proche de 0
@@ -813,196 +886,12 @@ image nebuleuse(int profondeur){
 
 
 
-/* On construit une image toute blanche a la bonne profondeur. On tire un nombre
-au hasard entre 0 et le nombre de cases dans l'image. Il faut tirer autant de numéros
-que l'on veut de pixel noir dans l'image. puis on remplace les images correspondants
-aux numéros de cases tirés par des images noires.
 
+/*Fonction qui compte les images noires
+@param : image I : une image dont on veut compter le nombre d'images noires dont elle est constituée
+         int* cpt : un entier qui nous servira de compteur
+@return: un entier indiquant le nombre d'image noires constituant I
 */
-
-int* trieTableau(int tab[], int taille){
-  for(int h = 1; h<taille; h++){
-    int pos = h;
-    while(pos>0 && tab[pos]<tab[pos-1]){
-      int tmp = tab[pos];
-      tab[pos]=tab[pos-1];
-      tab[pos-1]=tmp;
-      pos --;
-    }
-  }
-  return tab;
-}
-
-/*int* enleveDoublon(int tab[], int taille, int profondeur){ //on fournit un tableau d'entier trié
-
-  //on compare un element avec le suivant.
-  /*Si on trouve un doublon :
-  - il est la premiere valeur : on regarde si la 2eme valeur est differente de 0. Si c'est le cas, on lui donne
-  une nouvelle valeur entre 0 et la valeur de la case suivante. Sinon, on decale la case suivante avec la premiere valeur, et on met doublonVersDroite a true, et on
-  sauvegarde l'indice dans lequel on a déposé la valeur en double( par exemple ici la 2eme case)
-  - il est la derniere valeur : on regarde si l'avant derniere valeur est differente de taille*taille -1. Si c'est le cas, on
-  attribue a la derniere case une valeur entre la valeur de l'avent derniere case et taille*taille - 1. Sinon, on décale la case prevédente dans la derniere case,
-  et on met doublonVersGauche a true.
-  -Il est au milieu du tableau : on regarde si la difference entre la valeur precendent et la valeur suivante est differente de 1.
-  Si c'est le cas, on attribue a la case une nouvelle valeur comprise entre les 2 qui l'encadre.
-  Sinon, on decale cette valeur vers la droite, et on met doublonVersDroite a true, en sauvegardant le nouvel indice de la case que l'on vient de decaler.
-
-  Si doublonVersDroite est vrai : Tant que c'est le cas, on vérifie si la différence et suivant et du précedent est superieur a 1.
-  Si c'est le cas, on attribue une nouvelle valeur entre ces 2 borne, et on met doublonVersDroite a false.
-  Sinon,  on donne a la case la valeur de la case suivante, et on sauvegarde l'indice de la case suivant (comme étant la case contenant le doublon du coup)
-  si l'indie de la nouvelle case est taille*taille -1; on met doublonVersDroite a false et doublonVersGauche a true.
-
-  Si doublonVersGauche est vrai : on fait la meme chose que pour doublonVersDroite, mais en décalant vers la gauche a chaque fois.
-
-  tant qu'un de ces 2 bool est TRUE, on ne sort pas de la boule.
-
-  bool doublon = FALSE;
-  for(int j = 0; j< taille-1; j++){
-    if(tab[j] == tab[j+1]){ // MINCE! on a trouvé un doublon !
-      doublon = TRUE;
-      if(j == 0) { // Premier cas particulier : le doublon se trouve dans la premiere case
-        if(tab[j+1] != 0){ // OUF ! on a de la chance ! on a le loisir de mettre une nouvelle valeur dans tab[0]
-          tab[j]=rand()%tab[j+1]; // On attribue une nouvelle valeur aléatoire entre 0 et la valeur de la case suivante.
-        }
-        else{ // Mince alors ! la prochaine case est egale a 0 !
-          if(taille>1){ // on essaye de ne pas sortir du tableau
-            int tmp = tab[j+1];
-            tab[j+1] = tab[j+2];
-            tab[j+2] = tmp;
-            j+=2;
-            tab[j]=(rand()%(tab[j+1]-tab[j-1] -1)) + tab[j-1]; // on a changé la valeur suivante
-          }
-        }
-      }
-      else{
-        if(j == taille - 2){ // Deuxieme cas particulier : le doublon se trouve dans l'avent avent derniere case
-          if(tab[j+1] != profondeur*profondeur -1){ //Ouf ! on a la place pour redonner une valeur !
-            tab[j]=rand()%(profondeur*profondeur-1)+tab[j-1] +1;
-          }
-          else{ // Quel Dommage... Il n'y a pas la place ! on va décaler toutes les valeurs vers la droite, et attribuer a la premiere valeur la meme valeur que la deuxieme, et tout recommencer.
-            if(taille>1){// on esaye toujours de rester dans le tableau
-              for(int g = taille-1; g>0; g--){
-                int tmp = tab[g-1];
-                tab[g]=tab[g-1];
-                tab[g-1]=tmp;
-              }
-            }
-          }
-        }
-        else{ //SI on est ni a la premiere case, ni a l'avent derniere
-          if(tab[j+1]-tab[j-1]>1){ // C'est bon! on a de la place!
-            tab[j]=rand()%(tab[j+1]-tab[j-1]-1) + tab[j-1]; // A verifier ce calcul la, je suis pas sure du tout
-          }
-          else{
-            if(taille>3){
-              int tmp = tab[j+1];
-              tab[j+1] = tab[j+2];
-              tab[j+2] = tmp;
-              j+=2;
-              tab[j]=(rand()%(tab[j+1]-tab[j-1] -1)) + tab[j-1]; // on a changé la valeur suivante
-            }
-          }
-        }
-      }
-    }
-  }
-  if(doublon){
-    return enleveDoublon(tab, taille, profondeur);
-  }
-  return tab;
-}
-*/
-
-int* enleveDoublon(int tab[], int taille, int profondeur){  
-  tab = trieTableau(tab, taille);
-  bool doublon = FALSE;
-  for(int i = 0; i< taille -1; i++){
-    if(tab[i] == tab[i+1]){
-      doublon=TRUE;
-      tab[i] = rand()%(profondeur);
-    }
-  }
-  if(doublon == TRUE){
-    tab = enleveDoublon(tab,taille,profondeur);
-  }
-  return tab;
-}
-
-void remplaceBlancParNoir(image* I){
-  if(est_blanche(*I)){
-    *I = construit_noir();
-  }
-}
-
-void alea_boucle(image* I, int* i, int aleas[], int* j,int taille, int profondeur){
-  if(*j != taille){
-    if((*I==NULL) || ((*I)->toutnoir)){
-      if((*i) == aleas[*j]){
-        (*j)++;
-        remplaceBlancParNoir(I);
-      }
-      (*i)++;
-    }
-    if(!((*I)==NULL) && !((*I)->toutnoir)){
-      for(int k = 0; k < 4; k++){
-        alea_boucle(&((*I)->fils[k]), i, aleas, j,taille, profondeur);
-      }
-    }
-  }
-}
-
-/*image alea_aux(int profondeur, int pixelsnoir){
-
-  image I = construit_image_prof(profondeur);
-  I=Division_aux(I, profondeur);
-
-  int aleas[pixelsnoir];
-  int max = (int) pow(4,profondeur);
-
-  for(int j = 0 ; j < pixelsnoir; j++){
-    aleas[j]=rand()%(max); // les positions ou placer les images noirs
-  }
-
-  // Ici on s'occupe des doublons dans aleas si il y en a, pour avoir le bon nombre d'images noires
-  enleveDoublon(aleas, pixelsnoir,max);
-
-  int pi = 0;
-  int* i = &pi;
-  int pj = 0;
-  int* j = &pj;
-  alea_boucle(&I,i,aleas,j,pixelsnoir, max);
-  return I;
-}
-*/
-image alea(int profondeur,int pixelsnoir){
-  if(pixelsnoir> (int) pow(4,profondeur)){
-    return construit_noir();
-  }
-  int pcompteur=0;
-  int* compteur = &pcompteur;
-  image I = construit_image_prof(profondeur);
-  I=Division_aux(I, profondeur);
-
-  int aleas[pixelsnoir];
-  int max = (int) pow(4,profondeur);
-
-  for(int j = 0 ; j < pixelsnoir; j++){
-    aleas[j]=rand()%(max); // les positions ou placer les images noirs
-  }
-
-  // Ici on s'occupe des doublons dans aleas si il y en a, pour avoir le bon nombre d'images noires
-  enleveDoublon(aleas, pixelsnoir,max);
-
-  int pi = 0;
-  int* i = &pi;
-  int pj = 0;
-  int* j = &pj;
-  alea_boucle(&I,i,aleas,j,pixelsnoir, max);
-  return I;
-  //return alea_aux(profondeur, pixelsnoir);
-
-}
-
 void compteImageNoire(image I, int* cpt ){
 
   if(est_noire(I) || est_blanche(I)){
@@ -1027,7 +916,10 @@ void compteImageNoire(image I, int* cpt ){
 
 
 ---------------------------------------------------------------------- */
-
+/*Procédure de test pour est_blanche
+@param : aucun
+@return: aucun
+*/
 void testEstBlanche(){
   image Image1 = construit_blanc();
   image Image2 = construit_compose(construit_blanc(),
@@ -1038,6 +930,10 @@ void testEstBlanche(){
   assert(est_blanche(Image2));
 }
 
+/*Procédure de test pour est_noire
+@param : aucun
+@return: aucun
+*/
 void testEstNoire(){
   image Image1 = construit_noir();
   image Image2 = construit_compose(construit_noir(),
@@ -1048,16 +944,28 @@ void testEstNoire(){
   assert(est_noire(Image2));
 }
 
+/*Procédure de test pour construit_blanc
+@param : aucun
+@return: aucun
+*/
 void testConstruitBlanc(){
   image I1 = construit_blanc();
   assert(est_blanche(I1));
 }
 
+/*Procédure de test pour construit_noir
+@param : aucun
+@return: aucun
+*/
 void testConstruitNoir(){
   image I2 = construit_noir();
   assert(est_noire(I2));
 }
 
+/*Procédure de test pour construit_compose
+@param : aucun
+@return: aucun
+*/
 void testConstruitCompose(){
   image I1 = construit_compose(construit_blanc(),
                                construit_blanc(),
@@ -1081,12 +989,20 @@ void testConstruitCompose(){
 
 }
 
+/*Procédure de test pour construit_alea
+@param : aucun
+@return: aucun
+*/
 void testConstruitAlea(){
   image Image1 = construit_alea(5);
   assert(donne_profondeur_max(Image1)==5);
 
 }
 
+/*Procédure de test pour copie
+@param : aucun
+@return: aucun
+*/
 void testCopie(){
   image nebu;
   nebu = nebuleuse(3);
@@ -1095,6 +1011,10 @@ void testCopie(){
   assert(meme_dessin(nebu,nebu2));
 }
 
+/*Procédure de test pour donne_profondeur_max
+@param : aucun
+@return: aucun
+*/
 void testDonneProfondeurMax(){
   image Image1 = construit_compose(construit_noir(),
                                    construit_blanc(),
@@ -1110,6 +1030,10 @@ void testDonneProfondeurMax(){
   assert(donne_profondeur_max(Image1)==3);
 }
 
+/*Procédure de test pour tabdechar_to_image
+@param : aucun
+@return: aucun
+*/
 void testTabdeChartoImage(){
 
   char imagetest[10] = {'.','B','B','N','.','B','B','B','N'};
@@ -1126,6 +1050,10 @@ void testTabdeChartoImage(){
 
 }
 
+/*Procédure de test pour Division
+@param : aucun
+@return: aucun
+*/
 void testDivision(){
   image I1 = construit_compose(construit_noir(),
                                construit_blanc(),
@@ -1155,6 +1083,10 @@ void testDivision(){
   assert(meme_dessin(I3,I2));
 }
 
+/*Procédure de test pour construit_image_prof
+@param : aucun
+@return: aucun
+*/
 void testConstruitImageProf(){
   image I1 = construit_image_prof(2);
   image I2 = construit_compose(construit_compose(construit_blanc(),
@@ -1176,6 +1108,10 @@ void testConstruitImageProf(){
   assert(meme_dessin(I1,I2));
 }
 
+/*Procédure de test pour aire
+@param : aucun
+@return: aucun
+*/
 void testAire(){
   image I1 = construit_compose(construit_noir(),
                                construit_blanc(),
@@ -1202,6 +1138,10 @@ void testAire(){
   assert(aire(I4)==0.5);
 }
 
+/*Procédure de test pour simplifie
+@param : aucun
+@return: aucun
+*/
 void testSimplifie(){
   image Image1 = construit_compose(construit_noir(),
                                    construit_blanc(),
@@ -1230,6 +1170,10 @@ void testSimplifie(){
 
 }
 
+/*Procédure de test pour meme_dessin
+@param : aucun
+@return: aucun
+*/
 void testMemeDessin(){
   image Image1 = construit_compose(construit_noir(),
                                    construit_blanc(),
@@ -1258,6 +1202,10 @@ void testMemeDessin(){
   assert(meme_dessin(Image3, Image4));
 }
 
+/*Procédure de test pour negatif
+@param : aucun
+@return: aucun
+*/
 void testNegatif(){
   image Image1 = construit_compose(construit_noir(),
                                    construit_blanc(),
@@ -1276,9 +1224,13 @@ void testNegatif(){
                                                      construit_blanc())) ;
 
   negatif(&Image1);
-  assert(meme_dessin(Image1, Image2));} //Probleme avec les free() (double free detected in tcache 2) - résolu
+  assert(meme_dessin(Image1, Image2));} //Probleme résolu
 
-void testArrondit(){ //Probleme avec les free() (double free detected in tcache 2) - résolu
+  /*Procédure de test pour arrondit
+  @param : aucun
+  @return: aucun
+  */
+void testArrondit(){ //Probleme résolu
   image Image1 = construit_compose(construit_noir(),
                                    construit_blanc(),
                                    construit_noir(),
@@ -1302,6 +1254,10 @@ void testArrondit(){ //Probleme avec les free() (double free detected in tcache 
 
 }
 
+/*Procédure de test pour difference
+@param : aucun
+@return: aucun
+*/
 void testDifference(){
 
   image Image1 = construit_compose(construit_noir(),
@@ -1345,8 +1301,12 @@ void testDifference(){
   Image3 = difference(Image1,Image2);
 
 
-  assert(meme_dessin(Image3,diff12));} //Segmentation Fault
+  assert(meme_dessin(Image3,diff12));} //Segmentation Fault NON RESOLU !
 
+  /*Procédure de test pour lecture_au_clavier
+  @param : aucun
+  @return: aucun
+  */
 void testLectureAuClavier(){
   printf("Rentrez .NNB.NNB.BNNN svp\n");
   image I = construit_compose(construit_noir(),
@@ -1364,6 +1324,10 @@ void testLectureAuClavier(){
 
 }
 
+/*Procédure de test pour
+@param : aucun
+@return: aucun
+*/
 void testAlea(){
   image I = alea(5, 64);
   int In = 0;
@@ -1374,11 +1338,12 @@ void testAlea(){
   image N = alea(2, 1024);
   image noire = construit_noir();
   assert(meme_dessin(N,noire));
-
-
-
 }
 
+/*Procédure de test pour CompteSousImagePleine
+@param : aucun
+@return: aucun
+*/
 /*void testCompteSousImagePleine(){
    image I1 = construit_compose(construit_compose(construit_blanc(),
                                                   construit_blanc(),
@@ -1492,7 +1457,7 @@ int main() {
                                                       construit_blanc(),
                                                       construit_noir())) ;
   */
-  //image Image3 = construit_compose(construit_noir(),
+  /*//image Image3 = construit_compose(construit_noir(),
   //                                 construit_blanc(),
   //                                 construit_noir(),
   //                                 construit_noir());
@@ -1516,7 +1481,7 @@ int main() {
 
   //image Image6 = construit_image_prof(5);
   //affichage2kpixel(Image6);
-
+  */
 
   testEstBlanche();
   testEstNoire();
@@ -1525,22 +1490,18 @@ int main() {
   testConstruitCompose();
   testCopie();
   testDonneProfondeurMax();
-  //testTabdeChartoImage(); //erreur de segmentation
   testDivision();
   testConstruitImageProf();
   testAire();
   testSimplifie();
   testMemeDessin();
-  testNegatif(); //double free detected - résolu
-  testArrondit(); // double free detected - résolu
+  testNegatif();
+  testArrondit();
   testAlea();
-  //image diff = difference(lecture_au_fichier(fichier),lecture_au_fichier(fichier));
-
-  affichage2kpixel(alea(6, 1000));//segmentation fault
-
-  //testDifference(); // segmentation fault
   //testLectureAuClavier(); //Elle fonctionne, c'est juste qu'il faut rentrer un truc si on la met pas en commentaire et c'est chiant
 
+  //testTabdeChartoImage(); //erreur de segmentation
+  //testDifference(); // segmentation fault
   //testCompteSousImagePleine();
 
   fclose( fichier );
@@ -1567,8 +1528,13 @@ int main() {
   // negatif
   // simplifie
   // affichage2kpixel
-  alea
+  //alea
   nebuleuse
   main()
   Permutations dans PilesLR.c
+
+
+  erreur de segmentation dans : Difference
+                                tabdechar_to_image
+                                compte
 */
