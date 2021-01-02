@@ -630,11 +630,8 @@ image lecture_au_clavier(){
   char image1[256];
   char flag = 's';
   int i = 0;
-  while (flag != '\n'){
-    flag = getchar();
-    image1[i] = flag;
-    i++;
-  }
+  while ((image1[i++] = getchar()) != '\n')
+    ;
   int shift = 0;
   return image_from_tabchar_aux(image1, 0, &shift);
 }
@@ -989,16 +986,6 @@ void testConstruitCompose(){
 
 }
 
-/*Procédure de test pour construit_alea
-@param : aucun
-@return: aucun
-*/
-void testConstruitAlea(){
-  image Image1 = construit_alea(5);
-  assert(donne_profondeur_max(Image1)==5);
-
-}
-
 /*Procédure de test pour copie
 @param : aucun
 @return: aucun
@@ -1303,7 +1290,7 @@ void testDifference(){
 
   assert(meme_dessin(Image3,diff12));} //Segmentation Fault NON RESOLU !
 
-  /*Procédure de test pour lecture_au_clavier
+/*Procédure de test pour lecture_au_clavier
   @param : aucun
   @return: aucun
   */
@@ -1503,6 +1490,8 @@ int main() {
   //testTabdeChartoImage(); //erreur de segmentation
   //testDifference(); // segmentation fault
   //testCompteSousImagePleine();
+
+  affichage2kpixel(alea(5,80));
 
   fclose( fichier );
 
