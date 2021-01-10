@@ -856,7 +856,7 @@ choisie aléatoirement tel qu'au centre la densité de noirs soit proche de 1 et
 @param : la profondeur
 @return : Une image de cette profondeur qui ressemble à une nebuleuse
 */
-image nebuleuse_aux(int profondeur, int pos_x, int pos_y, int length, int original){
+image nebuleuse_aux(int profondeur, int pos_x, int pos_y, float original){
   if (profondeur == 0) {
 
     float random = (float)(rand()%100)/100;
@@ -868,17 +868,15 @@ image nebuleuse_aux(int profondeur, int pos_x, int pos_y, int length, int origin
     else return construit_blanc();
   }
   else {
-    length = length/2;
-    return construit_compose(nebuleuse_aux(profondeur-1, pos_x, pos_y, length, original),
-                             nebuleuse_aux(profondeur-1, pos_x + length, pos_y, length, original),
-                             nebuleuse_aux(profondeur-1, pos_x, pos_y + length, length, original),
-                             nebuleuse_aux(profondeur-1, pos_x + length, pos_y + length, length, original));
+    return construit_compose(nebuleuse_aux(profondeur-1, pos_x,                             pos_y,                             original),
+                             nebuleuse_aux(profondeur-1, pos_x + (int)pow(2, profondeur-1), pos_y,                             original),
+                             nebuleuse_aux(profondeur-1, pos_x,                             pos_y + (int)pow(2, profondeur-1), original),
+                             nebuleuse_aux(profondeur-1, pos_x + (int)pow(2, profondeur-1), pos_y + (int)pow(2, profondeur-1), original));
   }
 }
 
 image nebuleuse(int profondeur){
-  int length = (int)pow(2, profondeur);
-  return nebuleuse_aux(profondeur, 0, 0, length, length);
+  return nebuleuse_aux(profondeur, 0, 0, pow(2, profondeur));
 }
 
 
