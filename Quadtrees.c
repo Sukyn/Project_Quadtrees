@@ -1136,6 +1136,7 @@ void testCompteSousImagePleine(){
                                                   construit_noir(),
                                                   construit_blanc()));
 
+
   char phrase[58] = {'.','.','.','B','B', 'N', 'B','.', 'N', 'N', 'B', 'N', '.','B','B','B', 'N', '.','N','N','N', 'B', 'N','.','N','B','N','.','B','B','N','B','.','B','N','B','.','.','B','B','N','B','.','N','B','B','N','.','B','N','B','N','.','N','B','N','B', '\n'};
   image I2 = tabdechar_to_image(phrase);
 
@@ -1193,7 +1194,7 @@ int main() {
   image I2_copie = copie(Image2) ;
 
             //                      1   2    3    4        5    6    7    8        9   10  11   12       13  14  15   16   17      18  19  20      21  22  23  24      25  26  27          28   29  30  31     32  33  34  35      36  37  38  39      40  41  42  43        N     . N   B   N     . B   B     N   B  .  B   N     B  .  .   B   B   N     B   . N     B   B   N   .   B N   B   N   .     N   B   N   B
-  char phrase[58] = {'.','.','.','B','B', 'N', 'B','.', 'N', 'N', 'B', 'N', '.','B','B','B', 'N', '.','N','N','N', 'B', 'N','.','N','B','N','.','B','B','N','B','.','B','N','B','.','.','B','B','N','B','.','N','B','B','N','.','B','N','B','N','.','N','B','N','B', '\n'};
+ //char phrase[58] = {'.','.','.','B','B', 'N', 'B','.', 'N', 'N', 'B', 'N', '.','B','B','B', 'N', '.','N','N','N', 'B', 'N','.','N','B','N','.','B','B','N','B','.','B','N','B','.','.','B','B','N','B','.','N','B','B','N','.','B','N','B','N','.','N','B','N','B', '\n'};
 
 
   //affichage2kpixel(tabdechar_to_image(phrase));
@@ -1203,23 +1204,31 @@ int main() {
 
   //Fonctions de tests.
 
+
   image Image5 = alea(5);
   affichage2kpixel(Image5);
 
+  printf("B\n");
   image Image6 = construit_image_prof(5);
+  printf("C\n");
   affichage2kpixel(Image6);
 
+  printf("D\n");
   testEstBlanche();
+  printf("E");
   testEstNoire();
+  printf("E");
   testConstruitBlanc();
   testConstruitNoir();
   testConstruitCompose();
   testCopie();
+  printf("F");
   testDonneProfondeurMax();
   testTabdeChartoImage();
   testDivision();
   testConstruitImageProf();
   testAire();
+  printf("G");
   testSimplifie();
   testMemeDessin();
   //testNegatif();
