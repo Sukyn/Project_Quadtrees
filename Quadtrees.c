@@ -414,27 +414,14 @@ de base est représentée par un carré de taille 1x1
 @param : L'image dont on cherche l'aire
 @return : Un flottant qui représente cette aire
 */
-/* Fonction auxiliaire */
-double aire_aux(image I, double cote){
-  if (est_blanche(I)){
-    return 0;
-  }
-  else{
-    if (est_noire(I)){
-      return cote*cote;
-    }
-    else{
-      return (aire_aux(I->fils[0], cote/2) +
-              aire_aux(I->fils[1], cote/2) +
-              aire_aux(I->fils[2], cote/2) +
-              aire_aux(I->fils[3], cote/2)) ;
-    }
-  }
-}
 
-/* Fonction principale */
 double aire(image I){
-  return aire_aux(I,1);
+  if (est_blanche(I)) return 0;
+  else if (est_noire(I)) return 1;
+  else return (aire(I->fils[0])
+            +  aire(I->fils[1])
+            +  aire(I->fils[2])
+            +  aire(I->fils[3]))/4;
 }
 
 
