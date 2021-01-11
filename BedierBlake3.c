@@ -1336,3 +1336,6 @@ int main() {
                                 tabdechar_to_image
                                 compte
 */
+
+
+// Playlist pour travailler : https://www.youtube.com/watch?v=uuI_IgFFVT8
