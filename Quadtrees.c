@@ -313,7 +313,26 @@ image construit_image_prof(int n){
                                 construit_image_prof(n -1));}
 
 
-
+/*fonction qui supprime les doublons dans un tableau d'entier, et les remplace par d'autres entier au hasard.
+@param : int tab[] : le tableu d'entier dont on veut supprimer les doublons
+         int taille : la taille du tableau
+         int max : la valeur maximum que peut prendre les entiers dans le tableau
+@ return : le tableau trié et sans doublons, ayant le meme nombre d'éléments que le tableau entré en parametre
+*/
+int* enleveDoublon(int tab[], int taille, int max){
+  tab = trieTableau(tab, taille);
+  bool doublon = FALSE;
+  for(int i = 0; i< taille -1; i++){
+    if(tab[i] == tab[i+1]){
+      doublon=TRUE;
+      tab[i] = rand()%(max);
+    }
+  }
+  if(doublon == TRUE){
+    tab = enleveDoublon(tab,taille, max);
+  }
+  return tab;
+}
 
 
 
@@ -512,10 +531,7 @@ void arrondit_elementaire(image *I) {
     if (compte_blanc >= 2) {
       rendmemoire(I);
       (*I) = NULL ;
-    } else {
-      //rendmemoire(I);
-      (*I)->toutnoir = TRUE ;
-    }
+    } else (*I)->toutnoir = TRUE ;
   }
 }
 /* Fonction auxiliaire */
@@ -581,13 +597,13 @@ image difference (image I1a, image I2a){
     int prof1 = donne_profondeur_max(I1);
     int prof2 = donne_profondeur_max(I2);
     if(I1 != I2){
-      if (donne_profondeur_max(I1)>=donne_profondeur_max(I2)){
-        I1 = Division_aux(I1, donne_profondeur_max(I1));
-        I2 = Division_aux(I2, donne_profondeur_max(I1));
+      if (prof1 >= prof2){
+        I1 = Division_aux(I1, prof1);
+        I2 = Division_aux(I2, prof1);
       }
       else{
-        I1 = Division_aux(I1, donne_profondeur_max(I2));
-        I2 = Division_aux(I2, donne_profondeur_max(I2));
+        I1 = Division_aux(I1, prof2);
+        I2 = Division_aux(I2, prof2);
       }
     }
 
@@ -726,30 +742,8 @@ int* trieTableau(int tab[], int taille){
       int tmp = tab[pos];
       tab[pos]=tab[pos-1];
       tab[pos-1]=tmp;
-      pos --;
+      pos--;
     }
-  }
-  return tab;
-}
-
-
-/*fonction qui supprime les doublons dans un tableau d'entier, et les remplace par d'autres entier au hasard.
-@param : int tab[] : le tableu d'entier dont on veut supprimer les doublons
-         int taille : la taille du tableau
-         int max : la valeur maximum que peut prendre les entiers dans le tableau
-@ return : le tableau trié et sans doublons, ayant le meme nombre d'éléments que le tableau entré en parametre
-*/
-int* enleveDoublon(int tab[], int taille, int max){
-  tab = trieTableau(tab, taille);
-  bool doublon = FALSE;
-  for(int i = 0; i< taille -1; i++){
-    if(tab[i] == tab[i+1]){
-      doublon=TRUE;
-      tab[i] = rand()%(max);
-    }
-  }
-  if(doublon == TRUE){
-    tab = enleveDoublon(tab,taille, max);
   }
   return tab;
 }
@@ -766,18 +760,18 @@ int* enleveDoublon(int tab[], int taille, int max){
 */
 void alea_boucle(image* I, int* i, int aleas[], int* j,int taille, int profondeur){
   if(*j != taille){
-    if((*I==NULL) || ((*I)->toutnoir)){
-      if((*i) == aleas[*j]){
-        (*j)++;
-        remplaceBlancParNoir(I);
+      if((*I==NULL) || ((*I)->toutnoir)){
+
+        if((*i) == aleas[*j]){
+          (*j)++;
+          remplaceBlancParNoir(I);
+        }
+        (*i)++;
       }
-      (*i)++;
-    }
-    if(!((*I)==NULL) && !((*I)->toutnoir)){
-      for(int k = 0; k < 4; k++){
-        alea_boucle(&((*I)->fils[k]), i, aleas, j,taille, profondeur);
+      else {
+        for(int k = 0; k < 4; k++)
+          alea_boucle(&((*I)->fils[k]), i, aleas, j,taille, profondeur);
       }
-    }
   }
 }
 
@@ -788,28 +782,21 @@ donné de pixels noirs.
 @return : une image avec pixelsnoir points noirs
 */
 image alea(int profondeur,int pixelsnoir){
-  if(pixelsnoir> (int) pow(4,profondeur)){
-    return construit_noir();
-  }
-  int pcompteur=0;
-  int* compteur = &pcompteur;
-  image I = construit_image_prof(profondeur);
-  I=Division_aux(I, profondeur);
+  if(pixelsnoir > (int)pow(4,profondeur)) return construit_noir();
+  image I = Division_aux(construit_image_prof(profondeur), profondeur);
 
   int aleas[pixelsnoir];
-  int max = (int) pow(4,profondeur);
+  int max = (int)pow(4,profondeur);
 
   for(int j = 0 ; j < pixelsnoir; j++){
     aleas[j]=rand()%(max);
   }
 
-  enleveDoublon(aleas, pixelsnoir,max);
+  enleveDoublon(aleas, pixelsnoir, max);
 
-  int pi = 0;
-  int* i = &pi;
-  int pj = 0;
-  int* j = &pj;
-  alea_boucle(&I,i,aleas,j,pixelsnoir, max);
+  int i = 0;
+  int j = 0;
+  alea_boucle(&I, &i, aleas, &j, pixelsnoir, max);
   return I;
 
 
@@ -854,18 +841,14 @@ image nebuleuse(int profondeur){
          int* cpt : un entier qui nous servira de compteur
 @return: un entier indiquant le nombre d'image noires constituant I
 */
-void compteImageNoire(image I, int* cpt ){
+void compteImageNoire(image I){
 
-  if(est_noire(I) || est_blanche(I)){
-    if(est_noire(I)){
-      (*cpt)++;
-    }
-  }
-  else{
-    for(int i = 0; i<4; i++){
-      compteImageNoire(I -> fils[i], cpt);
-    }
-  }
+  if(est_noire(I)) return 1;
+  else if est_blanche(I) return 0;
+  else return (compteImageNoire(I -> fils[0])
+             + compteImageNoire(I -> fils[1])
+             + compteImageNoire(I -> fils[2])
+             + compteImageNoire(I -> fils[3]));
 }
 
 
@@ -952,10 +935,8 @@ void testConstruitCompose(){
 @return: aucun
 */
 void testCopie(){
-  image nebu;
-  nebu = nebuleuse(3);
-  image nebu2;
-  nebu2=copie(nebu);
+  image nebu = nebuleuse(3);
+  image nebu2 = copie(nebu);
   assert(meme_dessin(nebu,nebu2));
 }
 
@@ -1102,7 +1083,6 @@ void testSimplifie(){
                                                                        construit_noir(),
                                                                        construit_noir()))) ;
 
-  //image* Image1ptr -> Image1;
 
   image Image2 = construit_compose(construit_noir(),
                                        construit_blanc(),
@@ -1367,57 +1347,6 @@ void testAlea(){
 int main() {
 
   srand(time(NULL));
-  FILE* fichier = NULL;
-  fichier = fopen("quadtreesfile", "r");
-
-  /*image Image1 = construit_compose(construit_noir(),
-                                   construit_blanc(),
-                                   construit_noir(),
-                                   construit_compose(construit_blanc(),
-                                                     construit_blanc(),
-                                                     construit_blanc(),
-                                                     construit_compose(construit_noir(),
-                                                                       construit_noir(),
-                                                                       construit_noir(),
-                                                                       construit_noir()))) ;*/
-  /*image Image2 = construit_compose(construit_compose(construit_noir(),
-                                                     construit_noir(),
-                                                     construit_noir(),
-                                                     construit_compose(construit_noir(),
-                                                                       construit_noir(),
-                                                                       construit_noir(),
-                                                                       construit_compose(construit_noir(),
-                                                                                         construit_noir(),
-                                                                                         construit_noir(),
-                                                                                         construit_noir()))),
-                                    construit_blanc(),
-                                    construit_noir(),
-                                    construit_compose(construit_blanc(),
-                                                      construit_compose(construit_blanc(),
-                                                                        construit_noir(),
-                                                                        construit_blanc(),
-                                                                        construit_blanc()),
-                                                      construit_blanc(),
-                                                      construit_noir())) ;
-  */
-  /*//image Image3 = construit_compose(construit_noir(),
-  //                                 construit_blanc(),
-  //                                 construit_noir(),
-  //                                 construit_noir());
-  //image Image4 = construit_noir();
-  //image I_copie = copie(Image1) ;
-  //image I2_copie = copie(Image2) ;
-  //                      1   2    3    4        5    6    7    8        9   10  11   12       13  14  15   16   17      18  19  20      21  22  23  24      25  26  27          28   29  30  31     32  33  34  35      36  37  38  39      40  41  42  43        N     . N   B   N     . B   B     N   B  .  B   N     B  .  .   B   B   N     B   . N     B   B   N   .   B N   B   N   .     N   B   N   B
-  //char phrase3[58] = {'.','.','.','B','B', 'N', 'B','.', 'N', 'N', 'B', 'N', '.','B','B','B', 'N', '.','N','N','N', 'B', 'N','.','N','B','N','.','B','B','N','B','.','B','N','B','.','.','B','B','N','B','.','N','B','B','N','.','B','N','B','N','.','N','B','N','B', '\n'};
-  //affichage2kpixel(tabdechar_to_image(phrase3));
-  //image I = alea(3, 5);
-  //affichage2kpixel(I);
-  //Fonctions de tests.
-  //image Image5 = alea(5);
-  //affichage2kpixel(Image5);
-  //image Image6 = construit_image_prof(5);
-  //affichage2kpixel(Image6);
-  */
 
   testEstBlanche();
   testEstNoire();
@@ -1467,8 +1396,8 @@ int main() {
   // simplifie
   // affichage2kpixel
   //alea
-  nebuleuse
-  main()
+  // nebuleuse
+  // main()
   Permutations dans PilesLR.c
   erreur de segmentation dans : Difference
                                 tabdechar_to_image
