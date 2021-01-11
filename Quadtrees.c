@@ -334,7 +334,23 @@ int* enleveDoublon(int tab[], int taille, int max){
   return tab;
 }
 
-
+/*Fonction qui trie un tableau d'entier
+@param :tab[] : le tableau a trier,
+        taille: la taille de tab.
+@return : un tableau trié.
+*/
+int* trieTableau(int tab[], int taille){
+  for(int h = 1; h<taille; h++){
+    int pos = h;
+    while(pos>0 && tab[pos]<tab[pos-1]){
+      int tmp = tab[pos];
+      tab[pos]=tab[pos-1];
+      tab[pos-1]=tmp;
+      pos--;
+    }
+  }
+  return tab;
+}
 
 
 /* ----------------------------------------------------------------------
@@ -452,15 +468,9 @@ void simplifie(image* I){
 */
 bool meme_dessin(image I, image I2){
 
-  if (est_blanche(I)){
-    return (est_blanche(I2)) ;
-  }
-  else if (est_noire(I)){
-      return (est_noire(I)) ;
-    }
-  else if (I2==NULL || I2->toutnoir){
-      return FALSE;
-    }
+  if (est_blanche(I))                 return (est_blanche(I2)) ;
+  else if (est_noire(I))              return (est_noire(I)) ;
+  else if (I2==NULL || I2->toutnoir)  return FALSE ;
 
   return (meme_dessin_aux(I->fils[0], I2->fils[0])
        && meme_dessin_aux(I->fils[1], I2->fils[1])
@@ -528,6 +538,8 @@ L'image rendue est noire là où l'une des deux images de départ est noire mais
 @param Les deux images que l'on compare
 @return L'image de la différence
 */
+
+// A RETRAVAILLER
 image difference (image I1a, image I2a){
   // --- On travaille sur des images qui n'ont pas de fils identiques ---
 
@@ -595,6 +607,8 @@ image difference (image I1a, image I2a){
 La fonction fait deux passes, ce qui est à l'origine du shift, on peut bien
 la simplifier en ne faisant qu'une passe
 */
+
+// A AMELIORER !
 image lecture_au_clavier(){
   char image1[256];
   char flag = 's';
@@ -630,7 +644,9 @@ image lecture_au_fichier(FILE* fichier){
 @param : L'image que l'on examine, la hauteur qui nous intéresse
 @return : Le nombre de sous images pleines
 */
-/*int CompteSousImagePleine(image I, int n){
+
+// A RELIRE
+int CompteSousImagePleine(image I, int n){
   if (I == NULL || I->toutnoir) {
     if (n == 0) return 1;
     else return 0;
@@ -665,64 +681,6 @@ image lecture_au_fichier(FILE* fichier){
    return 0;
   }
 }
-*/
-/*int CompteSousImagePleine(image I, int n){
-  CompteSousImagePleine_aux(I, n-1);
-}*/
-
-/* Fonction qui prend en argument la profondeur k, et un entier n et quir
-endra une image dont la partie noire sera constistuée de n pixels noirs à profondeur k,
-positionnées aléatoirement.  Chaque image pouvant sortir de préférence avec équiprobabilité.
-@param : profondeur et dot_count le nombre de points à placer
-@return : une image avec dot_count points noirs
-*/
-
-/*image alea(int profondeur, int dot_count){
-    if (profondeur == 0) {
-      if (dot_count > 0) {
-        return construit_noir();
-      }
-      else return construit_blanc();
-    }
-    else {
-      // S'il y a plus de points que de capacité...
-      if (dot_count > 2*pow(2, profondeur)) return construit_noir();
-      // Sinon
-      /* TROUVER UN MOYEN DE REPARTIR LES POINTS ALEATOIREMENT ENTRE LES 4 FILS
-      int random = rand()%4
-      int n1 = dot_count*random/4;
-      int n2 = dot_count/4;
-      int n3 = dot_count/4;
-      int n4 = dot_count - n3 - n2 - n1;
-      printf("DOT = %d, 1 = %d, 2 = %d, 3 = %d; 4 = %d\n", dot_count, n1, n2, n3, n4);
-      return construit_compose(alea(profondeur-1, n1),
-                               alea(profondeur-1, n2),
-                               alea(profondeur-1, n3),
-                               alea(profondeur-1, n4));
-    }
-  }
-*/
-
-
-
-/*Fonction qui trie un tableau d'entier
-@param :tab[] : le tableau a trier,
-        taille: la taille de tab.
-@return : un tableau trié.
-*/
-int* trieTableau(int tab[], int taille){
-  for(int h = 1; h<taille; h++){
-    int pos = h;
-    while(pos>0 && tab[pos]<tab[pos-1]){
-      int tmp = tab[pos];
-      tab[pos]=tab[pos-1];
-      tab[pos-1]=tmp;
-      pos--;
-    }
-  }
-  return tab;
-}
-
 
 
 
