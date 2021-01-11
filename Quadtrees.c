@@ -463,14 +463,13 @@ void simplifie(image* I){
 @param : Les deux images que l'on souhaite comparer
 @return : TRUE si les deux images sont identiques
 */
-/* Fonction auxiliaire */
-bool meme_dessin_aux(image I, image I2){
+bool meme_dessin(image I, image I2){
 
-  if (I == NULL){
-    return (I2 == NULL) ;
+  if (est_blanche(I)){
+    return (est_blanche(I2)) ;
   }
-  else if (I->toutnoir){
-      return (I2->toutnoir) ;
+  else if (est_noire(I)){
+      return (est_noire(I)) ;
     }
   else if (I2==NULL || I2->toutnoir){
       return FALSE;
@@ -480,17 +479,6 @@ bool meme_dessin_aux(image I, image I2){
        && meme_dessin_aux(I->fils[1], I2->fils[1])
        && meme_dessin_aux(I->fils[2], I2->fils[2])
        && meme_dessin_aux(I->fils[3], I2->fils[3]) ) ;
-}
-/* Fonction principale */
-bool meme_dessin(image I, image I2) {
-  /* Il est plus simple de simplifier au maximum nos images, on sait ainsi que si l'on tombe
-  sur un élément blanc ou noir, c'est qu'il est à la profondeur minimale telle qu'il représente l'image,
-  on peut donc comparer plus facilement les images (mais de manière moins optimisée...) */
-  image I_copie = copie(I) ;
-  simplifie(&I_copie) ;
-  image I2_copie = copie(I2) ;
-  simplifie(&I2_copie) ;
-  return meme_dessin_aux(I_copie, I2_copie);
 }
 
 /* Procédure qui transforme une image en sa forme négative,
