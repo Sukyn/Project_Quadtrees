@@ -261,24 +261,10 @@ artificiellement des fils qui lui sont identiques.
 @return : L'image où tous les fils sont à la même profondeur
 */
 /* Fonction auxiliaire */
-
-/*
-Division_aux :  la complexité ne va pas.
-Vous commencez par tester est_blanche. Vous le testez à chaque pixel,
-donc on part déjà sur du quadratique. Mais si une image est blanche non
-simple, genre .BBB.BBBB, vous relancez 4 fois avec cette iamge sur
-lauqlele on va refaire un parcours est_blanche
-
-
-if(est_blanche(I) || est_noire(I)){
-     if(profondeur == 0) {
-       if (est_blanche(I))
-et puis là, vous testez deux fois est_blanche, vu quele test n'est pas
-gratuit, c'est une mauviase idée*/
 image Division_aux (image I, int profondeur){
-  if(est_blanche(I) || est_noire(I)){
+  if(I == NULL || I->toutnoir){
     if(profondeur == 0) {
-      if (est_blanche(I)) return construit_blanc();
+      if (I == NULL) return construit_blanc();
                      else return construit_noir();
     }
     else return construit_compose(Division_aux(I,profondeur-1),
@@ -546,15 +532,6 @@ void negatif(image* I) {
 @param : L'image que l'on souhaite arrondir, la profondeur a partir de laquelle on souhaite arrondir
 @return : Aucun
 */
-
-/*
-Arrondit : double argument inutile : compteur + valeur limite, comptez à
-rebours
-   critère de choix BN pas top
-      // le fait récursivement
-      . B  .B.NNNB.NNNB.NNNB  .B.NNNB.NNNB.NNNB  .B.NNNB.NNNB.NNNB
-      sera arrondit en noir alors qu'il y a 58% de blanc
-      */
 
 /* Fonction auxiliaire */
 void arrondit_elementaire(image *I) {
