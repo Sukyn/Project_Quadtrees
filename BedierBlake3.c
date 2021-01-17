@@ -199,10 +199,9 @@ int donne_profondeur_max(image I){
   else {
     int max = 0;
         for (int i = 0; i < 4; i++) {
-          int resultat = donne_profondeur_max_aux(I->fils[i], profondeur+1);
+          int resultat = donne_profondeur_max(I->fils[i]);
           if (resultat > max) max = resultat; //On trouve le plus profond des 4 fils
         }
-    }
     return max+1 ; //On incrémente de 1 pour compter le nouveau noeud
   }
 }
@@ -335,6 +334,25 @@ image construit_image_prof(int n){
                                 construit_image_prof(n -1));}
 
 
+
+  /*Fonction qui trie un tableau d'entier
+  @param :tab[] : le tableau a trier,
+          taille: la taille de tab.
+  @return : un tableau trié.
+  */
+  int* trieTableau(int tab[], int taille){
+    for(int h = 1; h<taille; h++){
+      int pos = h;
+      while(pos>0 && tab[pos]<tab[pos-1]){
+        int tmp = tab[pos];
+        tab[pos]=tab[pos-1];
+        tab[pos-1]=tmp;
+        pos--;
+      }
+    }
+    return tab;
+  }
+
 /*fonction qui supprime les doublons dans un tableau d'entier, et les remplace par d'autres entier au hasard.
 @param : int tab[] : le tableu d'entier dont on veut supprimer les doublons
          int taille : la taille du tableau
@@ -356,23 +374,7 @@ int* enleveDoublon(int tab[], int taille, int max){
   return tab;
 }
 
-/*Fonction qui trie un tableau d'entier
-@param :tab[] : le tableau a trier,
-        taille: la taille de tab.
-@return : un tableau trié.
-*/
-int* trieTableau(int tab[], int taille){
-  for(int h = 1; h<taille; h++){
-    int pos = h;
-    while(pos>0 && tab[pos]<tab[pos-1]){
-      int tmp = tab[pos];
-      tab[pos]=tab[pos-1];
-      tab[pos-1]=tmp;
-      pos--;
-    }
-  }
-  return tab;
-}
+
 
 
 /* ----------------------------------------------------------------------
@@ -491,15 +493,16 @@ d'avoir des fils et on les remplace par un élément simple (noir ou blanc)
 /* Simplifie : quadratique, pourtant vous chauffiez*/
 void simplifie(image* I){
   if (*I != NULL && !((*I)->toutnoir)) {
-    for (int i = 0; i < 4; i++) {
-          simplifie(&((*I)->fils[i])) ;
-    }
     if (est_blanche(*I)) { // En fait on regarde ici si les enfants sont unis
           rendmemoire(I);
           (*I) = construit_blanc() ;
     } else if (est_noire(*I)) {
           rendmemoire(I);
           (*I) = construit_noir();
+    } else {
+      for (int i = 0; i < 4; i++) {
+            simplifie(&((*I)->fils[i])) ;
+      }
     }
   }
 }
@@ -514,10 +517,10 @@ bool meme_dessin(image I, image I2){
   else if (est_noire(I))              return (est_noire(I)) ;
   else if (I2==NULL || I2->toutnoir)  return FALSE ;
 
-  return (meme_dessin_aux(I->fils[0], I2->fils[0])
-       && meme_dessin_aux(I->fils[1], I2->fils[1])
-       && meme_dessin_aux(I->fils[2], I2->fils[2])
-       && meme_dessin_aux(I->fils[3], I2->fils[3]) ) ;
+  return (meme_dessin(I->fils[0], I2->fils[0])
+       && meme_dessin(I->fils[1], I2->fils[1])
+       && meme_dessin(I->fils[2], I2->fils[2])
+       && meme_dessin(I->fils[3], I2->fils[3]) ) ;
 }
 
 /* Procédure qui transforme une image en sa forme négative,
@@ -859,10 +862,10 @@ image nebuleuse(int profondeur){
          int* cpt : un entier qui nous servira de compteur
 @return: un entier indiquant le nombre d'image noires constituant I
 */
-void compteImageNoire(image I){
+int compteImageNoire(image I){
 
   if(est_noire(I)) return 1;
-  else if est_blanche(I) return 0;
+  else if (est_blanche(I)) return 0;
   else return (compteImageNoire(I -> fils[0])
              + compteImageNoire(I -> fils[1])
              + compteImageNoire(I -> fils[2])
@@ -1278,8 +1281,8 @@ void testAlea(){
   image I = alea(5, 64);
   int In = 0;
   int* ptrIn = & In;
-  compteImageNoire(I, ptrIn);
-  assert(64 ==  *ptrIn);
+  int in = compteImageNoire(I);
+  assert(64 ==  in);
 
   image N = alea(2, 1024);
   image noire = construit_noir();
@@ -1388,9 +1391,6 @@ int main() {
   //testCompteSousImagePleine();
 
   affichage2kpixel(alea(5,80));
-
-  fclose( fichier );
-
   return 0;
 }
 
