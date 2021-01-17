@@ -1,3 +1,7 @@
+/*
+Tout est dans le désorde dans ce projet...
+plus pas bien aéré
+*/
 
 #include <stdio.h> // printf, random ...
 #include <stdlib.h> // malloc, free, ...
@@ -141,7 +145,7 @@ void remplaceBlancParNoir(image* I){
 @return Une copie de l'image, que l'on peut modifier sans modifier l'originale
 */
 image copie(image I){
-  image I_copie = (bloc_image*) malloc(sizeof(bloc_image)) ;
+  image I_copie;
   if (I == NULL) I_copie = construit_blanc() ;
   else if (I->toutnoir) I_copie = construit_noir() ;
   else I_copie = construit_compose(copie(I->fils[0]),
@@ -160,8 +164,12 @@ Il faut donc créer de nouvelles images */
 
 /*Fonction qui vérifie si 2 images sont parfaitement identiques, sans les simplifier.
 @param : les 2 images que l'on souhaite comparer
-@return : TRUE si les 2 images sont parfaitement identiques, FALSE sinon
+@return :
+TRUE si les 2 images sont parfaitement identiques, FALSE sinon
 */
+/*MemeDessin :  // attention MemeDessinParfait n'est pas MemeDessin
+Quadratique
+Bug etourderie... testez-là !*/
 bool meme_dessin_parfait(image I, image I2){
   if (I == NULL){
     return (I2 == NULL) ;
@@ -179,25 +187,25 @@ bool meme_dessin_parfait(image I, image I2){
        && meme_dessin_parfait(I->fils[3], I2->fils[3]) ) ;
 }
 
+
+
+
 /* Fonction qui cherche la profondeur maximale d'une image
 @param L'image dont on veut connaître la profondeur
 @return La profondeur maximale de l'image
 */
-/* Fonction auxiliaire */
-int donne_profondeur_max_aux(image I, int profondeur){
-  int max = 0;
-  if ((I == NULL) || I->toutnoir) return profondeur;
-  else {
-      for (int i = 0; i < 4; i++) {
-        int resultat = donne_profondeur_max_aux(I->fils[i], profondeur+1);
-        if (resultat > max) max = resultat;
-      }
-  }
-  return max;
-}
-/* Fonction principale */
 int donne_profondeur_max(image I){
-  return donne_profondeur_max_aux(I, 0);}
+  if ((I == NULL) || I->toutnoir) return 0;
+  else {
+    int max = 0;
+        for (int i = 0; i < 4; i++) {
+          int resultat = donne_profondeur_max_aux(I->fils[i], profondeur+1);
+          if (resultat > max) max = resultat; //On trouve le plus profond des 4 fils
+        }
+    }
+    return max+1 ; //On incrémente de 1 pour compter le nouveau noeud
+  }
+}
 
 /* Fonction identique à construit_compose mais qui construit dans le sens inverse
 @param : Les 4 images à composer
@@ -254,6 +262,20 @@ artificiellement des fils qui lui sont identiques.
 @return : L'image où tous les fils sont à la même profondeur
 */
 /* Fonction auxiliaire */
+
+/*
+Division_aux :  la complexité ne va pas.
+Vous commencez par tester est_blanche. Vous le testez à chaque pixel,
+donc on part déjà sur du quadratique. Mais si une image est blanche non
+simple, genre .BBB.BBBB, vous relancez 4 fois avec cette iamge sur
+lauqlele on va refaire un parcours est_blanche
+
+
+if(est_blanche(I) || est_noire(I)){
+     if(profondeur == 0) {
+       if (est_blanche(I))
+et puis là, vous testez deux fois est_blanche, vu quele test n'est pas
+gratuit, c'est une mauviase idée*/
 image Division_aux (image I, int profondeur){
   if(est_blanche(I) || est_noire(I)){
     if(profondeur == 0) {
@@ -404,6 +426,24 @@ void affiche_profondeur(image I) { affiche_prof_aux(I, 0) ; }
 @param : L'image à afficher
 @return : Aucun
 */
+
+/* Pixel : pourquoi les fonctions outils sont à 3km ? Très mal organisé,
+très pénible
+un tableau à deux dimensiosn serait plus clair
+   L'énoncé dit de ne pas passer par un tableau, il faut imprimer à la volée
+
+   Votre code est très lourd :   faire une copie qui est complétée à
+profondeur prof(I), ensuite transccriptio dans un tableau (là, ce serait
+déjà mieux si vous pouviez transcrire dans le tableau sans passer par
+une copie que vous explosez) puis afichage du tabeau
+
+Je crois que vous avez un bug si l'image est moins profonde que la
+définition k=3 i=.NBNB
+Si je veux afficher k=1
+i=.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNBN,
+vous explosez la mémoire pour afficher 4 char.
+*/
+
 void affichage2kpixel(image image1){
   int profondeur = donne_profondeur_max(image1);
   int length = pow(2, profondeur);
@@ -447,6 +487,8 @@ d'avoir des fils et on les remplace par un élément simple (noir ou blanc)
 @param : L'image que l'on souhaite simplifier
 @return : Aucun
 */
+
+/* Simplifie : quadratique, pourtant vous chauffiez*/
 void simplifie(image* I){
   if (*I != NULL && !((*I)->toutnoir)) {
     for (int i = 0; i < 4; i++) {
@@ -485,7 +527,6 @@ c'est à dire que les cases blanches deviennent noires et réciproquement.
 */
 void negatif(image* I) {
   if (*I == NULL) {
-    rendmemoire(I);
     *I = construit_noir();
   }
   else if ((*I)->toutnoir) {
@@ -502,6 +543,15 @@ void negatif(image* I) {
 @param : L'image que l'on souhaite arrondir, la profondeur a partir de laquelle on souhaite arrondir
 @return : Aucun
 */
+
+/*
+Arrondit : double argument inutile : compteur + valeur limite, comptez à
+rebours
+   critère de choix BN pas top
+      // le fait récursivement
+      . B  .B.NNNB.NNNB.NNNB  .B.NNNB.NNNB.NNNB  .B.NNNB.NNNB.NNNB
+      sera arrondit en noir alors qu'il y a 58% de blanc
+      */
 
 /* Fonction auxiliaire */
 void arrondit_elementaire(image *I) {
@@ -539,7 +589,14 @@ L'image rendue est noire là où l'une des deux images de départ est noire mais
 @return L'image de la différence
 */
 
-// A RETRAVAILLER
+/*
+Difference : pourquoi faire des copies ?
+quadratique
+code lourd, simplifiez, Réorganisez vos CB, évitez les tests (im==NULL
+ou autres) à répétition
+   chez vous, ça tourne à la folie
+Vous appelez prof et Division ??? les bras m'en tombent !
+*/
 image difference (image I1a, image I2a){
   // --- On travaille sur des images qui n'ont pas de fils identiques ---
 
@@ -608,7 +665,10 @@ La fonction fait deux passes, ce qui est à l'origine du shift, on peut bien
 la simplifier en ne faisant qu'une passe
 */
 
-// A AMELIORER !
+/*
+Lecture : pas besoin de stocker dans un tableau buffer, construisez
+l'image à la volée
+*/
 image lecture_au_clavier(){
   char image1[256];
   char flag = 's';
@@ -645,7 +705,7 @@ image lecture_au_fichier(FILE* fichier){
 @return : Le nombre de sous images pleines
 */
 
-// A RELIRE
+/* CSIP : quadratique */
 int CompteSousImagePleine(image I, int n){
   if (I == NULL || I->toutnoir) {
     if (n == 0) return 1;
@@ -713,6 +773,31 @@ donné de pixels noirs.
 @param : int profondeur : la profondeur voulue
          int pixelsnoir : le nombre de pixels noir à placer
 @return : une image avec pixelsnoir points noirs
+*/
+
+/*
+Alea : A nouveau les outils sont à 3km, tout dispersés
+
+Donc en bref, vous faites une imae pleine, vous faites un tableau de
+taille n dans lequel vous mettez n nombres de 1 à 4^k
+puis vous les placez
+
+Division_aux(construit_image_prof(profondeur), profondeur);
+je ne compredsn pas : vous créez une image complete de prof p, et vous
+la comlétez à p ? Mais elle l'est déjà !
+En fait, ça fait juste une copie (aevc aspillageg memoire de l'image
+originelle)
+
+Votre technique pour que les n nombres soient differents est horrible
+n nombres tirés au hasard, puis
+trier les elements, puis reperer les doublons, refaire un tiraeg pour
+chaque doublon
+    et si il y a eu une modif, recommencer : trier etc...
+Votre tri est insertion simple donc quadrartique
+Si n = 4^k/2, il vous faudra de lo'rdre de ln n itérations, donc
+compleité totale de l'ordre de n^2 * ln n
+si n s'approche de 4^k, disons 4^k-1, il faudra de l'ordre de n
+itérrations, sonc comp totale de l'orde de n^3
 */
 image alea(int profondeur,int pixelsnoir){
   if(pixelsnoir > (int)pow(4,profondeur)) return construit_noir();
