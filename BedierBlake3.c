@@ -562,28 +562,20 @@ void arrondit_elementaire(image *I) {
     for (int i = 0; i < 4; i++) {
           arrondit_elementaire(&((*I)->fils[i])) ;
     }
-    int compte_blanc = 0; // Cette variable permet de savoir si l'on doit arrondir en blanc ou en noir (la majorité l'emporte)
-    for (int i = 0; i < 4; i++) {
-      if (((*I)->fils[i]) == NULL) compte_blanc++;
-    }
-    if (compte_blanc >= 2) {
+    if (aire(*I) < 0.5) {
       rendmemoire(I);
       (*I) = NULL ;
     } else (*I)->toutnoir = TRUE ;
   }
 }
-/* Fonction auxiliaire */
-void arrondit_aux(image* I, int k, int n) {
-  if (k <= n) arrondit_elementaire(I); // Si l'on est à la profondeur recherchée, on arrondit notre image en un élément (noir ou blanc)
-  else if (((*I) != NULL) && !((*I)->toutnoir)) {
-      for (int i = 0; i < 4; i++) {
-        arrondit_aux(&((*I)->fils[i]), k, n+1);
-      }
-  }
-}
 /* Fonction principale */
 void arrondit(image* I, int k) {
-  arrondit_aux(I, k, 0);
+  if (k == 0) arrondit_elementaire(I); // Si l'on est à la profondeur recherchée, on arrondit notre image en un élément (noir ou blanc)
+  else if (((*I) != NULL) && !((*I)->toutnoir)) {
+      for (int i = 0; i < 4; i++) {
+        arrondit(&((*I)->fils[i]), k-1);
+      }
+  }
 }
 
 /* Fonction qui renvoie une image représentant la différence entre deux images :
