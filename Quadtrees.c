@@ -707,183 +707,9 @@ image lecture_au_fichier(FILE* fichier){
   CompteSousImagePleine_aux(I, n-1);
 }*/
 
-/* Fonction qui prend en argument la profondeur k, et un entier n et quir
-endra une image dont la partie noire sera constistuée de n pixels noirs à profondeur k,
-positionnées aléatoirement.  Chaque image pouvant sortir de préférence avec équiprobabilité.
-@param : profondeur et dot_count le nombre de points à placer
-@return : une image avec dot_count points noirs
-*/
-
-/*image alea(int profondeur, int dot_count){
-    if (profondeur == 0) {
-
-
-      if (dot_count > 0) {
-        return construit_noir();
-      }
-      else return construit_blanc();
-    }
-    else {
-
-      // S'il y a plus de points que de capacité...
-      if (dot_count > 2*pow(2, profondeur)) return construit_noir();
-
-      // Sinon
-
-      /* TROUVER UN MOYEN DE REPARTIR LES POINTS ALEATOIREMENT ENTRE LES 4 FILS
-      int random = rand()%4
-      int n1 = dot_count*random/4;
-      int n2 = dot_count/4;
-      int n3 = dot_count/4;
-      int n4 = dot_count - n3 - n2 - n1;
-
-      printf("DOT = %d, 1 = %d, 2 = %d, 3 = %d; 4 = %d\n", dot_count, n1, n2, n3, n4);
-      return construit_compose(alea(profondeur-1, n1),
-                               alea(profondeur-1, n2),
-                               alea(profondeur-1, n3),
-                               alea(profondeur-1, n4));
-    }
-  }
-*/
-
-//Il faut changer le mode de trie et le mode de enleveDoublon
-
-
-/*Fonction qui trie un tableau d'entier
-@param :tab[] : le tableau a trier,
-        taille: la taille de tab.
-@return : un tableau trié.
-
-int* trieTableau(int tab[], int taille){
-  for(int h = 1; h<taille; h++){
-    int pos = h;
-    while(pos>0 && tab[pos]<tab[pos-1]){
-      int tmp = tab[pos];
-      tab[pos]=tab[pos-1];
-      tab[pos-1]=tmp;
-      pos --;
-    }
-  }
-  return tab;
-}
 
 
 
-
-int choisitPP(int tab[], int taille){
-  if(taille == 1){
-    return tab[0];
-  }
-  else{
-    if(taille == 2){
-      return tab[0];
-    }
-    else{
-      int premier = tab[0];
-      int deuxieme = tab[taille-1];
-      int troisieme = tab[1];
-
-      if(premier>=deuxieme){
-        if(troisieme>=premier){
-          return premier;
-        }
-        else{
-          if (troisieme>=deuxieme){
-            return troisieme;
-          }
-        }
-        return deuxieme;
-      }
-      else{ // deuxieme > premier
-        if(troisieme>deuxieme){
-          return deuxieme;
-        }
-        else{
-          if(troisieme>premier){
-            return troisieme;
-          }
-          return premier;
-        }
-      }
-    }
-  }
-}
-
-
-
-void Separate ( int* T[], int low, int high, int* PivotPos){	// Separates T[low … high],  									// with pivot =T[low]
-	int pivot = *T[low];
-	int up = low;
-	int down = high;
-	bool UpGoing = FALSE;
-  for(int i = 0; i < high - low; i++){
-    if(UpGoing){
-      if( *T[up] <= pivot){
-        up++;
-      }
-      else{
-        *T[down] = *T[up];
-        down--;
-        UpGoing=FALSE;
-      }
-    }
-    else{
-      if (*T[down] >= pivot){
-        down--;
-      }
-      else{
-        *T[up] = *T[down];
-        up++;
-        UpGoing = TRUE;
-      }
-    }
-  }
-  *PivotPos = up;
-  *T[*PivotPos] = pivot;
-}
-
-void TR(int* tab[],int d,int f){
-  if(d+10<f){
-    int p = choisitPP(*tab, f+1);
-    int* pp = &p;
-    Separate(tab, d, f, pp);
-    TR(tab, d, (*pp)-1);
-    TR(tab, (*pp)+1, f);
-  }
-  else{
-    trieTableau(*tab, f+1);
-  }
-}
-
-int* triRapide(int* tab[], int taille){
-	TR( tab, 0, taille-1);
-  return *tab;
-}
-
-
-
-/*fonction qui supprime les doublons dans un tableau d'entier, et les remplace par d'autres entier au hasard.
-@param : int tab[] : le tableu d'entier dont on veut supprimer les doublons
-         int taille : la taille du tableau
-         int max : la valeur maximum que peut prendre les entiers dans le tableau
-@ return : le tableau trié et sans doublons, ayant le meme nombre d'éléments que le tableau entré en parametre
-
-int* enleveDoublon(int tab[], int taille, int max){
-  tab = trieRapide(tab, taille);
-  bool doublon = FALSE;
-  for(int i = 0; i< taille -1; i++){
-    if(tab[i] == tab[i+1]){
-      doublon=TRUE;
-      tab[i] = rand()%(max);
-    }
-  }
-  if(doublon == TRUE){
-    tab = enleveDoublon(tab,taille, max);
-  }
-  return tab;
-}
-
-*/
 
 /*fonction qui prend un tableau d'entier et le renvoie mélanger ( en echangant 2 à 2 les valeurs)
 @param : int aleas[] : un tableau d'entier
@@ -901,34 +727,12 @@ int* repartitNoir(int aleas[], int max){
   }
 }
 
-/*procédure auxiliaire de alea
-@param : image *I : une image I en in/out
-         int aleas[]: un tableau d'entier
-         int pixelsnoir : un entier indiquant le nombre d'images noires voulues
-         int max : un entier indiquant la taille du tableau
-         int* i : un entier i nous servant de compter combien de fois on passe dans la boucle
-         int* cptDejaNoirs : un entier nous servant de compter combien de fois on a deja mis de pixels noirs.
+/*procédure auxiliaire de alea, renvoie une image blanche avec des pixels noirs
+@param : int n : un entier indiquant la profonfeur de l'image
+         int aleas[] : un tableau d'entier avec le nombre de cases egales au nombres de fils de l'images voulue, avec des 1 la ou on veut des pixels noirs
 */
-/*void alea_boucle(image* I, int aleas[], int pixelsnoir, int max, int* i, int* cptDejaNoirs){
-  if(*cptDejaNoirs < pixelsnoir){
-    if(*i != max){
-      if(aleas[*i] == 1){
-        cptDejaNoirs++;
-        remplaceBlancParNoir(I);
-      }
-      (*i)++;
-    }
-    for(int k = 0; k < 4; k++){
-      alea_boucle(&((*I)->fils[k]), aleas, pixelsnoir, max, i, cptDejaNoirs);
-    }
-  }
-}
-*/
-
 image construit_alea(int n, int aleas[], int* i){
   if(n==0){
-    printf("dans if de n==0\n");
-    printf("%d\n", *i );
     (*i)++;
     if (aleas[*i] == 1){
       printf("avant construit noir\n");
@@ -957,10 +761,8 @@ image alea(int profondeur,int pixelsnoir){
     return construit_noir();
   }
 
-  //image I = construit_image_prof(profondeur);
   int max = (int) pow(4,profondeur);
   int aleas[max];
-
 
   int j;
   for(j = 0 ; j < pixelsnoir; j++){
