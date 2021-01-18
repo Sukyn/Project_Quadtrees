@@ -753,7 +753,7 @@ positionnées aléatoirement.  Chaque image pouvant sortir de préférence avec 
 @param :tab[] : le tableau a trier,
         taille: la taille de tab.
 @return : un tableau trié.
-*/
+
 int* trieTableau(int tab[], int taille){
   for(int h = 1; h<taille; h++){
     int pos = h;
@@ -867,9 +867,9 @@ int* triRapide(int* tab[], int taille){
          int taille : la taille du tableau
          int max : la valeur maximum que peut prendre les entiers dans le tableau
 @ return : le tableau trié et sans doublons, ayant le meme nombre d'éléments que le tableau entré en parametre
-*/
+
 int* enleveDoublon(int tab[], int taille, int max){
-  tab = trieTableau(tab, taille);
+  tab = trieRapide(tab, taille);
   bool doublon = FALSE;
   for(int i = 0; i< taille -1; i++){
     if(tab[i] == tab[i+1]){
@@ -883,31 +883,66 @@ int* enleveDoublon(int tab[], int taille, int max){
   return tab;
 }
 
+*/
 
+/*fonction qui prend un tableau d'entier et le renvoie mélanger ( en echangant 2 à 2 les valeurs)
+@param : int aleas[] : un tableau d'entier
+         int max : un entier indiquant la taille du tableau
+*/
+int* repartitNoir(int aleas[], int max){
+  for(int i = 0; i< max; i++){
+    int pos1 = rand()%max;
+    int pos2 = rand()%max;
+    int tmp;
 
+    tmp = aleas[pos1];
+    aleas[pos1]=aleas[pos2];
+    aleas[pos2]=tmp;
+  }
+}
 
 /*procédure auxiliaire de alea
 @param : image *I : une image I en in/out
          int aleas[]: un tableau d'entier
-         int *j : un entier j nous servant de compteur
-         int taille : un entier indiquant la taille du tableau
-         int profondeur : un entier indiquant la profondeur de l'image I
+         int pixelsnoir : un entier indiquant le nombre d'images noires voulues
+         int max : un entier indiquant la taille du tableau
+         int* i : un entier i nous servant de compter combien de fois on passe dans la boucle
+         int* cptDejaNoirs : un entier nous servant de compter combien de fois on a deja mis de pixels noirs.
 */
-void alea_boucle(image* I, int* i, int aleas[], int* j,int taille, int profondeur){
-  if(*j != taille){
-    if((*I==NULL) || ((*I)->toutnoir)){
-      if((*i) == aleas[*j]){
-        (*j)++;
+/*void alea_boucle(image* I, int aleas[], int pixelsnoir, int max, int* i, int* cptDejaNoirs){
+  if(*cptDejaNoirs < pixelsnoir){
+    if(*i != max){
+      if(aleas[*i] == 1){
+        cptDejaNoirs++;
         remplaceBlancParNoir(I);
       }
       (*i)++;
     }
-    if(!((*I)==NULL) && !((*I)->toutnoir)){
-      for(int k = 0; k < 4; k++){
-        alea_boucle(&((*I)->fils[k]), i, aleas, j,taille, profondeur);
-      }
+    for(int k = 0; k < 4; k++){
+      alea_boucle(&((*I)->fils[k]), aleas, pixelsnoir, max, i, cptDejaNoirs);
     }
   }
+}
+*/
+
+image construit_alea(int n, int aleas[], int* i){
+  if(n==0){
+    printf("dans if de n==0\n");
+    printf("%d\n", *i );
+    (*i)++;
+    if (aleas[*i] == 1){
+      printf("avant construit noir\n");
+      return construit_noir();
+    }
+    else{
+      printf("avant construit_blanc\n");
+      return construit_blanc();
+    }
+  }
+  else return construit_compose(construit_alea((n-1), aleas, i),
+                                construit_alea((n-1), aleas, i),
+                                construit_alea((n-1), aleas, i),
+                                construit_alea((n-1), aleas, i));
 }
 
 /* Fonction qui retourne une image de profondeur  choisit, comprenant un nombre
@@ -917,31 +952,30 @@ donné de pixels noirs.
 @return : une image avec pixelsnoir points noirs
 */
 image alea(int profondeur,int pixelsnoir){
+
   if(pixelsnoir> (int) pow(4,profondeur)){
     return construit_noir();
   }
-  int pcompteur=0;
-  int* compteur = &pcompteur;
-  image I = construit_image_prof(profondeur);
-  I=Division_aux(I, profondeur);
 
-  int aleas[pixelsnoir];
+  //image I = construit_image_prof(profondeur);
   int max = (int) pow(4,profondeur);
+  int aleas[max];
 
-  for(int j = 0 ; j < pixelsnoir; j++){
-    aleas[j]=rand()%(max);
+
+  int j;
+  for(j = 0 ; j < pixelsnoir; j++){
+    aleas[j]=1;
+  }
+  for(int i = j; i< max; i++){
+    aleas[i]=0;
   }
 
-  enleveDoublon(aleas, pixelsnoir,max);
-
-  int pi = 0;
+  repartitNoir(aleas, max);
+  printf("Apres repartiNoir\n");
+  int pi = -1;
   int* i = &pi;
-  int pj = 0;
-  int* j = &pj;
-  alea_boucle(&I,i,aleas,j,pixelsnoir, max);
-  return I;
 
-
+  return construit_alea(profondeur, aleas, i);
 }
 
 
@@ -1412,6 +1446,7 @@ void testLectureAuClavier(){
 */
 void testAlea(){
   image I = alea(5, 64);
+  affichage2kpixel(I);
   int In = 0;
   int* ptrIn = & In;
   compteImageNoire(I, ptrIn);
@@ -1564,7 +1599,6 @@ int main() {
   //image Image6 = construit_image_prof(5);
   //affichage2kpixel(Image6);
   */
-
   testEstBlanche();
   testEstNoire();
   testConstruitBlanc();
@@ -1579,7 +1613,9 @@ int main() {
   testMemeDessin();
   testNegatif();
   testArrondit();
+  printf("avantAlea\n");
   testAlea();
+  printf("avantAffichage2kpixel\n");
   //testLectureAuClavier(); //Elle fonctionne, c'est juste qu'il faut rentrer un truc si on la met pas en commentaire et c'est chiant
 
   //testTabdeChartoImage(); //erreur de segmentation
