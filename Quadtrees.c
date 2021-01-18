@@ -1415,9 +1415,8 @@ int main() {
   testMemeDessin();
   testNegatif();
   testArrondit();
-  printf("avantAlea\n");
   testAlea();
-  printf("avantAffichage2kpixel\n");
+
   //testLectureAuClavier(); //Elle fonctionne, c'est juste qu'il faut rentrer un truc si on la met pas en commentaire et c'est chiant
 
   //testTabdeChartoImage(); //erreur de segmentation
