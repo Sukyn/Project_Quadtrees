@@ -602,22 +602,24 @@ image difference (image I1, image I2){
 /* Fonction qui permet à l'utilisateur de rentrer une image depuis le terminal
 @param : Aucun
 @return : L'image construite à partir des indications de l'utilisateur
-La fonction fait deux passes, ce qui est à l'origine du shift, on peut bien
-la simplifier en ne faisant qu'une passe
-*/
-
-/*
-Lecture : pas besoin de stocker dans un tableau buffer, construisez
-l'image à la volée
 */
 image lecture_au_clavier(){
-  char image1[256];
-  char flag = 's';
-  int i = 0;
-  while ((image1[i++] = getchar()) != '\n')
-    ;
-  int shift = 0;
-  return image_from_tabchar_aux(image1, 0, &shift);
+  image p = NULL;
+  char input = getchar();
+  if (input == '.'){
+    image f0 = lecture_au_clavier();
+    image f1 = lecture_au_clavier();
+    image f2 = lecture_au_clavier();
+    image f3 = lecture_au_clavier();
+    p = construit_compose(f0, f1, f2, f3);
+  } else if (input == 'N'){
+    p = construit_noir();
+  } else if (input == 'B'){
+    p = construit_blanc();
+  } else {
+    p = lecture_au_clavier();
+  }
+  return p;
 }
 
 image lecture_au_fichier(FILE* fichier){
@@ -679,7 +681,8 @@ int CompteSousImagePleine(image I, int n){
                 CompteSousImagePleine(I->fils[3], n));
     if (v1 == n && v2 == n && v3 == n && v4 == n)
       return 1;
-   return 0;
+    else
+      return 0;
   }
 }
 
@@ -774,8 +777,7 @@ image nebuleuse_aux(int profondeur, int pos_x, int pos_y, int original){
     float random = (float)(rand()%100)/100;
     double far_from_center = sqrt(pow((original/2 - pos_x), 2) + pow((original/2 - pos_y), 2)); // Distance Euclidienne
     double max_distance = (double)original/sqrt(2);
-    double n = far_from_center/max_distance; // Définir ici un moyen d'avoir 0 si proche du centre, 1 sinon, qui dépend donc de la distance au centre
-    //printf("Distance : %f\n", far_from_center);
+    double n = far_from_center/max_distance;
     if (random > n) return construit_noir();
     else return construit_blanc();
   }
@@ -1322,7 +1324,7 @@ int main() {
   testNegatif();
   testArrondit();
   testAlea();
-  //testLectureAuClavier(); //Elle fonctionne, c'est juste qu'il faut rentrer un truc si on la met pas en commentaire et c'est chiant
+  testLectureAuClavier(); //Elle fonctionne, c'est juste qu'il faut rentrer un truc si on la met pas en commentaire et c'est chiant
 
   //testTabdeChartoImage(); //erreur de segmentation
   //testDifference(); // segmentation fault
