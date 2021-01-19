@@ -560,73 +560,42 @@ L'image rendue est noire là où l'une des deux images de départ est noire mais
 @param Les deux images que l'on compare
 @return L'image de la différence
 */
-
-/*
-Difference : pourquoi faire des copies ?
-quadratique
-code lourd, simplifiez, Réorganisez vos CB, évitez les tests (im==NULL
-ou autres) à répétition
-   chez vous, ça tourne à la folie
-Vous appelez prof et Division ??? les bras m'en tombent !
-*/
-image difference (image I1a, image I2a){
-  // --- On travaille sur des images qui n'ont pas de fils identiques ---
-
-  image I1 = copie(I1a) ;
-  image I2 = copie(I2a) ;
-
-    // ---
-
-  // Si les deux images sont identiques, il n'y a aucune différence donc on renvoie une imge blanche
-  printf("les 2 images copiées \n");
-  if(meme_dessin(I1,I2)){
-    printf("Les 2 sont les memes\n");
-    return construit_blanc();
-  }
-  printf("apres les 2 images sont identiques \n");
-
-
-  // Si les deux images sont unies mais opposées, on renvoie une image noire
-
-  if ((est_noire(I2) && est_blanche(I1)) || (est_blanche(I2) && est_noire(I1) )){
-    printf("Si les deux images sont unies mais opposées\n");
-    return construit_noir();
-  }
-
-  // Si la première image est unie mais pas la seconde (si la seconde était unie on serait rentrés dans un cas précédent)
-  else if ( est_noire(I1)||est_blanche(I1) ){
-          printf("la première image est unie mais pas la seconde\n");
-          /* Si la première est blanche, la différence correspond simplement à l'autre image :
-             En effet, si le fils est blanc alors la différence est blanche car ils sont identiques,
-             si le fils est noir alors la différence est noire car les deux sont opposés */
-          if (I1 == NULL) return I2;
-          // Si la première est noire, la différence correspond à l'opposé de l'autre image par un raisonnement analogue
-          else {
-            image dif = copie(I2);
-            negatif(&dif);
-            return dif;
-          }
-  }
-
-  else{ //aucune des 2 n'est unie.
-    printf("aucune des 2 n'est unie\n");
-    int prof1 = donne_profondeur_max(I1);
-    int prof2 = donne_profondeur_max(I2);
-    if(I1 != I2){
-      if (prof1 >= prof2){
-        I1 = Division_aux(I1, prof1);
-        I2 = Division_aux(I2, prof1);
+image difference (image I1, image I2){
+  if (I1 != NULL && !(I1->toutnoir)) {
+      if (I2 == NULL || I2->toutnoir) {
+        return construit_compose(difference(I1->fils[0], I2),
+                                                             difference(I1->fils[1], I2),
+                                                             difference(I1->fils[2], I2),
+                                                             difference(I1->fils[3], I2));
+      } else {
+        return construit_compose(difference(I1->fils[0], I2->fils[0]),
+                                                             difference(I1->fils[1], I2->fils[1]),
+                                                             difference(I1->fils[2], I2->fils[2]),
+                                                             difference(I1->fils[3], I2->fils[3]));
       }
-      else{
-        I1 = Division_aux(I1, prof2);
-        I2 = Division_aux(I2, prof2);
+  } else  {
+    if (I2 != NULL && !(I2->toutnoir)) {
+    return construit_compose(difference(I1, I2->fils[0]),
+                                    difference(I1, I2->fils[1]),
+                                  difference(I1, I2->fils[2]),
+                                  difference(I1, I2->fils[3]));
+    } else {
+      if (I1 == NULL) {
+        if (I2 == NULL) {
+          return construit_blanc();
+        }
+        else {
+          return construit_noir();
+        }
+      }
+      else {
+        if (I2 == NULL) { return construit_noir();
+        }
+        else {
+          return construit_blanc();
+        }
       }
     }
-
-    return construit_compose(difference(I1 -> fils[0], I2 -> fils[0]),
-                             difference(I1 -> fils[1], I2 -> fils[1]),
-                             difference(I1 -> fils[2], I2 -> fils[2]),
-                             difference(I1 -> fils[3], I2 -> fils[3]));
   }
 }
 
