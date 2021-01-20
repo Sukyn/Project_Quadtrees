@@ -692,15 +692,10 @@ image lecture_au_clavier(){
     image f1 = lecture_au_clavier();
     image f2 = lecture_au_clavier();
     image f3 = lecture_au_clavier();
-    p = construit_compose(f0, f1, f2, f3);
-  } else if (input == 'N'){
-    p = construit_noir();
-  } else if (input == 'B'){
-    p = construit_blanc();
-  } else {
-    p = lecture_au_clavier();
-  }
-  return p;
+    return construit_compose(f0, f1, f2, f3);
+  } else if (input == 'N')  return construit_noir();
+    else if (input == 'B')  return construit_blanc();
+    else return lecture_au_clavier();
 }
 
 image lecture_au_fichier(FILE* fichier){
@@ -1310,7 +1305,7 @@ int main() {
   testNegatif();
   testArrondit();
   testAlea();
-  //testLectureAuClavier(); //Elle fonctionne, c'est juste qu'il faut rentrer un truc si on la met pas en commentaire et c'est chiant
+  testLectureAuClavier(); //Elle fonctionne, c'est juste qu'il faut rentrer un truc si on la met pas en commentaire et c'est chiant
 
   //testTabdeChartoImage(); //erreur de segmentation
   //testDifference(); // segmentation fault
