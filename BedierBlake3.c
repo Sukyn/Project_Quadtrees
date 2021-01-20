@@ -509,11 +509,11 @@ char a2k(int k, image I, int height, int length, int size){
   else {
     size = size/2;
     if (height >= size) {
-      if (length >= size)      return a2k(k-1, I->fils[3], height%(size), length%size, size);
+      if (length >= size)       return a2k(k-1, I->fils[3], height%size, length%size, size);
       else                      return a2k(k-1, I->fils[2], height%size, length%size, size);
-    } else if (length >= size) return a2k(k-1, I->fils[1], height%size, length%size, size);
+    } else if (length >= size)  return a2k(k-1, I->fils[1], height%size, length%size, size);
       else                      return a2k(k-1, I->fils[0], height%size, length%size, size);
-  }
+    }
 }
 
 void affichage2kpixel(int k, image I){
