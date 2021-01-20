@@ -283,30 +283,7 @@ image Division (image I){
   // la profondeur a laquelle il faudra diviser tout les carrés qui ne le sont pas deja
   Division_aux(I, donne_profondeur_max(I));}
 
-/* Procédure qui nous permet de transformer une image en tableau de caractères
-@param : L'image que l'on souhaite transcrire
-@return : La chaîne de caractère associée
-*/
-/* Procédure auxiliaire */
-void image_divise_to_char_aux(image I, int pos_x, int pos_y, char(* imageI)[], int length, int original){
-if(I == NULL){
-    (*imageI)[pos_y*original+pos_x]='.';
 
-  } else if (I->toutnoir) {
-      (*imageI)[pos_y*original+pos_x]='8';
-
-  } else{
-    length = length/2;
-      image_divise_to_char_aux(I->fils[0], pos_x, pos_y,                   imageI, length, original);
-      image_divise_to_char_aux(I->fils[1], pos_x + length, pos_y,          imageI, length, original);
-      image_divise_to_char_aux(I->fils[2], pos_x, pos_y + length,          imageI, length, original);
-      image_divise_to_char_aux(I->fils[3], pos_x + length, pos_y + length, imageI, length, original);
-  }
-}
-/* Procédure principale */
-void image_divise_to_char(image I, char(* imageI)[], int length){
-  image_divise_to_char_aux(Division(I), 0, 0, imageI, length, length);
-}
 
 /* Fonction qui construit une image de profondeur de n, toute blanche
 @param : n la donne_profondeur
@@ -415,24 +392,100 @@ void affiche_profondeur(image I) { affiche_prof_aux(I, 0) ; }
 @return : Aucun
 */
 
-/* Pixel : pourquoi les fonctions outils sont à 3km ? Très mal organisé,
-très pénible
-un tableau à deux dimensiosn serait plus clair
-   L'énoncé dit de ne pas passer par un tableau, il faut imprimer à la volée
 
-   Votre code est très lourd :   faire une copie qui est complétée à
-profondeur prof(I), ensuite transccriptio dans un tableau (là, ce serait
-déjà mieux si vous pouviez transcrire dans le tableau sans passer par
-une copie que vous explosez) puis afichage du tabeau
 
-Je crois que vous avez un bug si l'image est moins profonde que la
-définition k=3 i=.NBNB
-Si je veux afficher k=1
-i=.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNBN,
-vous explosez la mémoire pour afficher 4 char.
+
+/* Procédure qui nous permet de transformer une image en tableau de caractères
+@param : L'image que l'on souhaite transcrire
+@return : La chaîne de caractère associée
 */
+/* Procédure auxiliaire */
+void image_divise_to_char_aux(image I, int pos_x, int pos_y, char(* imageI)[], int length, int original){
+if(I == NULL){
+    (*imageI)[pos_y*original+pos_x]='.';
 
+  } else if (I->toutnoir) {
+      (*imageI)[pos_y*original+pos_x]='8';
+
+  } else{
+    length = length/2;
+      image_divise_to_char_aux(I->fils[0], pos_x, pos_y,                   imageI, length, original);
+      image_divise_to_char_aux(I->fils[1], pos_x + length, pos_y,          imageI, length, original);
+      image_divise_to_char_aux(I->fils[2], pos_x, pos_y + length,          imageI, length, original);
+      image_divise_to_char_aux(I->fils[3], pos_x + length, pos_y + length, imageI, length, original);
+  }
+}
+/* Procédure principale */
+void image_divise_to_char(image I, char(* imageI)[], int length){
+  image_divise_to_char_aux(Division(I), 0, 0, imageI, length, length);
+}
+
+
+
+/*fonction qui prend un tableau d'entier et le renvoie mélanger ( en echangant 2 à 2 les valeurs)
+@param : int aleas[] : un tableau d'entier
+         int max : un entier indiquant la taille du tableau
+*/
+void repartitNoir(int aleas[], int max){
+  for(int i = 0; i< max; i++){
+    int pos1 = rand()%max;
+    int pos2 = rand()%max;
+    int tmp;
+
+    tmp = aleas[pos1];
+    aleas[pos1]=aleas[pos2];
+    aleas[pos2]=tmp;
+  }
+}
+
+/*procédure auxiliaire de alea, renvoie une image blanche avec des pixels noirs
+@param : int n : un entier indiquant la profonfeur de l'image
+         int aleas[] : un tableau d'entier avec le nombre de cases egales au nombres de fils de l'images voulue, avec des 1 la ou on veut des pixels noirs
+*/
+image construit_alea(int n, int aleas[], int* i){
+  if(n==0){
+    (*i)++;
+    if (aleas[*i] == 1) return construit_noir();
+    else return construit_blanc();
+  }
+  else return construit_compose(construit_alea((n-1), aleas, i),
+                                construit_alea((n-1), aleas, i),
+                                construit_alea((n-1), aleas, i),
+                                construit_alea((n-1), aleas, i));
+}
+
+/* Fonction qui retourne une image de profondeur  choisit, comprenant un nombre
+donné de pixels noirs.
+@param : int profondeur : la profondeur voulue
+         int pixelsnoir : le nombre de pixels noir à placer
+@return : une image avec pixelsnoir points noirs
+*/
+image alea(int profondeur,int pixelsnoir){
+
+  int max = (int) pow(4,profondeur);
+  if(pixelsnoir > max){
+    return construit_noir();
+  }
+  int aleas[max];
+  int pos = 0;
+  for(int j = 0 ; j < pixelsnoir; j++){
+    aleas[j]=1;
+    pos++;
+  }
+  for(int i = pos; i< max; i++){
+    aleas[i]=0;
+  }
+
+  repartitNoir(aleas, max);
+  int pi = -1;
+  return construit_alea(profondeur, aleas, &pi);
+}
+
+
+/*
 void affichage2kpixel(image image1){
+
+
   int profondeur = donne_profondeur_max(image1);
   int length = pow(2, profondeur);
   char I[length*length];
@@ -447,6 +500,34 @@ void affichage2kpixel(image image1){
 
   printf("\n");
 }
+*/
+
+char a2k(int k, image I, int height, int length, int size){
+  if (I == NULL) return '.';
+  if (I->toutnoir) return '8';
+  if (k == 0) return '/';
+  else {
+    size = size/2;
+    if (height >= size) {
+      if (length >= size)      return a2k(k-1, I->fils[3], height%(size), length%size, size);
+      else                      return a2k(k-1, I->fils[2], height%size, length%size, size);
+    } else if (length >= size) return a2k(k-1, I->fils[1], height%size, length%size, size);
+      else                      return a2k(k-1, I->fils[0], height%size, length%size, size);
+  }
+}
+
+void affichage2kpixel(int k, image I){
+  int size = pow(2, k);
+  for (int height = 0; height < size; height++) {
+    for (int length = 0; length < size; length++){
+      putchar(a2k(k, I, height, length, size));
+    }
+    putchar('\n');
+  }
+}
+
+
+
 
 /* ----------------------------------------------------------------------
                     FONCTIONS DEMANDEES
@@ -688,81 +769,6 @@ int CompteSousImagePleine(image I, int n){
 
 
 
-/*procédure auxiliaire de alea
-@param : image *I : une image I en in/out
-         int aleas[]: un tableau d'entier
-         int *j : un entier j nous servant de compteur
-         int taille : un entier indiquant la taille du tableau
-         int profondeur : un entier indiquant la profondeur de l'image I
-*/
-void alea_boucle(image* I, int* i, int aleas[], int* j,int taille, int profondeur){
-  if(*j != taille){
-      if((*I==NULL) || ((*I)->toutnoir)){
-
-        if((*i) == aleas[*j]){
-          (*j)++;
-          remplaceBlancParNoir(I);
-        }
-        (*i)++;
-      }
-      else {
-        for(int k = 0; k < 4; k++)
-          alea_boucle(&((*I)->fils[k]), i, aleas, j,taille, profondeur);
-      }
-  }
-}
-
-/* Fonction qui retourne une image de profondeur  choisit, comprenant un nombre
-donné de pixels noirs.
-@param : int profondeur : la profondeur voulue
-         int pixelsnoir : le nombre de pixels noir à placer
-@return : une image avec pixelsnoir points noirs
-*/
-
-/*
-Alea : A nouveau les outils sont à 3km, tout dispersés
-
-Donc en bref, vous faites une imae pleine, vous faites un tableau de
-taille n dans lequel vous mettez n nombres de 1 à 4^k
-puis vous les placez
-
-Division_aux(construit_image_prof(profondeur), profondeur);
-je ne compredsn pas : vous créez une image complete de prof p, et vous
-la comlétez à p ? Mais elle l'est déjà !
-En fait, ça fait juste une copie (aevc aspillageg memoire de l'image
-originelle)
-
-Votre technique pour que les n nombres soient differents est horrible
-n nombres tirés au hasard, puis
-trier les elements, puis reperer les doublons, refaire un tiraeg pour
-chaque doublon
-    et si il y a eu une modif, recommencer : trier etc...
-Votre tri est insertion simple donc quadrartique
-Si n = 4^k/2, il vous faudra de lo'rdre de ln n itérations, donc
-compleité totale de l'ordre de n^2 * ln n
-si n s'approche de 4^k, disons 4^k-1, il faudra de l'ordre de n
-itérrations, sonc comp totale de l'orde de n^3
-*/
-image alea(int profondeur,int pixelsnoir){
-  if(pixelsnoir > (int)pow(4,profondeur)) return construit_noir();
-  image I = Division_aux(construit_image_prof(profondeur), profondeur);
-
-  int aleas[pixelsnoir];
-  int max = (int)pow(4,profondeur);
-
-  for(int j = 0 ; j < pixelsnoir; j++){
-    aleas[j]=rand()%(max);
-  }
-
-  enleveDoublon(aleas, pixelsnoir, max);
-
-  int i = 0;
-  int j = 0;
-  alea_boucle(&I, &i, aleas, &j, pixelsnoir, max);
-  return I;
-
-
-}
 
 
 
@@ -1324,13 +1330,14 @@ int main() {
   testNegatif();
   testArrondit();
   testAlea();
-  testLectureAuClavier(); //Elle fonctionne, c'est juste qu'il faut rentrer un truc si on la met pas en commentaire et c'est chiant
+  //testLectureAuClavier(); //Elle fonctionne, c'est juste qu'il faut rentrer un truc si on la met pas en commentaire et c'est chiant
 
   //testTabdeChartoImage(); //erreur de segmentation
   //testDifference(); // segmentation fault
   //testCompteSousImagePleine();
-
-  affichage2kpixel(alea(5,80));
+  image I = alea(5,80);
+  affichage2kpixel(5, I);
+    putchar('\n');
   return 0;
 }
 
