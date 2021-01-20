@@ -283,30 +283,7 @@ image Division (image I){
   // la profondeur a laquelle il faudra diviser tout les carrés qui ne le sont pas deja
   Division_aux(I, donne_profondeur_max(I));}
 
-/* Procédure qui nous permet de transformer une image en tableau de caractères
-@param : L'image que l'on souhaite transcrire
-@return : La chaîne de caractère associée
-*/
-/* Procédure auxiliaire */
-void image_divise_to_char_aux(image I, int pos_x, int pos_y, char(* imageI)[], int length, int original){
-if(I == NULL){
-    (*imageI)[pos_y*original+pos_x]='.';
 
-  } else if (I->toutnoir) {
-      (*imageI)[pos_y*original+pos_x]='8';
-
-  } else{
-    length = length/2;
-      image_divise_to_char_aux(I->fils[0], pos_x, pos_y,                   imageI, length, original);
-      image_divise_to_char_aux(I->fils[1], pos_x + length, pos_y,          imageI, length, original);
-      image_divise_to_char_aux(I->fils[2], pos_x, pos_y + length,          imageI, length, original);
-      image_divise_to_char_aux(I->fils[3], pos_x + length, pos_y + length, imageI, length, original);
-  }
-}
-/* Procédure principale */
-void image_divise_to_char(image I, char(* imageI)[], int length){
-  image_divise_to_char_aux(Division(I), 0, 0, imageI, length, length);
-}
 
 /* Fonction qui construit une image de profondeur de n, toute blanche
 @param : n la donne_profondeur
@@ -415,24 +392,40 @@ void affiche_profondeur(image I) { affiche_prof_aux(I, 0) ; }
 @return : Aucun
 */
 
-/* Pixel : pourquoi les fonctions outils sont à 3km ? Très mal organisé,
-très pénible
-un tableau à deux dimensiosn serait plus clair
-   L'énoncé dit de ne pas passer par un tableau, il faut imprimer à la volée
 
-   Votre code est très lourd :   faire une copie qui est complétée à
-profondeur prof(I), ensuite transccriptio dans un tableau (là, ce serait
-déjà mieux si vous pouviez transcrire dans le tableau sans passer par
-une copie que vous explosez) puis afichage du tabeau
 
-Je crois que vous avez un bug si l'image est moins profonde que la
-définition k=3 i=.NBNB
-Si je veux afficher k=1
-i=.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNB.BNBN,
-vous explosez la mémoire pour afficher 4 char.
+
+/* Procédure qui nous permet de transformer une image en tableau de caractères
+@param : L'image que l'on souhaite transcrire
+@return : La chaîne de caractère associée
 */
+/* Procédure auxiliaire */
+void image_divise_to_char_aux(image I, int pos_x, int pos_y, char(* imageI)[], int length, int original){
+if(I == NULL){
+    (*imageI)[pos_y*original+pos_x]='.';
 
+  } else if (I->toutnoir) {
+      (*imageI)[pos_y*original+pos_x]='8';
+
+  } else{
+    length = length/2;
+      image_divise_to_char_aux(I->fils[0], pos_x, pos_y,                   imageI, length, original);
+      image_divise_to_char_aux(I->fils[1], pos_x + length, pos_y,          imageI, length, original);
+      image_divise_to_char_aux(I->fils[2], pos_x, pos_y + length,          imageI, length, original);
+      image_divise_to_char_aux(I->fils[3], pos_x + length, pos_y + length, imageI, length, original);
+  }
+}
+/* Procédure principale */
+void image_divise_to_char(image I, char(* imageI)[], int length){
+  image_divise_to_char_aux(Division(I), 0, 0, imageI, length, length);
+}
+
+
+
+/* Ancienne version
 void affichage2kpixel(image image1){
+
+
   int profondeur = donne_profondeur_max(image1);
   int length = pow(2, profondeur);
   char I[length*length];
@@ -447,6 +440,34 @@ void affichage2kpixel(image image1){
 
   printf("\n");
 }
+*/
+
+char a2k(int k, image I, int height, int length, int size){
+  if (I == NULL) return '.';
+  if (I->toutnoir) return '8';
+  if (k == 0) return '/';
+  else {
+    size = size/2;
+    if (height >= size) {
+      if (length >= size)      return a2k(k-1, I->fils[3], height%(size), length%size, size);
+      else                      return a2k(k-1, I->fils[2], height%size, length%size, size);
+    } else if (length >= size) return a2k(k-1, I->fils[1], height%size, length%size, size);
+      else                      return a2k(k-1, I->fils[0], height%size, length%size, size);
+  }
+}
+
+void affichage2kpixel(int k, image I){
+  int size = pow(2, k);
+  for (int height = 0; height < size; height++) {
+    for (int length = 0; length < size; length++){
+      putchar(a2k(k, I, height, length, size));
+    }
+    putchar('\n');
+  }
+}
+
+
+
 
 /* ----------------------------------------------------------------------
                     FONCTIONS DEMANDEES
@@ -1324,13 +1345,14 @@ int main() {
   testNegatif();
   testArrondit();
   testAlea();
-  testLectureAuClavier(); //Elle fonctionne, c'est juste qu'il faut rentrer un truc si on la met pas en commentaire et c'est chiant
+  //testLectureAuClavier(); //Elle fonctionne, c'est juste qu'il faut rentrer un truc si on la met pas en commentaire et c'est chiant
 
   //testTabdeChartoImage(); //erreur de segmentation
   //testDifference(); // segmentation fault
   //testCompteSousImagePleine();
-
-  affichage2kpixel(alea(5,80));
+  image I = alea(5,80);
+  affichage2kpixel(5, I);
+    putchar('\n');
   return 0;
 }
 
