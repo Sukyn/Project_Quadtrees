@@ -729,47 +729,28 @@ image lecture_au_fichier(FILE* fichier){
 @return : Le nombre de sous images pleines
 */
 
-/* CSIP : quadratique */
-int CompteSousImagePleine(image I, int n){
-  if (I == NULL || I->toutnoir) {
-    if (n == 0) return 1;
-    else return 0;
-  }
-  else {
-    int v1 = donne_profondeur_max(I->fils[0]);
-    if (v1 > n)
-        return (CompteSousImagePleine(I->fils[0], n) +
-                CompteSousImagePleine(I->fils[1], n) +
-                CompteSousImagePleine(I->fils[2], n) +
-                CompteSousImagePleine(I->fils[3], n));
-    int v2 = donne_profondeur_max(I->fils[1]);
-    if (v2 > n)
-        return (CompteSousImagePleine(I->fils[0], n) +
-                CompteSousImagePleine(I->fils[1], n) +
-                CompteSousImagePleine(I->fils[2], n) +
-                CompteSousImagePleine(I->fils[3], n));
-    int v3 = donne_profondeur_max(I->fils[2]);
-    if (v3 > n)
-        return (CompteSousImagePleine(I->fils[0], n) +
-                CompteSousImagePleine(I->fils[1], n) +
-                CompteSousImagePleine(I->fils[2], n) +
-                CompteSousImagePleine(I->fils[3], n));
-    int v4 = donne_profondeur_max(I->fils[3]);
-    if (v4 > n)
-        return (CompteSousImagePleine(I->fils[0], n) +
-                CompteSousImagePleine(I->fils[1], n) +
-                CompteSousImagePleine(I->fils[2], n) +
-                CompteSousImagePleine(I->fils[3], n));
-    if (v1 == n && v2 == n && v3 == n && v4 == n)
-      return 1;
-    else
-      return 0;
-  }
+bool estPleine(image I, int h){
+    if (h == 0)
+        return ((I == NULL) || (I->toutnoir));
+    else if (I != NULL && !(I->toutnoir))
+        return estPleine(I->fils[0], h-1)
+        && estPleine(I->fils[1], h-1)
+        && estPleine(I->fils[2], h-1)
+        && estPleine(I->fils[3], h-1);
+    else return (h == 0);
 }
 
-
-
-
+int CompteSousImagePleine(image I, int hauteur){
+    if((I == NULL) || (I->toutnoir)){
+        return estPleine(I, hauteur);
+    } else {
+        return estPleine(I, hauteur)
+             + CompteSousImagePleine(I->fils[0], hauteur)
+             + CompteSousImagePleine(I->fils[1], hauteur)
+             + CompteSousImagePleine(I->fils[2], hauteur)
+             + CompteSousImagePleine(I->fils[3], hauteur);
+    }
+}
 
 
 /* Fonction qui prend en argument la profondeur k et renvoie une image de profondeur k
@@ -1239,7 +1220,7 @@ void testAlea(){
 @param : aucun
 @return: aucun
 */
-/*void testCompteSousImagePleine(){
+void testCompteSousImagePleine(){
    image I1 = construit_compose(construit_compose(construit_blanc(),
                                                   construit_blanc(),
                                                   construit_noir(),
@@ -1300,12 +1281,11 @@ void testAlea(){
                                                                                     construit_blanc(),
                                                                                     construit_noir(),
                                                                                     construit_blanc()))));
-  //image I2 = tabdechar_to_image(phrase2);
-  affichage2kpixel(I2);
+  //image I2 = tabdechar_to_image(phrase2)
   //assert(CompteSousImagePleine(I1,2)==1);
   assert(CompteSousImagePleine(I2,2)==2);
 }
-*/
+
 
 /* ----------------------------------------------------------------------
                                 MAIN
@@ -1334,7 +1314,7 @@ int main() {
 
   //testTabdeChartoImage(); //erreur de segmentation
   //testDifference(); // segmentation fault
-  //testCompteSousImagePleine();
+  testCompteSousImagePleine();
   image I = alea(5,80);
   affichage2kpixel(5, I);
     putchar('\n');
