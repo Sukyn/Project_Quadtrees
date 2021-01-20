@@ -28,17 +28,31 @@ double e(float precision){
   double v_n = 1.; //v_n avec v_1 = 1/1!
   double v_nplus = 1.5; //v_n+1 avec v_2 = 1/1! + 1/2!
   int n = 2;
+  int sum = 1;
   while ((v_nplus - v_n) > precision){
     v_n = v_nplus;
+    sum = sum*(1/n);
     n++;
-    v_nplus += 1/factorielle(n);
+    v_nplus += sum;
   }
   return v_n;
 }
 
 //Implementez la fonction puissance(x,n),x réel,n entier positif ou nul.
-double puissance(double x, unsigned int n){
-  double res=1;
+double puissance(double x,int n){
+  double res=1.;
+  if (n < 0) return 1/puissance(x, -n);
+  while(n>=1) {
+    res*=x;
+    n--;
+  }
+  return(res);
+}
+
+//Implementez la fonction puissance(x,n),x réel,n entier positif ou nul.
+float puissanceFloat(float x, unsigned int n){
+  float res=1.;
+  if (n < 0) return 1/puissance(x, -n);
   while(n>=1) {
     res*=x;
     n--;
@@ -111,12 +125,12 @@ double X_rec(int n){
 
 int main(){
   double precision = 0.000001;
-  printf("1.1^10 = %f", puissance(1.1, 10));
-  printf("1.01^100 = %f", puissance(1.01, 100));
-  printf("1.001^1000 = %f", puissance(1.001, 1000));
-  printf("e (méthode 1/n!) = %f", e(precision));
-  printf("e (méthode (1+1/n)^n)) = %f", puissance(1 + precision, (int)(1/precision)));
-  printf("X100 itératif = %f", X_it(100));
-  printf("X100 récursif = %f", X_rec(100));
+  printf("1.1^10 = %f\n", puissance(1.1, 10));
+  printf("1.01^100 = %f\n", puissance(1.01, 100));
+  printf("1.001^1000 = %f\n", puissance(1.001, 1000));
+  printf("e (méthode 1/n!) = %f\n", e(precision));
+  printf("e (méthode (1+1/n)^n)) = %f\n", puissance(1 + precision, (int)(1/precision)));
+  printf("X100 itératif = %f\n", X_it(100));
+  printf("X100 récursif = %f\n", X_rec(100));
 
 }
