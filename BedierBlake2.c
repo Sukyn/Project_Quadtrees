@@ -297,6 +297,12 @@ typedef struct ListeDeListe
     struct ListeDeListe* suite;
 } ListeDeListe ;
 
+
+/*Fonction qui ajoute une liste de int au début d'une liste de liste de int.
+@param : Liste x : liste a ajouter
+         ListeDeListe L : ListedeListe a laquelle on ajoute x
+@return : Une liste de Liste de int
+*/
 ListeDeListe ajouteVersionListeDeListe (Liste x, ListeDeListe L){
   //ListeDeListe tmp = (ListeDeListe) malloc(sizeof(ListeDeListe));
   ListeDeListe tmp;
@@ -306,11 +312,22 @@ ListeDeListe ajouteVersionListeDeListe (Liste x, ListeDeListe L){
   return tmp ;
 }
 
+/*Fonction qui renvoie la liste de liste L privée de son premier élément.
+@param : ListeDeListe L : la ListeDeListe ou on veut acceder a la suite
+@return : une ListedeListe
+*/
 ListeDeListe suiteVersionListeDeListe(ListeDeListe L){
   return *(&L)->suite;
 }
 
-ListeDeListe AETTL(int x, ListeDeListe l){ // ajoute en tete toute liste
+/*Fonction Ajoute En Tete Toute Liste : renvoie une liste de liste , avec un entier
+ajoute devant chaque liste contenues dans la liste de liste fournit en parametre
+dans une ListDeListe.
+@param : int x : l'enter qu'on veut ajouter à toutes les Liste
+         ListDeListe l : la liste de liste contenant les listes auquelles on veut
+         ajouter x
+*/
+ListeDeListe AETTL(int x, ListeDeListe l){
   if(estVide(l.liste) && l.suite == NULL){
     return l;
   }
@@ -319,7 +336,13 @@ ListeDeListe AETTL(int x, ListeDeListe l){ // ajoute en tete toute liste
   }
 }
 
-ListeDeListe ATP(int x, Liste l){ // ajoute toute position
+/*Fonction ajoute toute position : fonction qui ajoute un x a toutes les positions
+possibles d'une liste
+@param : int x : l'entier qu'on veut ajouter
+         Liste l : la liste a laquelle on veut ajouter les x a toutes les
+         positions possibles.
+@return : une ListdeListe */
+ListeDeListe ATP(int x, Liste l){
   if(estVide(l)){
     ListeDeListe L;
     L.liste->nombre=x;
@@ -332,6 +355,10 @@ ListeDeListe ATP(int x, Liste l){ // ajoute toute position
   }
 }
 
+/*Fonction concatène : Concatène 2 listes de listes, a partir de 2 listes de listes
+en forme une seule.
+@param : ListeDeListe l1, l2 : les 2 listes de listes à concatener
+@return : une nouvelle ListDeListe formée par les 2 précédentes*/
 ListeDeListe concat(ListeDeListe l1, ListeDeListe l2){
   if(estVide(l1.liste) && l1.suite == NULL){
     return l2;
@@ -341,6 +368,11 @@ ListeDeListe concat(ListeDeListe l1, ListeDeListe l2){
   }
 }
 
+/*Fonction Ajoute Toute Position Toute Liste : une fonction qui a toutes les listes
+d'une listes de liste ajoute un entier a toutes le positions possibles
+@param : int n : l'entier a ajouter partout ou c'est possible
+         ListeDeListe l : La ListeDeListe auquelle on veut rajouter n
+@return : une ListDeListe*/
 ListeDeListe ATPTL(int n, ListeDeListe l){ // Ajoute Toute Position Toute Liste
   if(estVide(l.liste) && (&l)->suite == NULL){
     return l;
@@ -350,6 +382,12 @@ ListeDeListe ATPTL(int n, ListeDeListe l){ // Ajoute Toute Position Toute Liste
   }
 }
 
+/*Fonction qui renvoie la liste des positions possibles dans une liste pour les entiers de 1 à n
+@param : int n : le nombre d'entier que l'on veut dans chaque liste, chaque listes contenant les
+         entiers de 1 à n.
+@return : une ListeDeListe, donc chaque liste contient les positions possibles pour les entiers
+          de 1 à n
+*/
 ListeDeListe permutations(int n){
   if(n==0){
     ListeDeListe L;
@@ -365,7 +403,7 @@ ListeDeListe permutations(int n){
   }
 }
 
-/* procdédure EliminePositionPaires élimine un élément sur deux : les pointeurs de la liste chainée ne pointent
+/* procédédure EliminePositionPaires élimine un élément sur deux : les pointeurs de la liste chainée ne pointent
 plus vers le suivant, mais vers le suivant du suivant.
 -prend en parametre [in/out] l'adresse de la liste L
 -la procédure modifie la liste chainée.
@@ -594,6 +632,8 @@ int main() {
     bool somme = EstPalindrome(l);
     printf("Somme ? = %d\n\n", somme);
     poup(l);
+    ListeDeListe L;
+
 
     return 0;
 }
