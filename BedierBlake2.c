@@ -291,7 +291,79 @@ bool SousEnsemble(Liste l1, Liste l2){
   return SousEnsemble(l1,l2);
 }
 
-//void Permutations à faire
+typedef struct ListeDeListe
+{
+    Liste liste;
+    struct ListeDeListe* suite;
+} ListeDeListe ;
+
+ListeDeListe ajouteVersionListeDeListe (Liste x, ListeDeListe L){
+  //ListeDeListe tmp = (ListeDeListe) malloc(sizeof(ListeDeListe));
+  ListeDeListe tmp;
+  (tmp).liste = x ;
+  ListeDeListe* ptrL = &L;
+  (tmp).suite = ptrL ;
+  return tmp ;
+}
+
+ListeDeListe suiteVersionListeDeListe(ListeDeListe L){
+  return *(&L)->suite;
+}
+
+ListeDeListe AETTL(int x, ListeDeListe l){ // ajoute en tete toute liste
+  if(estVide(l.liste) && l.suite == NULL){
+    return l;
+  }
+  else{
+    return ajouteVersionListeDeListe(ajoute(x,l.liste),AETTL(x,l));
+  }
+}
+
+ListeDeListe ATP(int x, Liste l){ // ajoute toute position
+  if(estVide(l)){
+    ListeDeListe L;
+    L.liste->nombre=x;
+    L.liste->suivant==NULL;
+    L.suite = NULL;
+    return L;
+  }
+  else{
+    return ajouteVersionListeDeListe(ajoute(x,l),AETTL(premier(l),ATP(x,l->suivant)));
+  }
+}
+
+ListeDeListe concat(ListeDeListe l1, ListeDeListe l2){
+  if(estVide(l1.liste) && l1.suite == NULL){
+    return l2;
+  }
+  else{
+    return ajouteVersionListeDeListe(l1.liste ,concat(suiteVersionListeDeListe(l1),l2));
+  }
+}
+
+ListeDeListe ATPTL(int n, ListeDeListe l){ // Ajoute Toute Position Toute Liste
+  if(estVide(l.liste) && (&l)->suite == NULL){
+    return l;
+  }
+  else{
+    return concat(ATP(n,l.liste), ATPTL(n, suiteVersionListeDeListe(l)));
+  }
+}
+
+ListeDeListe permutations(int n){
+  if(n==0){
+    ListeDeListe L;
+    Liste L2;
+    initVide(&L2);
+    L.liste = L2;
+    L.liste->suivant==NULL;
+    L.suite = NULL;
+    return L;
+  }
+  else{
+    return ATPTL(n,permutations(n-1));
+  }
+}
 
 /* procdédure EliminePositionPaires élimine un élément sur deux : les pointeurs de la liste chainée ne pointent
 plus vers le suivant, mais vers le suivant du suivant.
@@ -496,6 +568,11 @@ bool SommeAvantApres(Liste L)
   SommeAvantApresAux(L, cptAvant, &cptApres, &res);
   return res;
 }
+
+
+
+
+
 /* --------------- */
 
 
