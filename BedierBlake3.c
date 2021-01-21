@@ -504,11 +504,11 @@ char a2k(int k, image I, int height, int length, int size){
   else {
     size = size/2;
     if (height >= size) {
-      if (length >= size)      return a2k(k-1, I->fils[3], height%(size), length%size, size);
+      if (length >= size)       return a2k(k-1, I->fils[3], height%size, length%size, size);
       else                      return a2k(k-1, I->fils[2], height%size, length%size, size);
-    } else if (length >= size) return a2k(k-1, I->fils[1], height%size, length%size, size);
+    } else if (length >= size)  return a2k(k-1, I->fils[1], height%size, length%size, size);
       else                      return a2k(k-1, I->fils[0], height%size, length%size, size);
-  }
+    }
 }
 
 void affichage2kpixel(int k, image I){
@@ -680,22 +680,16 @@ image difference (image I1, image I2){
 @return : L'image construite à partir des indications de l'utilisateur
 */
 image lecture_au_clavier(){
-  image p = NULL;
   char input = getchar();
   if (input == '.'){
     image f0 = lecture_au_clavier();
     image f1 = lecture_au_clavier();
     image f2 = lecture_au_clavier();
     image f3 = lecture_au_clavier();
-    p = construit_compose(f0, f1, f2, f3);
-  } else if (input == 'N'){
-    p = construit_noir();
-  } else if (input == 'B'){
-    p = construit_blanc();
-  } else {
-    p = lecture_au_clavier();
-  }
-  return p;
+    return construit_compose(f0, f1, f2, f3);
+  } else if (input == 'N')  return construit_noir();
+    else if (input == 'B')  return construit_blanc();
+    else return lecture_au_clavier();
 }
 
 image lecture_au_fichier(FILE* fichier){
@@ -725,14 +719,13 @@ image lecture_au_fichier(FILE* fichier){
 */
 
 bool estPleine(image I, int h){
-    if (h == 0)
-        return ((I == NULL) || (I->toutnoir));
+    if (h == 0) return ((I == NULL) || (I->toutnoir));
     else if (I != NULL && !(I->toutnoir))
         return estPleine(I->fils[0], h-1)
         && estPleine(I->fils[1], h-1)
         && estPleine(I->fils[2], h-1)
         && estPleine(I->fils[3], h-1);
-    else return (h == 0);
+    else return 0;
 }
 
 int CompteSousImagePleine(image I, int hauteur){
@@ -1304,7 +1297,7 @@ int main() {
   testNegatif();
   testArrondit();
   testAlea();
-  //testLectureAuClavier(); //Elle fonctionne, c'est juste qu'il faut rentrer un truc si on la met pas en commentaire et c'est chiant
+  testLectureAuClavier(); //Elle fonctionne, c'est juste qu'il faut rentrer un truc si on la met pas en commentaire et c'est chiant
 
   //testTabdeChartoImage(); //erreur de segmentation
   //testDifference(); // segmentation fault
