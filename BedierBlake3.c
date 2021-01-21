@@ -685,7 +685,6 @@ image difference (image I1, image I2){
 @return : L'image construite à partir des indications de l'utilisateur
 */
 image lecture_au_clavier(){
-  image p = NULL;
   char input = getchar();
   if (input == '.'){
     image f0 = lecture_au_clavier();
