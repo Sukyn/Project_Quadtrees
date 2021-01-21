@@ -122,21 +122,6 @@ double X_rec(int n){
   }
 }
 
-
-/*
-double ecartRelatif(double Vattendue, double Vobtenue){
-  double diff;
-  if(Vattendue>Vobtenue){
-    diff = Vattendue - Vobtenue;
-  }
-  else{
-    diff = Vobtenue - Vattendue;
-  }
-  return (diff/Vattendue)*100;
-}
-*/
-
-
 int main(){
   double precision = 0.000001;
   printf("1.1^10 = %f\n", puissance(1.1, 10));
@@ -147,8 +132,8 @@ int main(){
   printf("\nAvec des doubles : 1.001^1000 = %f\n", puissance(1.001, 1000));
   printf("Avec des float : 1.001^1000 = %f\n", puissanceFloat(1.001, 1000));
   printf("On voit qu'il y a bien un effet visible entre utiliser un double plutot qu'un float.\nCalculons l'écart relatif entre ces 2 valeurs\n");
-  //printf("ecart relatif entre les valeurs obtenues par les 2 méthodes : %f%% \n ", ecartRelatif(puissance(1.001, 1000),puissanceFloat(1.001, 1000)));
-
+  printf("Le rapport entre une valeur de type double sur valeur de type float, en pourcentage = %f%%\n",(puissance(1.001, 1000)/puissanceFloat(1.001, 1000))*100);
+  printf("On voit que les valeurs sont quand meme très proche, mais l'écart peut se creuser si on choisit une plus grande puissance de 10, donc il vaut mieux utiliser des doubles\n" );
   printf("\n X100 itératif = %f\n", X_it(100));
   printf("X100 récursif = %f\n", X_rec(100));
 
