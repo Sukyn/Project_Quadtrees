@@ -724,14 +724,13 @@ image lecture_au_fichier(FILE* fichier){
 */
 
 bool estPleine(image I, int h){
-    if (h == 0)
-        return ((I == NULL) || (I->toutnoir));
+    if (h == 0) return ((I == NULL) || (I->toutnoir));
     else if (I != NULL && !(I->toutnoir))
         return estPleine(I->fils[0], h-1)
         && estPleine(I->fils[1], h-1)
         && estPleine(I->fils[2], h-1)
         && estPleine(I->fils[3], h-1);
-    else return (h == 0);
+    else return 0;
 }
 
 int CompteSousImagePleine(image I, int hauteur){
