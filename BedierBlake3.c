@@ -1,7 +1,3 @@
-/*
-Tout est dans le désorde dans ce projet...
-plus pas bien aéré
-*/
 
 #include <stdio.h> // printf, random ...
 #include <stdlib.h> // malloc, free, ...
@@ -26,12 +22,6 @@ typedef struct bloc_image
   } bloc_image ;
 typedef bloc_image *image ;
 
-/*
-Ce compteur nous permettra de vérifier qu'on libère bien la mémoire...
-Il n'est pas nécessaire mais est pratique pour vérifier que notre code est propre.
-*/
-int compteur_memoire = 0;
-
 /* ----------------------------------------------------------------------
                             CONSTRUCTEURS
 ---------------------------------------------------------------------- */
@@ -41,11 +31,6 @@ int compteur_memoire = 0;
 @return : Une nouvelle image blanche
 */
 image construit_blanc(){
-  compteur_memoire++;
-  /* En réalité, on n'utilise pas vraiment la mémoire dans ce cas-ci,
-  puisque le pointeur ne pointe sur rien.
-  Il faudra enlever cette incrémentation à la fin, MAIS il faut d'abord
-  faire en sorte qu'on n'appelle pas free() sur une image blanche dans les autres fonctions ! */
   return NULL ;
 }
 
@@ -55,7 +40,6 @@ image construit_blanc(){
 */
 image construit_noir(){
   image I = (bloc_image*) malloc(sizeof(bloc_image)) ; // On alloue de la mémoire ...
-  compteur_memoire++; // On la compte (cette fois-ci on utilise réellement de la mémoire !)
   I->toutnoir = TRUE ;
   for (int i = 0; i < 4; i++) {
     I->fils[i] = NULL ;
@@ -71,7 +55,6 @@ image construit_noir(){
 */
 image construit_compose(image i1, image i2, image i3, image i4){
   image I = (bloc_image*) malloc(sizeof(bloc_image)) ;
-  compteur_memoire++;
   I->toutnoir = FALSE ;
   I->fils[0] = i1 ;
   I->fils[1] = i2 ;
@@ -95,14 +78,79 @@ void rendmemoire(image* I){
       rendmemoire(&((*I)->fils[i]));
     }
   }
-  compteur_memoire--;
   free(*I);
 }
 
+
+
+
+
+
+
+
+
 /* ----------------------------------------------------------------------
-                            BRIQUES DE BASE
+                            AFFICHAGE NORMAL
 ---------------------------------------------------------------------- */
 
+/* Fonction qui affiche une image selon la notation [.,N,B]
+@param : L'image que l'on souhaite afficher
+@return : Aucun
+*/
+void affiche_normal(image I){
+  if (I == NULL) printf("B") ;
+  else if (I->toutnoir) printf("N") ;
+  else {
+    printf(".") ; //CF. plus bas pour comprendre la notation
+    for (int i = 0; i < 4; i++) {
+      affiche_normal(I->fils[i]) ;
+    }
+  }
+}
+/* Explications sur la notation du "point" :
+Dans le sujet on a l'exemple de .N.BBNBB.N.NNB.NBNNBN,
+en fait le point est print avant l'appel récursif, la suite suivante se lirait
+plus naturellement par (N (BBNB) B (N(NNB(NBNN))BN))
+On doit toujours se retrouver avec 4 fils, donc décomposer en 4 images
+-> N est une image à lui seul
+-> BBNB est bien une image car 4 fils élémentaires
+-> NBNN est une image ayant des fils élémentaires, donc NNB(NBNN) est aussi une image, finalement (N(NNB(NBNN))BN) en est une
+En combinant les 4, on obtient bien une image. Le point sert donc à montrer l'appel récursif */
+
+
+
+
+/* ----------------------------------------------------------------------
+                            AFFICHAGE PROFONDEUR
+---------------------------------------------------------------------- */
+/* Fonction qui affiche l'image en précisant la profondeur de chaque noeud
+@param : L'image à afficher
+@return : Aucun
+*/
+
+/* Fonction auxiliaire */
+void affiche_prof_aux(image I, int profondeur){ // On définit une fonction auxiliaire qui garde en mémoire la profondeur{
+  if (I == NULL) printf("B%d", profondeur) ;
+  else if (I->toutnoir) printf("N%d", profondeur) ;
+  else {
+    printf(".%d", profondeur) ;
+    for (int i = 0; i < 4; i++) {
+      affiche_prof_aux(I->fils[i], profondeur+1) ;
+    }
+  }
+}
+/* Fonction principale */
+void affiche_profondeur(image I) { affiche_prof_aux(I, 0) ; }
+
+
+
+
+
+
+
+/* ----------------------------------------------------------------------
+                            EST NOIRE, EST BLANCHE
+---------------------------------------------------------------------- */
 /* Fonction qui vérifie si une image est toute blanche
 @param L'image que l'on veut tester
 @return TRUE si l'image est toute blanche
@@ -129,17 +177,16 @@ bool est_noire(image I){
        && est_noire(I->fils[3]));
 }
 
-/*Procédure qui remplace une image blanche par une image noire
-@param : image* I : une image en in/out
-@return : aucun
-*/
-void remplaceBlancParNoir(image* I){
-  if(est_blanche(*I)){
-    *I = construit_noir();
-  }
-}
 
 
+
+
+
+
+
+/* ----------------------------------------------------------------------
+                            COPIE
+---------------------------------------------------------------------- */
 /* Fonction qui copie une image dans un nouvel emplacement mémoire
 @param L'image à copier
 @return Une copie de l'image, que l'on peut modifier sans modifier l'originale
@@ -157,6 +204,419 @@ image copie(image I){
 /* Pourquoi ne pas juste faire I_copie = I ?
 Parce que ce sont des pointeurs, et donc ce ne serait pas une copie mais un pointeur vers le même
 Il faut donc créer de nouvelles images */
+
+
+
+
+
+
+
+/* ----------------------------------------------------------------------
+                            AIRE
+---------------------------------------------------------------------- */
+
+/* Fonction qui calcule l'aire d'une image
+Note : On considère que l'aire de l'image est la surface de ses carrés noirs, en partant du principe que l'image
+de base est représentée par un carré de taille 1x1
+@param : L'image dont on cherche l'aire
+@return : Un flottant qui représente cette aire
+*/
+
+double aire(image I){
+  if (est_blanche(I)) return 0;
+  else if (est_noire(I)) return 1;
+  else return (aire(I->fils[0])
+            +  aire(I->fils[1])
+            +  aire(I->fils[2])
+            +  aire(I->fils[3]))/4;
+}
+
+
+
+
+
+
+/* ----------------------------------------------------------------------
+                            MEME DESSIN
+---------------------------------------------------------------------- */
+
+/* Fonction qui vérifie si deux images représentent la même chose
+@param : Les deux images que l'on souhaite comparer
+@return : TRUE si les deux images sont identiques
+*/
+bool meme_dessin(image I, image I2){
+
+  if (est_blanche(I))                 return (est_blanche(I2)) ;
+  else if (est_noire(I))              return (est_noire(I2)) ;
+  else if (I2==NULL || I2->toutnoir)  return FALSE ;
+
+  return (meme_dessin(I->fils[0], I2->fils[0])
+       && meme_dessin(I->fils[1], I2->fils[1])
+       && meme_dessin(I->fils[2], I2->fils[2])
+       && meme_dessin(I->fils[3], I2->fils[3]) ) ;
+}
+
+
+
+
+/* ----------------------------------------------------------------------
+                            DIFFERENCE
+---------------------------------------------------------------------- */
+
+
+/* Fonction qui renvoie une image représentant la différence entre deux images :
+L'image rendue est noire là où l'une des deux images de départ est noire mais l'autre blanche
+@param Les deux images que l'on compare
+@return L'image de la différence
+*/
+image difference (image I1, image I2){
+  if (I1 != NULL && !(I1->toutnoir)) {
+      if (I2 == NULL || I2->toutnoir)
+        return construit_compose(difference(I1->fils[0], I2),
+                                                             difference(I1->fils[1], I2),
+                                                             difference(I1->fils[2], I2),
+                                                             difference(I1->fils[3], I2));
+      else
+        return construit_compose(difference(I1->fils[0], I2->fils[0]),
+                                                             difference(I1->fils[1], I2->fils[1]),
+                                                             difference(I1->fils[2], I2->fils[2]),
+                                                             difference(I1->fils[3], I2->fils[3]));
+  } else  {
+    if (I2 != NULL && !(I2->toutnoir))
+    return construit_compose(difference(I1, I2->fils[0]),
+                                    difference(I1, I2->fils[1]),
+                                  difference(I1, I2->fils[2]),
+                                  difference(I1, I2->fils[3]));
+    else {
+      if (I1 == NULL) {
+        if (I2 == NULL) return construit_blanc();
+        else return construit_noir();
+      }
+      else {
+        if (I2 == NULL)  return construit_noir();
+        else return construit_blanc();
+      }
+    }
+  }
+}
+
+
+
+/* ----------------------------------------------------------------------
+                            LECTURE AU CLAVIER
+---------------------------------------------------------------------- */
+
+/* Fonction qui permet à l'utilisateur de rentrer une image depuis le terminal
+@param : Aucun
+@return : L'image construite à partir des indications de l'utilisateur
+*/
+image lecture_au_clavier(){
+  char input = getchar();
+  if (input == '.'){
+    image f0 = lecture_au_clavier();
+    image f1 = lecture_au_clavier();
+    image f2 = lecture_au_clavier();
+    image f3 = lecture_au_clavier();
+    return construit_compose(f0, f1, f2, f3);
+  } else if (input == 'N')  return construit_noir();
+    else if (input == 'B')  return construit_blanc();
+    else return lecture_au_clavier();
+}
+
+
+
+
+/* ----------------------------------------------------------------------
+                            COMPTE SOUS IMAGES
+---------------------------------------------------------------------- */
+
+/* Fonction qui compte le nombre de sous image pleine à une profondeur donnée
+@param : L'image que l'on examine, la hauteur qui nous intéresse
+@return : Le nombre de sous images pleines
+*/
+
+bool estPleine(image I, int h){
+    if (h == 0) return ((I == NULL) || (I->toutnoir));
+    else if (I != NULL && !(I->toutnoir))
+        return estPleine(I->fils[0], h-1)
+        && estPleine(I->fils[1], h-1)
+        && estPleine(I->fils[2], h-1)
+        && estPleine(I->fils[3], h-1);
+    else return 0;
+}
+
+int CompteSousImagePleine(image I, int hauteur){
+    if((I == NULL) || (I->toutnoir)){
+        return estPleine(I, hauteur);
+    } else {
+        return estPleine(I, hauteur)
+             + CompteSousImagePleine(I->fils[0], hauteur)
+             + CompteSousImagePleine(I->fils[1], hauteur)
+             + CompteSousImagePleine(I->fils[2], hauteur)
+             + CompteSousImagePleine(I->fils[3], hauteur);
+    }
+}
+
+
+
+
+/* ----------------------------------------------------------------------
+                            ARRONDIT
+---------------------------------------------------------------------- */
+
+/* Procédure qui arrondit les fils à une profondeur demandée d'une image
+@param : L'image que l'on souhaite arrondir, la profondeur a partir de laquelle on souhaite arrondir
+@return : Aucun
+*/
+
+void arrondit(image* I, int k) {
+  if (k == 0)  {
+    if (aire(*I) < 0.5) {
+      rendmemoire(I);
+      (*I) = NULL ;
+    } else (*I)->toutnoir = TRUE ;
+  }
+  else if (((*I) != NULL) && !((*I)->toutnoir)) {
+      for (int i = 0; i < 4; i++) {
+        arrondit(&((*I)->fils[i]), k-1);
+      }
+  }
+}
+
+
+
+
+
+/* ----------------------------------------------------------------------
+                            NEGATIF
+---------------------------------------------------------------------- */
+
+/* Procédure qui transforme une image en sa forme négative,
+c'est à dire que les cases blanches deviennent noires et réciproquement.
+@param : L'image que l'on souhaite inverser
+@return : Aucun
+*/
+void negatif(image* I) {
+  if (*I == NULL)  *I = construit_noir();
+  else if ((*I)->toutnoir) {
+    rendmemoire(I);
+    *I = construit_blanc();
+  } else {
+    for (int i = 0; i < 4; i++) {
+      negatif(&((*I)->fils[i]));
+    }
+  }
+}
+
+
+
+/* ----------------------------------------------------------------------
+                            SIMPLIFIE
+---------------------------------------------------------------------- */
+
+/* Procédure qui simplifie une image :
+C'est à dire que si tous les enfants d'une image sont de la même couleur, on considère qu'il n'est pas utile
+d'avoir des fils et on les remplace par un élément simple (noir ou blanc)
+@param : L'image que l'on souhaite simplifier
+@return : Aucun
+*/
+
+void simplifie(image* I){
+  if (*I != NULL && !((*I)->toutnoir)) {
+    if (est_blanche(*I)) {
+          (*I) = construit_blanc() ;
+    } else if (est_noire(*I)) {
+          rendmemoire(I);
+          (*I) = construit_noir();
+    } else {
+      for (int i = 0; i < 4; i++) {
+            simplifie(&((*I)->fils[i])) ;
+      }
+    }
+  }
+}
+
+
+
+
+/* ----------------------------------------------------------------------
+                            AFFICHAGE 2K PIXEL
+---------------------------------------------------------------------- */
+
+/* Procédure qui permet d'afficher une image en 2D
+@param : L'image à afficher
+@return : Aucun
+*/
+char a2k(int k, image I, int height, int length, int size){
+  if (I == NULL) return '.';
+  if (I->toutnoir) return '8';
+  if (k == 0) return '-';
+  else {
+    size = size/2;
+    if (height >= size) {
+      if (length >= size)       return a2k(k-1, I->fils[3], height%size, length%size, size);
+      else                      return a2k(k-1, I->fils[2], height%size, length%size, size);
+    } else if (length >= size)  return a2k(k-1, I->fils[1], height%size, length%size, size);
+      else                      return a2k(k-1, I->fils[0], height%size, length%size, size);
+    }
+}
+
+void affichage2kpixel(int k, image I){
+  int size = pow(2, k);
+  for (int height = 0; height < size; height++) {
+    for (int length = 0; length < size; length++){
+      putchar(a2k(k, I, height, length, size));
+    }
+    putchar('\n');
+  }
+}
+
+
+
+
+
+
+
+
+
+
+/* ----------------------------------------------------------------------
+                            ALEA
+---------------------------------------------------------------------- */
+
+/*fonction qui prend un tableau d'entier et le renvoie mélanger ( en echangant 2 à 2 les valeurs)
+@param : int aleas[] : un tableau d'entier
+         int max : un entier indiquant la taille du tableau
+*/
+void repartitNoir(int aleas[], int max){
+  for(int i = 0; i< max; i++){
+    int pos1 = rand()%max;
+    int pos2 = rand()%max;
+    int tmp;
+
+    tmp = aleas[pos1];
+    aleas[pos1]=aleas[pos2];
+    aleas[pos2]=tmp;
+  }
+}
+
+/*procédure auxiliaire de alea, renvoie une image blanche avec des pixels noirs
+@param : int n : un entier indiquant la profonfeur de l'image
+         int aleas[] : un tableau d'entier avec le nombre de cases egales au nombres de fils de l'images voulue, avec des 1 la ou on veut des pixels noirs
+*/
+image construit_alea(int n, int aleas[], int* i){
+  if(n==0){
+    (*i)++;
+    if (aleas[*i] == 1) return construit_noir();
+    else return construit_blanc();
+  }
+  else return construit_compose(construit_alea((n-1), aleas, i),
+                                construit_alea((n-1), aleas, i),
+                                construit_alea((n-1), aleas, i),
+                                construit_alea((n-1), aleas, i));
+}
+
+/* Fonction qui retourne une image de profondeur  choisit, comprenant un nombre
+donné de pixels noirs.
+@param : int profondeur : la profondeur voulue
+         int pixelsnoir : le nombre de pixels noir à placer
+@return : une image avec pixelsnoir points noirs
+*/
+image alea(int profondeur,int pixelsnoir){
+
+  int max = (int) pow(4,profondeur);
+  if(pixelsnoir > max){
+    return construit_noir();
+  }
+  int aleas[max];
+  int pos = 0;
+  for(int j = 0 ; j < pixelsnoir; j++){
+    aleas[j]=1;
+    pos++;
+  }
+  for(int i = pos; i< max; i++){
+    aleas[i]=0;
+  }
+
+  repartitNoir(aleas, max);
+  int pi = -1;
+  return construit_alea(profondeur, aleas, &pi);
+}
+
+
+
+
+
+
+
+
+
+
+/* ----------------------------------------------------------------------
+                          NEBULEUSE
+---------------------------------------------------------------------- */
+
+
+/* Fonction qui prend en argument la profondeur k et renvoie une image de profondeur k
+choisie aléatoirement tel qu'au centre la densité de noirs soit proche de 1 et au bord proche de 0
+@param : la profondeur
+@return : Une image de cette profondeur qui ressemble à une nebuleuse
+*/
+image nebuleuse_aux(int profondeur, int pos_x, int pos_y, int original){
+  if (profondeur == 0) {
+
+    float random = (float)(rand()%100)/100;
+    double far_from_center = sqrt(pow((original/2 - pos_x), 2) + pow((original/2 - pos_y), 2)); // Distance Euclidienne
+    double max_distance = (double)original/sqrt(2);
+    double n = far_from_center/max_distance;
+    if (random > n) return construit_noir();
+    else return construit_blanc();
+  }
+  else {
+    return construit_compose(nebuleuse_aux(profondeur-1, pos_x,                             pos_y,                             original),
+                             nebuleuse_aux(profondeur-1, pos_x + (int)pow(2, profondeur-1), pos_y,                             original),
+                             nebuleuse_aux(profondeur-1, pos_x,                             pos_y + (int)pow(2, profondeur-1), original),
+                             nebuleuse_aux(profondeur-1, pos_x + (int)pow(2, profondeur-1), pos_y + (int)pow(2, profondeur-1), original));
+  }
+}
+
+image nebuleuse(int profondeur){
+  int length = (int)pow(2, profondeur);
+  return nebuleuse_aux(profondeur, 0, 0, length);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* ----------------------------------------------------------------------
               FONCTIONS SUPPLEMENTAIRES / UTILITAIRES
@@ -188,8 +648,6 @@ bool meme_dessin_parfait(image I, image I2){
 }
 
 
-
-
 /* Fonction qui cherche la profondeur maximale d'une image
 @param L'image dont on veut connaître la profondeur
 @return La profondeur maximale de l'image
@@ -212,7 +670,6 @@ int donne_profondeur_max(image I){
 */
 image construit_compose_retourne(image i1, image i2, image i3, image i4) {
   image I = (bloc_image*) malloc(sizeof(bloc_image)) ;
-  compteur_memoire++;
   I->toutnoir = FALSE ;
   I->fils[0] = i4 ;
   I->fils[1] = i3 ;
@@ -338,63 +795,6 @@ int* enleveDoublon(int tab[], int taille, int max){
 }
 
 
-
-
-/* ----------------------------------------------------------------------
-                            AFFICHAGE
----------------------------------------------------------------------- */
-
-/* Fonction qui affiche une image selon la notation [.,N,B]
-@param : L'image que l'on souhaite afficher
-@return : Aucun
-*/
-void affiche_normal(image I){
-  if (I == NULL) printf("B") ;
-  else if (I->toutnoir) printf("N") ;
-  else {
-    printf(".") ; //CF. plus bas pour comprendre la notation
-    for (int i = 0; i < 4; i++) {
-      affiche_normal(I->fils[i]) ;
-    }
-  }
-}
-/* Explications sur la notation du "point" :
-Dans le sujet on a l'exemple de .N.BBNBB.N.NNB.NBNNBN,
-en fait le point est print avant l'appel récursif, la suite suivante se lirait
-plus naturellement par (N (BBNB) B (N(NNB(NBNN))BN))
-On doit toujours se retrouver avec 4 fils, donc décomposer en 4 images
--> N est une image à lui seul
--> BBNB est bien une image car 4 fils élémentaires
--> NBNN est une image ayant des fils élémentaires, donc NNB(NBNN) est aussi une image, finalement (N(NNB(NBNN))BN) en est une
-En combinant les 4, on obtient bien une image. Le point sert donc à montrer l'appel récursif */
-
-/* Fonction qui affiche l'image en précisant la profondeur de chaque noeud
-@param : L'image à afficher
-@return : Aucun
-*/
-
-/* Fonction auxiliaire */
-void affiche_prof_aux(image I, int profondeur){ // On définit une fonction auxiliaire qui garde en mémoire la profondeur{
-  if (I == NULL) printf("B%d", profondeur) ;
-  else if (I->toutnoir) printf("N%d", profondeur) ;
-  else {
-    printf(".%d", profondeur) ;
-    for (int i = 0; i < 4; i++) {
-      affiche_prof_aux(I->fils[i], profondeur+1) ;
-    }
-  }
-}
-/* Fonction principale */
-void affiche_profondeur(image I) { affiche_prof_aux(I, 0) ; }
-
-/* Procédure qui permet d'afficher une image en 2D
-@param : L'image à afficher
-@return : Aucun
-*/
-
-
-
-
 /* Procédure qui nous permet de transformer une image en tableau de caractères
 @param : L'image que l'on souhaite transcrire
 @return : La chaîne de caractère associée
@@ -422,281 +822,6 @@ void image_divise_to_char(image I, char(* imageI)[], int length){
 
 
 
-/*fonction qui prend un tableau d'entier et le renvoie mélanger ( en echangant 2 à 2 les valeurs)
-@param : int aleas[] : un tableau d'entier
-         int max : un entier indiquant la taille du tableau
-*/
-void repartitNoir(int aleas[], int max){
-  for(int i = 0; i< max; i++){
-    int pos1 = rand()%max;
-    int pos2 = rand()%max;
-    int tmp;
-
-    tmp = aleas[pos1];
-    aleas[pos1]=aleas[pos2];
-    aleas[pos2]=tmp;
-  }
-}
-
-/*procédure auxiliaire de alea, renvoie une image blanche avec des pixels noirs
-@param : int n : un entier indiquant la profonfeur de l'image
-         int aleas[] : un tableau d'entier avec le nombre de cases egales au nombres de fils de l'images voulue, avec des 1 la ou on veut des pixels noirs
-*/
-image construit_alea(int n, int aleas[], int* i){
-  if(n==0){
-    (*i)++;
-    if (aleas[*i] == 1) return construit_noir();
-    else return construit_blanc();
-  }
-  else return construit_compose(construit_alea((n-1), aleas, i),
-                                construit_alea((n-1), aleas, i),
-                                construit_alea((n-1), aleas, i),
-                                construit_alea((n-1), aleas, i));
-}
-
-/* Fonction qui retourne une image de profondeur  choisit, comprenant un nombre
-donné de pixels noirs.
-@param : int profondeur : la profondeur voulue
-         int pixelsnoir : le nombre de pixels noir à placer
-@return : une image avec pixelsnoir points noirs
-*/
-image alea(int profondeur,int pixelsnoir){
-
-  int max = (int) pow(4,profondeur);
-  if(pixelsnoir > max){
-    return construit_noir();
-  }
-  int aleas[max];
-  int pos = 0;
-  for(int j = 0 ; j < pixelsnoir; j++){
-    aleas[j]=1;
-    pos++;
-  }
-  for(int i = pos; i< max; i++){
-    aleas[i]=0;
-  }
-
-  repartitNoir(aleas, max);
-  int pi = -1;
-  return construit_alea(profondeur, aleas, &pi);
-}
-
-
-/*
-void affichage2kpixel(image image1){
-
-
-  int profondeur = donne_profondeur_max(image1);
-  int length = pow(2, profondeur);
-  char I[length*length];
-  image_divise_to_char(image1, &I, length);
-
-
-  for (int i = 0; i < length*length; i++){
-    if (i%length == 0) putchar('\n');
-    putchar(I[i]);
-
-  }
-
-  printf("\n");
-}
-*/
-
-char a2k(int k, image I, int height, int length, int size){
-  if (I == NULL) return '.';
-  if (I->toutnoir) return '8';
-  if (k == 0) return '/';
-  else {
-    size = size/2;
-    if (height >= size) {
-      if (length >= size)       return a2k(k-1, I->fils[3], height%size, length%size, size);
-      else                      return a2k(k-1, I->fils[2], height%size, length%size, size);
-    } else if (length >= size)  return a2k(k-1, I->fils[1], height%size, length%size, size);
-      else                      return a2k(k-1, I->fils[0], height%size, length%size, size);
-    }
-}
-
-void affichage2kpixel(int k, image I){
-  int size = pow(2, k);
-  for (int height = 0; height < size; height++) {
-    for (int length = 0; length < size; length++){
-      putchar(a2k(k, I, height, length, size));
-    }
-    putchar('\n');
-  }
-}
-
-
-
-
-/* ----------------------------------------------------------------------
-                    FONCTIONS DEMANDEES
----------------------------------------------------------------------- */
-
-/* Fonction qui calcule l'aire d'une image
-Note : On considère que l'aire de l'image est la surface de ses carrés noirs, en partant du principe que l'image
-de base est représentée par un carré de taille 1x1
-@param : L'image dont on cherche l'aire
-@return : Un flottant qui représente cette aire
-*/
-
-double aire(image I){
-  if (est_blanche(I)) return 0;
-  else if (est_noire(I)) return 1;
-  else return (aire(I->fils[0])
-            +  aire(I->fils[1])
-            +  aire(I->fils[2])
-            +  aire(I->fils[3]))/4;
-}
-
-
-/* Procédure qui simplifie une image :
-C'est à dire que si tous les enfants d'une image sont de la même couleur, on considère qu'il n'est pas utile
-d'avoir des fils et on les remplace par un élément simple (noir ou blanc)
-@param : L'image que l'on souhaite simplifier
-@return : Aucun
-*/
-
-/* Simplifie : quadratique, pourtant vous chauffiez*/
-void simplifie(image* I){
-  if (*I != NULL && !((*I)->toutnoir)) {
-    if (est_blanche(*I)) { // En fait on regarde ici si les enfants sont unis
-          rendmemoire(I);
-          (*I) = construit_blanc() ;
-    } else if (est_noire(*I)) {
-          rendmemoire(I);
-          (*I) = construit_noir();
-    } else {
-      for (int i = 0; i < 4; i++) {
-            simplifie(&((*I)->fils[i])) ;
-      }
-    }
-  }
-}
-
-/* Fonction qui vérifie si deux images représentent la même chose
-@param : Les deux images que l'on souhaite comparer
-@return : TRUE si les deux images sont identiques
-*/
-bool meme_dessin(image I, image I2){
-
-  if (est_blanche(I))                 return (est_blanche(I2)) ;
-  else if (est_noire(I))              return (est_noire(I)) ;
-  else if (I2==NULL || I2->toutnoir)  return FALSE ;
-
-  return (meme_dessin(I->fils[0], I2->fils[0])
-       && meme_dessin(I->fils[1], I2->fils[1])
-       && meme_dessin(I->fils[2], I2->fils[2])
-       && meme_dessin(I->fils[3], I2->fils[3]) ) ;
-}
-
-/* Procédure qui transforme une image en sa forme négative,
-c'est à dire que les cases blanches deviennent noires et réciproquement.
-@param : L'image que l'on souhaite inverser
-@return : Aucun
-*/
-void negatif(image* I) {
-  if (*I == NULL) {
-    *I = construit_noir();
-  }
-  else if ((*I)->toutnoir) {
-    rendmemoire(I);
-    *I = construit_blanc();
-  } else {
-    for (int i = 0; i < 4; i++) {
-      negatif(&((*I)->fils[i]));
-    }
-  }
-}
-
-/* Procédure qui arrondit les fils à une profondeur demandée d'une image
-@param : L'image que l'on souhaite arrondir, la profondeur a partir de laquelle on souhaite arrondir
-@return : Aucun
-*/
-
-/* Fonction auxiliaire */
-void arrondit_elementaire(image *I) {
-  if (((*I) != NULL) && !((*I)->toutnoir)) {
-    for (int i = 0; i < 4; i++) {
-          arrondit_elementaire(&((*I)->fils[i])) ;
-    }
-    if (aire(*I) < 0.5) {
-      rendmemoire(I);
-      (*I) = NULL ;
-    } else (*I)->toutnoir = TRUE ;
-  }
-}
-/* Fonction principale */
-void arrondit(image* I, int k) {
-  if (k == 0) arrondit_elementaire(I); // Si l'on est à la profondeur recherchée, on arrondit notre image en un élément (noir ou blanc)
-  else if (((*I) != NULL) && !((*I)->toutnoir)) {
-      for (int i = 0; i < 4; i++) {
-        arrondit(&((*I)->fils[i]), k-1);
-      }
-  }
-}
-
-/* Fonction qui renvoie une image représentant la différence entre deux images :
-L'image rendue est noire là où l'une des deux images de départ est noire mais l'autre blanche
-@param Les deux images que l'on compare
-@return L'image de la différence
-*/
-image difference (image I1, image I2){
-  if (I1 != NULL && !(I1->toutnoir)) {
-      if (I2 == NULL || I2->toutnoir) {
-        return construit_compose(difference(I1->fils[0], I2),
-                                                             difference(I1->fils[1], I2),
-                                                             difference(I1->fils[2], I2),
-                                                             difference(I1->fils[3], I2));
-      } else {
-        return construit_compose(difference(I1->fils[0], I2->fils[0]),
-                                                             difference(I1->fils[1], I2->fils[1]),
-                                                             difference(I1->fils[2], I2->fils[2]),
-                                                             difference(I1->fils[3], I2->fils[3]));
-      }
-  } else  {
-    if (I2 != NULL && !(I2->toutnoir)) {
-    return construit_compose(difference(I1, I2->fils[0]),
-                                    difference(I1, I2->fils[1]),
-                                  difference(I1, I2->fils[2]),
-                                  difference(I1, I2->fils[3]));
-    } else {
-      if (I1 == NULL) {
-        if (I2 == NULL) {
-          return construit_blanc();
-        }
-        else {
-          return construit_noir();
-        }
-      }
-      else {
-        if (I2 == NULL) { return construit_noir();
-        }
-        else {
-          return construit_blanc();
-        }
-      }
-    }
-  }
-}
-
-/* Fonction qui permet à l'utilisateur de rentrer une image depuis le terminal
-@param : Aucun
-@return : L'image construite à partir des indications de l'utilisateur
-*/
-image lecture_au_clavier(){
-  char input = getchar();
-  if (input == '.'){
-    image f0 = lecture_au_clavier();
-    image f1 = lecture_au_clavier();
-    image f2 = lecture_au_clavier();
-    image f3 = lecture_au_clavier();
-    return construit_compose(f0, f1, f2, f3);
-  } else if (input == 'N')  return construit_noir();
-    else if (input == 'B')  return construit_blanc();
-    else return lecture_au_clavier();
-}
-
 image lecture_au_fichier(FILE* fichier){
 
   if(fichier != NULL){
@@ -718,65 +843,6 @@ image lecture_au_fichier(FILE* fichier){
 }
 
 
-/* Fonction qui compte le nombre de sous image pleine à une profondeur donnée
-@param : L'image que l'on examine, la hauteur qui nous intéresse
-@return : Le nombre de sous images pleines
-*/
-
-bool estPleine(image I, int h){
-    if (h == 0) return ((I == NULL) || (I->toutnoir));
-    else if (I != NULL && !(I->toutnoir))
-        return estPleine(I->fils[0], h-1)
-        && estPleine(I->fils[1], h-1)
-        && estPleine(I->fils[2], h-1)
-        && estPleine(I->fils[3], h-1);
-    else return 0;
-}
-
-int CompteSousImagePleine(image I, int hauteur){
-    if((I == NULL) || (I->toutnoir)){
-        return estPleine(I, hauteur);
-    } else {
-        return estPleine(I, hauteur)
-             + CompteSousImagePleine(I->fils[0], hauteur)
-             + CompteSousImagePleine(I->fils[1], hauteur)
-             + CompteSousImagePleine(I->fils[2], hauteur)
-             + CompteSousImagePleine(I->fils[3], hauteur);
-    }
-}
-
-
-/* Fonction qui prend en argument la profondeur k et renvoie une image de profondeur k
-choisie aléatoirement tel qu'au centre la densité de noirs soit proche de 1 et au bord proche de 0
-@param : la profondeur
-@return : Une image de cette profondeur qui ressemble à une nebuleuse
-*/
-image nebuleuse_aux(int profondeur, int pos_x, int pos_y, int original){
-  if (profondeur == 0) {
-
-    float random = (float)(rand()%100)/100;
-    double far_from_center = sqrt(pow((original/2 - pos_x), 2) + pow((original/2 - pos_y), 2)); // Distance Euclidienne
-    double max_distance = (double)original/sqrt(2);
-    double n = far_from_center/max_distance;
-    if (random > n) return construit_noir();
-    else return construit_blanc();
-  }
-  else {
-    return construit_compose(nebuleuse_aux(profondeur-1, pos_x,                             pos_y,                             original),
-                             nebuleuse_aux(profondeur-1, pos_x + (int)pow(2, profondeur-1), pos_y,                             original),
-                             nebuleuse_aux(profondeur-1, pos_x,                             pos_y + (int)pow(2, profondeur-1), original),
-                             nebuleuse_aux(profondeur-1, pos_x + (int)pow(2, profondeur-1), pos_y + (int)pow(2, profondeur-1), original));
-  }
-}
-
-image nebuleuse(int profondeur){
-  int length = (int)pow(2, profondeur);
-  return nebuleuse_aux(profondeur, 0, 0, length);
-}
-
-
-
-
 /*Fonction qui compte les images noires
 @param : image I : une image dont on veut compter le nombre d'images noires dont elle est constituée
          int* cpt : un entier qui nous servira de compteur
@@ -791,6 +857,23 @@ int compteImageNoire(image I){
              + compteImageNoire(I -> fils[2])
              + compteImageNoire(I -> fils[3]));
 }
+
+
+/*Procédure qui remplace une image blanche par une image noire
+@param : image* I : une image en in/out
+@return : aucun
+*/
+void remplaceBlancParNoir(image* I){
+  if(est_blanche(*I)){
+    *I = construit_noir();
+  }
+}
+
+
+
+
+
+
 
 
 
@@ -1109,7 +1192,7 @@ void testArrondit(){ //Probleme résolu
                                                      construit_compose(construit_noir(),
                                                                        construit_noir(),
                                                                        construit_blanc(),
-                                                                       construit_noir()))) ;
+                                                                      construit_noir()))) ;
 
   image Image1arr = construit_compose(construit_noir(),
                                       construit_blanc(),
@@ -1117,6 +1200,7 @@ void testArrondit(){ //Probleme résolu
                                       construit_blanc()) ;
 
   arrondit(&Image1,1);
+
 
   assert(meme_dessin(Image1,Image1arr));
 
@@ -1164,9 +1248,7 @@ void testDifference(){
                                                                       construit_blanc()))) ;
 
 
-  //affichage2kpixel(Image2);
   image Image3;
-  printf("Avant l'appel de difference dans testDifference\n");
   Image3 = difference(Image1,Image2);
 
 
@@ -1275,9 +1357,25 @@ void testCompteSousImagePleine(){
                                                                                     construit_noir(),
                                                                                     construit_blanc()))));
   //image I2 = tabdechar_to_image(phrase2)
-  //assert(CompteSousImagePleine(I1,2)==1);
+  assert(CompteSousImagePleine(I1,2)==1);
   assert(CompteSousImagePleine(I2,2)==2);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /* ----------------------------------------------------------------------
@@ -1303,44 +1401,14 @@ int main() {
   testNegatif();
   testArrondit();
   testAlea();
-  testLectureAuClavier(); //Elle fonctionne, c'est juste qu'il faut rentrer un truc si on la met pas en commentaire et c'est chiant
-
-  //testTabdeChartoImage(); //erreur de segmentation
-  //testDifference(); // segmentation fault
+  testLectureAuClavier();
+  testDifference();
   testCompteSousImagePleine();
   image I = alea(5,80);
   affichage2kpixel(5, I);
     putchar('\n');
   return 0;
 }
-
-/* LISTE DES FONCTIONS A FAIRE
-  // construit_blanc()
-  // construit_noir()
-  // construit_compose()
-  // affiche_normal()
-  // affiche_profondeur()
-  // est_noire()
-  // est_blanche
-  // copie
-  // aire
-  // meme_dessin
-  // difference
-  // rendmemoire
-  A OPTIMISER lecture_au_clavier
-  // CompteSousImagePleine
-  // arrondit
-  // negatif
-  // simplifie
-  // affichage2kpixel
-  //alea
-  // nebuleuse
-  // main()
-  Permutations dans PilesLR.c
-  erreur de segmentation dans : Difference
-                                tabdechar_to_image
-                                compte
-*/
 
 
 // Playlist pour travailler : https://www.youtube.com/watch?v=uuI_IgFFVT8
