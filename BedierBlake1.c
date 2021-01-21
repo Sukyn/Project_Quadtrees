@@ -62,7 +62,8 @@ float puissanceFloat(float x, unsigned int n){
 
 
 //Implémentez les deux méthodes pour calculer la fonction d’Ackermann.
-//regarder pour mettre r en inout
+
+//methode 1
 int Ackerman(int m, int n){
 	if (m == 0){
 		return n+1;
@@ -76,7 +77,7 @@ int Ackerman(int m, int n){
 	}
 }
 
-
+//methode 2
 int Acker(int m,int n){
 	if (m==0){
 		return n+1;
@@ -122,6 +123,19 @@ double X_rec(int n){
 }
 
 
+/*
+double ecartRelatif(double Vattendue, double Vobtenue){
+  double diff;
+  if(Vattendue>Vobtenue){
+    diff = Vattendue - Vobtenue;
+  }
+  else{
+    diff = Vobtenue - Vattendue;
+  }
+  return (diff/Vattendue)*100;
+}
+*/
+
 
 int main(){
   double precision = 0.000001;
@@ -130,7 +144,12 @@ int main(){
   printf("1.001^1000 = %f\n", puissance(1.001, 1000));
   printf("e (méthode 1/n!) = %f\n", e(precision));
   printf("e (méthode (1+1/n)^n)) = %f\n", puissance(1 + precision, (int)(1/precision)));
-  printf("X100 itératif = %f\n", X_it(100));
+  printf("\nAvec des doubles : 1.001^1000 = %f\n", puissance(1.001, 1000));
+  printf("Avec des float : 1.001^1000 = %f\n", puissanceFloat(1.001, 1000));
+  printf("On voit qu'il y a bien un effet visible entre utiliser un double plutot qu'un float.\nCalculons l'écart relatif entre ces 2 valeurs\n");
+  //printf("ecart relatif entre les valeurs obtenues par les 2 méthodes : %f%% \n ", ecartRelatif(puissance(1.001, 1000),puissanceFloat(1.001, 1000)));
+
+  printf("\n X100 itératif = %f\n", X_it(100));
   printf("X100 récursif = %f\n", X_rec(100));
 
 }
