@@ -1,7 +1,7 @@
 
-#include <stdio.h> // printf, random ...
-#include <stdlib.h> // malloc, free, ...
-#include <math.h> // pow, ...
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 #include <time.h>
 #include <assert.h>
 
@@ -44,8 +44,6 @@ image construit_noir(){
   for (int i = 0; i < 4; i++) {
     I->fils[i] = NULL ;
   }
-  /* Il n'est pas obligatoire d'initialiser les fils à NULL parce que dans les faits si le paramètre
-  toutnoir vaut TRUE, on ne cherchera pas à accéder aux fils, mais ça ne coûte rien et ça évite de faire des conneries */
   return I ;
 }
 
@@ -201,9 +199,6 @@ image copie(image I){
                                    copie(I->fils[3])) ;
   return I_copie ;
 }
-/* Pourquoi ne pas juste faire I_copie = I ?
-Parce que ce sont des pointeurs, et donc ce ne serait pas une copie mais un pointeur vers le même
-Il faut donc créer de nouvelles images */
 
 
 

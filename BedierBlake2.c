@@ -72,13 +72,11 @@ void VD (Liste *L);
 void VireDernier_rec (Liste *L);
 void VireDernier_iter (Liste *L);
 
-
 /*************************************************/
 /*                                               */
 /*                briques de base                */
 /*                                               */
 /*************************************************/
-
 
 void initVide( Liste *L)
 {
@@ -113,7 +111,6 @@ Liste suite(Liste l)
     return l->suivant ;
 }
 
-
 void depile(Liste *L)
 {
     Liste tmp = *L ;
@@ -138,7 +135,6 @@ void affiche_rec(Liste l)
     }
 }
 
-
 void affiche_iter(Liste l)
 {
     Liste L2 = l;
@@ -162,7 +158,6 @@ int longueur_rec (Liste l)
          return 0 ;
     else return (1 + longueur_rec(l->suivant)) ;
 }
-
 
 int longueur_iter (Liste l)
 {
@@ -296,7 +291,6 @@ typedef struct ListeDeListe
     Liste liste;
     struct ListeDeListe* suite;
 } ListeDeListe ;
-
 
 /*Fonction qui ajoute une liste de int au début d'une liste de liste de int.
 @param : Liste x : liste a ajouter
@@ -437,8 +431,6 @@ void Begaye(Liste *L)
     }
 }
 
-
-
 /* fonction Max qui compare deux entiers et retourne ne plus grand
 [in] first : un entier
 [in] second : un entiers
@@ -492,7 +484,6 @@ int MZCR(Liste L, int max, int suite){
   }
 }
 
-
 /* récursive avec une sous fonction avec trois arguments in
 fonction MaxZerosConsecutifsIteratif, version itérative de MaxZerosConsecutifs,
 appelle MZCR avec comme premiere valeur de max et suite : max = 0 et suite = 0
@@ -502,7 +493,6 @@ return un entier, return ce que MZCR return à la fin.
 int MaxZerosConsecutifsRec(Liste L){
   return MZCR(L, 0, 0);
 }
-
 
 /* récursive avec une sous fonction avec un argument in et deux arguments out */
 
@@ -533,14 +523,7 @@ int MaxZerosConsecutifsRecBis(Liste L){
   return max;
 }
 
-
-
-
-
-
 /* La fonction EstPalindrome vue en TD.*/
-
-
 
 /*procédure EstPalindromeAux qui vérifie si une liste d'entier est un palindrome,
 modifie la valeur de *estPalin; Si la liste L est un palindrome,
@@ -559,7 +542,6 @@ void EstPalindromeAux(Liste *P, Liste L, bool *estPalin){
   }
 }
 
-
 /*fonction EstPalindrome qui détermine si une liste est un palindrome ou non.
 [in] L : une liste chainée d'entier L.
 return estPalin.
@@ -576,8 +558,6 @@ bool EstPalindrome(Liste L)
 élément tel que la somme de tous les éléments qui le précèdent est égal à la somme de
 tous les éléments qui le suivent
 */
-
-
 
 /*Procédure SommeAvantApresAux
 [in] L : une liste chainée d'entiers L
@@ -597,7 +577,6 @@ void SommeAvantApresAux(Liste L, int cptAvant, int *cptApres, bool *res)
   }
 }
 
-
 bool SommeAvantApres(Liste L)
 {
   bool res;
@@ -607,14 +586,7 @@ bool SommeAvantApres(Liste L)
   return res;
 }
 
-
-
-
-
 /* --------------- */
-
-
-
 
 int main() {
     Liste l ;
