@@ -557,40 +557,34 @@ choisie aléatoirement tel qu'au centre la densité de noirs soit proche de 1 et
 @param : la profondeur
 @return : Une image de cette profondeur qui ressemble à une nebuleuse
 */
-image nebuleuse_aux(int profondeur, int pos_x, int pos_y, int original){
+image nebuleuse_aux(int profondeur, int pos_x, int pos_y, double max_distance){
   if (profondeur == 0) {
 
     float random = (float)(rand()%100)/100;
-    double far_from_center = sqrt(pow((original/2 - pos_x), 2) + pow((original/2 - pos_y), 2)); // Distance Euclidienne
-    double max_distance = (double)original/sqrt(2);
-    double n = far_from_center/max_distance;
-    if (random > n) return construit_noir();
+    double far_from_center = sqrt(pow((max_distance/sqrt(2) - pos_x), 2) + pow((max_distance/sqrt(2) - pos_y), 2)); // Distance Euclidienne
+    if (random > far_from_center/max_distance) return construit_noir();
     else return construit_blanc();
   }
-  else {
-    return construit_compose(nebuleuse_aux(profondeur-1, pos_x,                             pos_y,                             original),
-                             nebuleuse_aux(profondeur-1, pos_x + (int)pow(2, profondeur-1), pos_y,                             original),
-                             nebuleuse_aux(profondeur-1, pos_x,                             pos_y + (int)pow(2, profondeur-1), original),
-                             nebuleuse_aux(profondeur-1, pos_x + (int)pow(2, profondeur-1), pos_y + (int)pow(2, profondeur-1), original));
-  }
+  else return construit_compose(nebuleuse_aux(profondeur-1, pos_x,                             pos_y,                             max_distance),
+                                nebuleuse_aux(profondeur-1, pos_x + (int)pow(2, profondeur-1), pos_y,                             max_distance),
+                                nebuleuse_aux(profondeur-1, pos_x,                             pos_y + (int)pow(2, profondeur-1), max_distance),
+                                nebuleuse_aux(profondeur-1, pos_x + (int)pow(2, profondeur-1), pos_y + (int)pow(2, profondeur-1), max_distance));
 }
 
 image nebuleuse(int profondeur){
-  int length = (int)pow(2, profondeur);
-  return nebuleuse_aux(profondeur, 0, 0, length);
+  /* La longueur des côtés est de 2^profondeur
+  Donc la distance maximale au centre est sqrt( ((2^prof)/2)^2 + ((2^prof)/2)^2 )
+  = sqrt( 2^2prof/4 + 2^2prof/4)
+  = sqrt( (2*2^2prof)/4 )
+  = sqrt(2^2prof/2)
+  = sqrt(2^2prof) / sqrt(2)
+  = 2^prof / sqrt(2)
+  = 2^prof / 2^1/2
+  = 2^(prof-0.5)
+  La passer en paramètre nous évite de la recalculer à chaque appel */
+  double max_distance = pow(2, profondeur-0.5);
+  return nebuleuse_aux(profondeur, 0, 0, max_distance);
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1396,11 +1390,11 @@ int main() {
   testNegatif();
   testArrondit();
   testAlea();
-  testLectureAuClavier();
+  //testLectureAuClavier();
   testDifference();
   testCompteSousImagePleine();
-  image I = alea(5,80);
-  affichage2kpixel(5, I);
+  image I = nebuleuse(6);
+  affichage2kpixel(6, I);
     putchar('\n');
   return 0;
 }

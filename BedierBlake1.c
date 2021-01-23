@@ -39,7 +39,7 @@ double e(float precision){
 }
 
 //Implementez la fonction puissance(x,n),x réel,n entier positif ou nul.
-double puissance(double x,int n){
+double puissance(double x, int n){
   double res=1.;
   if (n < 0) return 1/puissance(x, -n);
   while(n>=1) {
@@ -48,9 +48,7 @@ double puissance(double x,int n){
   }
   return(res);
 }
-
-//Implementez la fonction puissance(x,n),x réel,n entier positif ou nul.
-float puissanceFloat(float x, unsigned int n){
+float puissanceFloat(float x, int n){
   float res=1.;
   if (n < 0) return 1/puissance(x, -n);
   while(n>=1) {
@@ -59,7 +57,11 @@ float puissanceFloat(float x, unsigned int n){
   }
   return(res);
 }
-
+float puissanceRec(float x, int n){
+  if (n == 0) return 1;
+  else if (n < 0) return 1/puissanceRec(x, -n);
+  else return puissanceRec(x, n-1)*x;
+}
 
 //Implémentez les deux méthodes pour calculer la fonction d’Ackermann.
 
