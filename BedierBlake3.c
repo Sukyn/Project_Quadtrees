@@ -268,20 +268,20 @@ image difference (image I1, image I2){
   if (I1 != NULL && !(I1->toutnoir)) {
       if (I2 == NULL || I2->toutnoir)
         return construit_compose(difference(I1->fils[0], I2),
-                                                             difference(I1->fils[1], I2),
-                                                             difference(I1->fils[2], I2),
-                                                             difference(I1->fils[3], I2));
+                                 difference(I1->fils[1], I2),
+                                 difference(I1->fils[2], I2),
+                                 difference(I1->fils[3], I2));
       else
         return construit_compose(difference(I1->fils[0], I2->fils[0]),
-                                                             difference(I1->fils[1], I2->fils[1]),
-                                                             difference(I1->fils[2], I2->fils[2]),
-                                                             difference(I1->fils[3], I2->fils[3]));
+                                 difference(I1->fils[1], I2->fils[1]),
+                                 difference(I1->fils[2], I2->fils[2]),
+                                 difference(I1->fils[3], I2->fils[3]));
   } else  {
     if (I2 != NULL && !(I2->toutnoir))
     return construit_compose(difference(I1, I2->fils[0]),
-                                    difference(I1, I2->fils[1]),
-                                  difference(I1, I2->fils[2]),
-                                  difference(I1, I2->fils[3]));
+                             difference(I1, I2->fils[1]),
+                             difference(I1, I2->fils[2]),
+                             difference(I1, I2->fils[3]));
     else {
       if (I1 == NULL) {
         if (I2 == NULL) return construit_blanc();
@@ -334,10 +334,10 @@ bool estPleine(image I, int h){
     if (h == 0) return ((I == NULL) || (I->toutnoir));
     else if (I != NULL && !(I->toutnoir))
         return estPleine(I->fils[0], h-1)
-        && estPleine(I->fils[1], h-1)
-        && estPleine(I->fils[2], h-1)
-        && estPleine(I->fils[3], h-1);
-    else return 0;
+            && estPleine(I->fils[1], h-1)
+            && estPleine(I->fils[2], h-1)
+            && estPleine(I->fils[3], h-1);
+    else return FALSE;
 }
 
 int CompteSousImagePleine(image I, int hauteur){
@@ -448,12 +448,16 @@ char a2k(int k, image I, int height, int length, int size){
   if (k == 0) return '-';
   else {
     size = size/2;
+    int fils;
     if (height >= size) {
-      if (length >= size)       return a2k(k-1, I->fils[3], height%size, length%size, size);
-      else                      return a2k(k-1, I->fils[2], height%size, length%size, size);
-    } else if (length >= size)  return a2k(k-1, I->fils[1], height%size, length%size, size);
-      else                      return a2k(k-1, I->fils[0], height%size, length%size, size);
-    }
+      if (length >= size)       fils = 3;
+      else                      fils = 2;
+    } else if (length >= size)  fils = 1;
+      else                      fils = 0;
+
+    return a2k(k-1, I->fils[fils], height%size, length%size, size);
+  }
+
 }
 
 void affichage2kpixel(int k, image I){
